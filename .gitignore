@@ -1,0 +1,4 @@
+*.pyc
+build
+dist
+pypi.sh
