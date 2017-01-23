@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="js/sketch.js"></script>
+        <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
+        <style>
+        .outside_wrapper{ 
+            width:900px; height:700px; 
+            margin:20px 60px; 
+            border:4px solid black;}
+        .inside_wrapper{ 
+            width:100%; height:100%; 
+            position:relative;}
+        .som_image{ 
+            width:100%; height:100%; 
+            position:absolute; top:0px; left:0px;
+         }
+        #som_sketch{ 
+            width:100%; height:100%; 
+            position:absolute; top:0px; left:0px;
+            background-color: rgba(255,0,0,.1);
+        }
+        #tools {
+            padding-left:100px;
+            padding-top:20px;
+        }
+        .button {
+            cursor: pointer;
+        }
+        .button:hover{
+            color: purple;
+        }
+        </style>
+  </head>
+  <body>
+     <span id="tools"></span>
+     <span style="padding-left:560px">
+         <i id="save_button" class="button fa fa-2x fa-arrow-circle-down"></i>
+    </span>
+    <div class="outside_wrapper">
+        <div class="inside_wrapper">
+            <img src="img/20_right.jpeg" class="som_image">
+            <canvas id='som_sketch' width='900' height='700' style="border: 1px solid black;"></canvas>
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+      $(function() {
+        $.each(['#FF0000','#EB5E94','#073AB1', '#378B2E', 'yellow', '#000', '#fff'], function() {
+          $('#tools').append("<a href='#som_sketch' data-color='" + this + "' style='border: 1px solid black; width: 30px; height: 30px; background: " + this + "; display: inline-block;'></a> ");
+        });
+      });
+
+      // Hold this guy around
+      var handle = $('#som_sketch').sketch();
+
+      // Open new window with png when user saves
+      $("#save_button").click(function(){
+         handle.sketch().download('png');
+      })
+    </script>
+
+  </body>
+</html>
