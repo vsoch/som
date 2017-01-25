@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-requirements = ['requests']
+requirements = ['requests','retrying','validator.py']
 
 setup(
     name='som',
