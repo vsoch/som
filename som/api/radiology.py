@@ -7,7 +7,7 @@ base.py: base module for working with som api
 
 from som.logman import bot
 from som.auth import (
-    authenticate
+    authenticate,
     get_headers
 )
 
@@ -39,8 +39,9 @@ def get_radiology_base(base=None,version=None):
     return "%s/radiology/api/%s" %(base,version)
 
 
-def deidentify(person=None,person_id=None,person_id_source=None,person_id_timestamp=None,person_sources=None,
-               person_custom_fields=None,item_id,item_id_source,item_id_timestamp,
+def deidentify(item_id,item_id_source,item_id_timestamp,
+               person=None,person_id=None,person_id_source=None,person_id_timestamp=None,
+               person_sources=None,person_custom_fields=None,
                item_custom_fields=None,item_sources=None,               
                base=None,version=None,headers=None,verbose=False):
     '''deidentify will send a post to deidentify one or more images

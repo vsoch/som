@@ -129,8 +129,8 @@ def validate_item(item,sources=None,verbose=True):
     # These are the rules for an item
     rules = {
         "id": [Required, Pattern("^[A-Za-z0-9_-]*$")], # pattern
-        "id_source": [Required, In(item_sources],      # must be in item sources
-        "id_timestamp": [Required,XXX], 
+        "id_source": [Required, In(item_sources)],      # must be in item sources
+        "id_timestamp": [Required,"xxx"], 
         "effective_timestamp":[],
         "custom_fields":[]
     }
