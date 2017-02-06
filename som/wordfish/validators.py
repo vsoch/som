@@ -250,7 +250,8 @@ def validate_compressed(compressed_file,testing_base=None,clean_up=True):
     collections = os.listdir(test_folder)
     bot.logger.info("collections found: %s", len(collections))
     for collection in collections:
-        if validate_folder(collection) == False:
+        collection_path = "%s/%s" %(test_folder,collection)
+        if validate_folder(collection_path) == False:
             bot.logger.error("collection %s is invalid.", collection)
 
     if clean_up == True:
