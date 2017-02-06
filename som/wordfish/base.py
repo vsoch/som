@@ -14,8 +14,11 @@ from som.utils import (
 )
 
 from som.wordfish.validators import (
-    validate_folder,
-    validate_compressed
+    validate_dataset
+)
+
+from som.wordfish.structures import (
+    structure_dataset
 )
 
 import subprocess
@@ -75,3 +78,53 @@ def run_validation(inputs,test_dir=None,clean_up=True,fail_exit=True):
             return valid
 
     return valid
+
+
+def get_structures(inputs,build_dir=None,clean_up=True,fail_exit=True):
+    '''get structures will parse one or more compressed files and/ or folder paths
+    and return a data structure that has full file paths for images/text documents,
+    and the loaded json for metadata.
+    :param inputs: a single, or list of inputs, meaning folders and compressed files 
+    for validation
+    :param build_dir: a directory to use to extract and run things. If not specified,
+    one is created.
+    :param clean_up: boolean to determine if test_dir and subcontents should be
+    removed after tests. Default is True.
+    :param fail_exit: Given failure of validation, fail the process. Otherwise, return
+    False to the calling function. Default fail_exit is True
+    '''
+    if not isinstance(inputs,list):
+        inputs = [inputs]
+
+    bot.logger.debug("Found %s inputs to structure using som-validator.", len(inputs))
+    
+    # Where are we testing?
+    if build_dir == None:
+        build_dir = tempfile.mkdtemp()
+
+    # We will return a list of structures, each a collection
+    structures = dict()
+
+    # Tell the user about testing folder
+    message = "Building folder will be %s"
+    if clean_up == True:
+        message = "%s, and will be removed upon completion." %(message)
+    bot.logger.debug(message, build_dir)
+
+    for testing in inputs:
+        valid = validate_dataset(dataset=testing,
+                                 testing_base=build_dir,
+                                 clean_up=clean_up)
+
+        # We only structure input that is valid
+        if valid == False:
+            if fail_exit == True:
+                bot.logger.error("Input %s is not valid, please fix. Exiting.", testing)
+                sys.exit(1)
+            bot.logger.error("Input %s is not valid, skipping.")
+        else:
+            structures[dataset] = structure_dataset(dataset=testing,
+                                                    testing_base=build_dir,
+                                                    clean_up=clean_up)
+
+    return structures

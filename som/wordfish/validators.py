@@ -2,7 +2,7 @@
 
 '''
 
-validators/requests.py: validation of json (dict) structures to send
+validators.py: validation of folders and compressed objects for wordfish standard
 
 '''
 
@@ -10,6 +10,7 @@ from som.logman import bot
 import tempfile
 import shutil
 import os
+import re
 import json
 import sys
 
@@ -29,6 +30,23 @@ from validator import (
     In, 
     validate
 )
+
+def validate_dataset(dataset,testing_base=None,clean_up=True):
+    '''validate_dataset is a general function to take a compressed object 
+    (zip or .targz) or folder and run the correct validation functions depending
+    on the input type.
+    :param dataset: the full path to the dataset
+    :param testing_base: the testing_base directory
+    :param clean_up: whether to clean up the directory upon finish
+    '''
+    if os.path.isdir(dataset):
+        valid = validate_folder(folder=dataset)
+    elif re.search("[.]zip$|[.]tar[.]gz$",dataset):
+        valid = validate_compressed(compressed_file=dataset,
+                                    testing_base=testing_base,
+                                    clean_up=clean_up)
+    return valid
+
 
 def validate_folder(folder):
     '''validate_folder will ensure the folder provided is reflective of WordFish standard
