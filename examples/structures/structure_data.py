@@ -5,6 +5,10 @@
 # and it's up to the application to decide how to read/move etc.
 
 import os 
+from som.wordfish.structures import (
+    structure_compressed,
+    structure_folder
+)
 
 # If you want to control the debug level, change MESSAGELEVEL in your 
 # environment
@@ -12,12 +16,11 @@ import os
 # Eg, only print critical information.
 os.environ['MESSAGELEVEL'] = "CRITICAL"
 
-u
 
 # File
 compressed_file = "data.zip"
-valid = validate_compressed(compressed_file)
+structure = structure_compressed(compressed_file)
 
 # Folder
 folder_path = os.path.abspath("data")
-valid = validate_folder(folder_path)
+structure = structure_folder(folder_path)
