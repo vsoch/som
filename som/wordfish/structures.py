@@ -79,13 +79,14 @@ def structure_metadata(full_path,metadata_type=None):
         return None
 
 
-def structure_compressed(compressed_file,testing_base=None,clean_up=True):
+def structure_compressed(compressed_file,testing_base=None,clean_up=False):
     '''structure_compressed will first decompress a file to a temporary location,
     and then return the file structure in the WordFish standard. 
     :param compressed_file: the file to first extract.
     :param testing_base: If not given, a temporary location will be created. Otherwise,
     a folder will be made in testing_base.
-    :param clean_up: clean up (remove) extracted files/folders after test. Default True
+    :param clean_up: clean up (remove) extracted files/folders after test. Default False,
+    so the user can access the extracted files.
     '''
     if testing_base == None:
         testing_base = tempfile.mkdtemp()
