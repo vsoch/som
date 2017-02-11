@@ -1,4 +1,4 @@
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 AUTHOR = 'Vanessa Sochat'
 AUTHOR_EMAIL = 'vsochat@stanford.edu'
 NAME = 'som'
@@ -9,13 +9,7 @@ LICENSE = "LICENSE"
 
 INSTALL_REQUIRES = (
 
-certifi >= 14.05.14
-six == 1.8.0
-python_dateutil >= 2.5.3
-setuptools >= 21.0.0
-urllib3 >= 1.15.1
-
-    ('certifi',{'min_version': '14.05.14' }),
+    ('certifi',{'min_version': '14.05.14'}),
     ('flask', {'min_version': '0.12'}),
     ('flask-restful', {'min_version': None}),
     ('pandas', {'min_version': '0.19.2'}),

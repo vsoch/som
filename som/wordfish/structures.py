@@ -119,12 +119,13 @@ def structure_compressed(compressed_file,testing_base=None,clean_up=False):
     return collections
 
 
-def structure_folder(folder):
+def structure_folder(folder,relative_path=False):
     '''structure_folder will return a json data structure to describe a collection folder.
     The collection is named according to the input data file, and so if additional metadata
     is to be added (a unique id, name, etc.) it should be done by the calling function using
     the name as a lookup.
     :param folder: the folder to generate a structure for
+    :param relative_path: if True, will return relative paths (for web server)
     :returns collection: a dictionary of entity and other objects. 
 
     A collection is a dictionary with the following:
@@ -152,6 +153,8 @@ def structure_folder(folder):
 
     collection = {'name': folder }
     full_path = os.path.abspath(folder)
+    if relative_path == True:
+        full_path = os.path.relpath(folder, os.getcwd())
 
     # Add any collection metadata
     metadata = structure_metadata(full_path)

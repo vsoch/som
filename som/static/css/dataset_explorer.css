@@ -1,0 +1,69 @@
+.menu-tree-container {
+    width: 300px;
+    height: 200px;
+    overflow-y: scroll;
+    border: 1px solid black;
+    padding: 10px 10px;
+    position: relative;
+}
+.menu-tree-preloader {
+    width: 50px;
+    top: 45%;
+    position: absolute;
+    left: 50%;
+    margin-left: -16px;
+    display: none;
+}
+.menu-tree {
+    /* display:none; Replaced with document.write in HEAD tags. */
+}
+.menu-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.menu-tree li li {
+    /*background-image: url(page.png);
+    background-position: 0 1px;
+    background-repeat: no-repeat;*/
+    padding-left: 20px;
+}
+.menu-tree li.folder {
+    /*background-image: url(folder.png);*/
+}
+.menu-tree a {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/directory.png) no-repeat left top;
+    padding: 0px 0 0px 21px;
+    display: block;
+    color: #000000;
+    cursor: pointer;
+    text-decoration: none;
+}
+.menu-tree a.expanded {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/folder_open.png) no-repeat left top;
+}
+.menu-tree a[href$=".html"], .menu-tree a[href^="http"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/html.png) no-repeat left top;
+}
+.menu-tree a[href$=".pdf"] {
+    background: transparent url(http://www.adobe.com/images/pdficon_small.png) no-repeat left top;
+}
+.menu-tree a[href$=".doc"], .menu-tree a[href$=".docx"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/file.png) no-repeat left top;
+}
+.menu-tree a[href$=".ppt"], .menu-tree a[href$=".pptx"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/ppt.png) no-repeat left top;
+}
+.menu-tree a[href$=".xls"], .menu-tree a[href$=".xlsx"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/xls.png) no-repeat left top;
+}
+.menu-tree a[href$=".txt"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/txt.png) no-repeat left top;
+}
+.menu-tree a[href$=".jpg"], .menu-tree a[href$=".jpeg"], .menu-tree a[href$=".png"], .menu-tree a[href$=".gif"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/picture.png) no-repeat left top;
+}
+.menu-tree a:hover {
+    text-decoration: underline;
+    background-color: #ccc;
+}
