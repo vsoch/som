@@ -1,0 +1,75 @@
+    body {
+      font-family: 'Roboto';
+    }
+    .menu-tree-container {
+      width: 350px;
+      height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #CCC;
+      padding: 10px 10px;
+      position: relative;
+    }
+    .menu-tree-preloader {
+      width: 50px;
+      top: 45%;
+      position: absolute;
+      left: 50%;
+      margin-left: -16px;
+      display: none;
+    }
+    .menu-tree {
+      /* display:none; Replaced with document.write in HEAD tags. */
+    }
+    .menu-tree ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .menu-tree li li {
+      /*background-image: url(page.png);
+    background-position: 0 1px;
+    background-repeat: no-repeat;*/
+      padding-left: 20px;
+    }
+    .menu-tree li.folder {
+      /*background-image: url(folder.png);*/
+    }
+    .menu-tree a {
+      background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/directory.png) no-repeat left top;
+      padding: 0px 0 0px 21px;
+      display: block;
+      color: #000000;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .menu-tree a.expanded {
+      background: transparent url(../img/icons/folder_open.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".html"], .menu-tree a[data-url^="http"] {
+      background: transparent url(../img/icons/html.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".json"], .menu-tree a[data-url^="json"] {
+      background: transparent url(../img/icons/code.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".pdf"] {
+      background: transparent url(http://www.adobe.com/images/pdficon_small.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".doc"], .menu-tree a[data-url$=".docx"] {
+      background: transparent url(../img/icons/file.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".ppt"], .menu-tree a[data-url$=".pptx"] {
+      background: transparent url(../img/icons/ppt.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".xls"], .menu-tree a[data-url$=".xlsx"] {
+      background: transparent url(../img/icons/xls.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".txt"] {
+      background: transparent url(../img/icons/txt.png) no-repeat left top;
+    }
+    .menu-tree a[data-url$=".jpg"], .menu-tree a[data-url$=".jpeg"], .menu-tree a[data-url$=".png"], .menu-tree a[data-url$=".gif"] {
+      background: transparent url(../img/icons/picture.png) no-repeat left top;
+    }
+    .menu-tree a:hover {
+      text-decoration: underline;
+      background-color: #ccc;
+    }

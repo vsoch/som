@@ -1,0 +1,69 @@
+[
+    {
+        "key": "id",
+        "value": "f0fd3dfe-d061-4931-ad04-b92cd546201d"
+    },
+    {
+        "key": "rx",
+        "value": "peacup_tumor"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "3"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "3"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "3"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ]
+        ]
+    }
+]

@@ -1,0 +1,29 @@
+[
+    {
+        "key": "id",
+        "value": "bf2517d8-27c3-497a-90b6-1938cf365055"
+    },
+    {
+        "key": "rx",
+        "value": "eminem_tumor.3"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.86667"
+                }
+            ]
+        ]
+    }
+]

@@ -6,7 +6,7 @@ validators/requests.py: validation of json (dict) structures to send
 '''
 
 from som.logman import bot
-from som.api.base import (
+from som.api.standards import (
     person_sources,
     item_sources
 )

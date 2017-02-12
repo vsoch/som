@@ -6,7 +6,7 @@ utils.py: general http functions (utils) for som api
 '''
 
 from som.logman import bot
-from som.api.standards import (
+from som.api.base import (
     api_base,
     api_version
 )

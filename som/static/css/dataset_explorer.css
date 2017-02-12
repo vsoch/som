@@ -1,3 +1,4 @@
+/** MENU TREE **/
 .menu-tree-container {
     width: 300px;
     height: 200px;
@@ -43,6 +44,9 @@
     background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/folder_open.png) no-repeat left top;
 }
 .menu-tree a[href$=".html"], .menu-tree a[href^="http"] {
+    background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/html.png) no-repeat left top;
+}
+.menu-tree a[href$=".json"], .menu-tree a[href^="json"] {
     background: transparent url(http://labs.abeautifulsite.net/archived/jquery-fileTree/demo/images/html.png) no-repeat left top;
 }
 .menu-tree a[href$=".pdf"] {
