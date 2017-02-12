@@ -19,6 +19,7 @@ from som.utils import (
 )
 
 import os
+import sys
 
 
 def authenticate(domain=None,token_folder=None):

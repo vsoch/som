@@ -19,6 +19,7 @@ INSTALL_REQUIRES = (
     ('simplejson', {'min_version': '3.10.0'}),
     ('six', {'min_version': '1.10'}),
     ('pygments', {'min_version': '2.1.3'}),
+    ('pyswagger',{'min_version': None }),
     ('python-dateutil',{'min_version': None }),
     ('urllib3',{'min_version': "1.15" }),
     ('validator.py',{'min_version': None }),
