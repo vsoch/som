@@ -1,0 +1,23 @@
+dependencies:
+  pre:
+    # update locally with:
+    # openssl aes-256-cbc -e -in .secret_env -out secret-env-cipher -k $KEY
+    - openssl aes-256-cbc -d -in secret-env-cipher -k $KEY >> ~/.circlerc
+
+test:
+  override:
+    - $HOME/miniconda3/bin/python -m unittest som.api.tests.test_developers_api
+    - $HOME/miniconda2/bin/python -m unittest som.api.tests.test_developers_api
+
+dependencies:
+  pre:
+    - echo "Preparing Python 2 environment!"
+    - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
+    - chmod +x miniconda2.sh
+    - ./miniconda2.sh -b
+    - $HOME/miniconda2/bin/python setup.py install
+    - echo "Preparing Python 3 environment!"
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3.sh
+    - chmod +x miniconda3.sh
+    - ./miniconda3.sh -b
+    - $HOME/miniconda3/bin/python setup.py install
