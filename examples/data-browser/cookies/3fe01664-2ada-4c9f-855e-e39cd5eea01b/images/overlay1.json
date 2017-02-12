@@ -1,0 +1,69 @@
+[
+    {
+        "key": "id",
+        "value": "3fe01664-2ada-4c9f-855e-e39cd5eea01b"
+    },
+    {
+        "key": "rx",
+        "value": "peanuteminem_tumor.1"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "1"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "1"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "1"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ]
+        ]
+    }
+]

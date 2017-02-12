@@ -23,11 +23,6 @@ from som.api.validators.utils import (
     get_universal_source
 )
 
-from som.api.standards import (
-    api_base,
-    api_version
-)
-
 import subprocess
 import tempfile
 import zipfile

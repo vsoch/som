@@ -1,0 +1,43 @@
+[
+    {
+        "key": "id",
+        "value": "24ad9c7d-e1cc-4e72-8848-1627788096a0"
+    },
+    {
+        "key": "rx",
+        "value": "peacup_tumor"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.5095"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.4905"
+                }
+            ]
+        ]
+    }
+]

@@ -79,13 +79,14 @@ def structure_metadata(full_path,metadata_type=None):
         return None
 
 
-def structure_compressed(compressed_file,testing_base=None,clean_up=True):
+def structure_compressed(compressed_file,testing_base=None,clean_up=False):
     '''structure_compressed will first decompress a file to a temporary location,
     and then return the file structure in the WordFish standard. 
     :param compressed_file: the file to first extract.
     :param testing_base: If not given, a temporary location will be created. Otherwise,
     a folder will be made in testing_base.
-    :param clean_up: clean up (remove) extracted files/folders after test. Default True
+    :param clean_up: clean up (remove) extracted files/folders after test. Default False,
+    so the user can access the extracted files.
     '''
     if testing_base == None:
         testing_base = tempfile.mkdtemp()
@@ -118,12 +119,13 @@ def structure_compressed(compressed_file,testing_base=None,clean_up=True):
     return collections
 
 
-def structure_folder(folder):
+def structure_folder(folder,relative_path=False):
     '''structure_folder will return a json data structure to describe a collection folder.
     The collection is named according to the input data file, and so if additional metadata
     is to be added (a unique id, name, etc.) it should be done by the calling function using
     the name as a lookup.
     :param folder: the folder to generate a structure for
+    :param relative_path: if True, will return relative paths (for web server)
     :returns collection: a dictionary of entity and other objects. 
 
     A collection is a dictionary with the following:
@@ -151,6 +153,8 @@ def structure_folder(folder):
 
     collection = {'name': folder }
     full_path = os.path.abspath(folder)
+    if relative_path == True:
+        full_path = os.path.relpath(folder, os.getcwd())
 
     # Add any collection metadata
     metadata = structure_metadata(full_path)

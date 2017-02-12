@@ -1,0 +1,69 @@
+[
+    {
+        "key": "id",
+        "value": "07b04104-642b-4d36-8b50-34add7b36562"
+    },
+    {
+        "key": "rx",
+        "value": "eminem_tumor.1"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "semantic"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "semantic"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "semantic"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ]
+        ]
+    }
+]

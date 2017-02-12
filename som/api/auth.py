@@ -6,18 +6,12 @@ auth.py: authentication functions for som api
 '''
 
 from som.logman import bot
-from som.api.base import (
+from som.api.utils import (
     api_base,
     api_get,
     api_post,
     api_put,
     api_version
-)
-
-from som.api.utils import (
-    api_get,
-    api_post,
-    api_put
 )
 
 from som.utils import (
@@ -34,7 +28,6 @@ def authenticate(domain=None,token_folder=None):
     :param domain: the domain to direct the user to for the token, default is api_base
     :param token_folder: the location of the token file, default is $HOME (~/)
     '''
-    #TODO: we may/may not want a client to hold an authentication object
 
     # Attempt 1: Get token from environmental variable
     token = os.environ.get("STANFORD_SOM_TOKEN",None)

@@ -1,0 +1,33 @@
+[
+    {
+        "key": "id",
+        "value": "a9a1aebd-5c1d-4329-b8e8-c65b15e84e80"
+    },
+    {
+        "key": "rx",
+        "value": "chunks_tumor.1"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.73855"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ]
+        ]
+    }
+]

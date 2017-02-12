@@ -1,0 +1,105 @@
+[
+    {
+        "key": "id",
+        "value": "5b748b0d-d9ce-4ae0-83ff-82c114eba014"
+    },
+    {
+        "key": "rx",
+        "value": "peanuteminem_tumor.2"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "5"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "5"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "5"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "5"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "5"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ]
+        ]
+    }
+]

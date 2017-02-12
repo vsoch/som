@@ -1,0 +1,85 @@
+[
+    {
+        "key": "id",
+        "value": "6a9edb61-da3b-4147-ac43-687049482496"
+    },
+    {
+        "key": "rx",
+        "value": "chunks_tumor.2"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.22235"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.22934"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.17905"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.18228"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "computational"
+                },
+                {
+                    "key": "value",
+                    "value": "0.18698"
+                }
+            ]
+        ]
+    }
+]

@@ -1,4 +1,4 @@
-__version__ = "0.0.3"
+__version__ = "0.0.5"
 AUTHOR = 'Vanessa Sochat'
 AUTHOR_EMAIL = 'vsochat@stanford.edu'
 NAME = 'som'
@@ -9,6 +9,7 @@ LICENSE = "LICENSE"
 
 INSTALL_REQUIRES = (
 
+    ('certifi',{'min_version': '14.05.14'}),
     ('flask', {'min_version': '0.12'}),
     ('flask-restful', {'min_version': None}),
     ('pandas', {'min_version': '0.19.2'}),
@@ -16,8 +17,12 @@ INSTALL_REQUIRES = (
     ('retrying', {'min_version': '1.3.3'}),
     ('selenium', {'min_version': '3.0.2'}),
     ('simplejson', {'min_version': '3.10.0'}),
+    ('six', {'min_version': '1.10'}),
     ('pygments', {'min_version': '2.1.3'}),
+    ('python-dateutil',{'min_version': None }),
+    ('urllib3',{'min_version': "1.15" }),
     ('validator.py',{'min_version': None }),
     ('google-api-python-client', {'min_version': None}),
     ('oauth2client', {'exact_version': '3.0'})
+
 )

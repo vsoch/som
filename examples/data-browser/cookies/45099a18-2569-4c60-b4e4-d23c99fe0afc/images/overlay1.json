@@ -1,0 +1,195 @@
+[
+    {
+        "key": "id",
+        "value": "45099a18-2569-4c60-b4e4-d23c99fe0afc"
+    },
+    {
+        "key": "rx",
+        "value": "chunks_tumor.3"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "count"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "10"
+                },
+                {
+                    "key": "units",
+                    "value": "counts"
+                }
+            ]
+        ]
+    }
+]

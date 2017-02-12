@@ -1,0 +1,915 @@
+[
+    {
+        "key": "id",
+        "value": "8645384055_fe400912c9"
+    },
+    {
+        "key": "rx",
+        "value": "peacup_tumor"
+    },
+    {
+        "key": "features",
+        "value": [
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.68314"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.68321"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.78616"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.69958"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.66693"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.77143"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.73317"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.7509"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.73473"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_area"
+                },
+                {
+                    "key": "type",
+                    "value": "numeric"
+                },
+                {
+                    "key": "value",
+                    "value": "0.66821"
+                },
+                {
+                    "key": "units",
+                    "value": "pixels"
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_shape"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "round"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_color"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "yellow"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_margin"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "circumscribed"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ],
+            [
+                {
+                    "key": "name",
+                    "value": "candy_tumor_texture"
+                },
+                {
+                    "key": "type",
+                    "value": "string"
+                },
+                {
+                    "key": "value",
+                    "value": "smooth"
+                },
+                {
+                    "key": "units",
+                    "value": ""
+                }
+            ]
+        ]
+    }
+]
