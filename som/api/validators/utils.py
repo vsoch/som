@@ -9,6 +9,17 @@ from som.logman import bot
 import os
 import sys
 
+def validate_fields(acceptable_fields,actual_fields):
+    '''validate_fields checks that there are not any in actual_fields
+    that are not in acceptable_fields
+    '''
+    checking = [x for x in actual_fields if x not in acceptable_fields]
+    if len(checking) == 0:
+        return True
+    bot.logger.error("Fields not allowed: ",", ".join(checking))
+    return False
+
+
 def get_universal_source(source,comparator):
     '''get universal source will, given a source item (a list or single item), check to
     see if the length of a comparator is equivalent. The comparator is expected to be a list

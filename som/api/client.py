@@ -6,6 +6,7 @@ client.py: simple clients for som api
 '''
 
 from som.api.auth import authenticate
+from som.logman import bot
 from som.api.standards import spec
 
 from pyswagger.core import BaseClient
@@ -56,4 +57,7 @@ class Client(object):
         params['token'] = self.token
         signal = self.app.op[endpoint](**params)
         response = self.client.request(signal)
+        if response.status == 200:
+            return response.data
+        bot.logger.warning("Response code %s", response.status)
         return response
