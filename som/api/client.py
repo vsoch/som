@@ -37,8 +37,8 @@ class Client(object):
     def __init__(self, spec=None, token=None):
         self.token = token
         self.app = SwaggerApp._create_(spec)
-        self.auth = SwaggerSecurity(app)
-        self.client = SwaggerClient(auth)
+        self.auth = SwaggerSecurity(self.app)
+        self.client = SwaggerClient(self.auth)
         self.client._Client__s.headers['Authorization'] = 'Bearer %s' %(self.token)
 
     def update_headers(self, headers):
@@ -56,6 +56,4 @@ class Client(object):
         params['token'] = self.token
         signal = self.app.op[endpoint](**params)
         response = self.client.request(signal)
-        if response.status == 200:
-            return response.data
         return response

@@ -19,12 +19,14 @@ import unittest
 from som.api.client import get_client
 from som.utils import read_json
 
+here = os.path.dirname(os.path.realpath(__file__))
+
 class TestDevelopersApi(unittest.TestCase):
     """ DevelopersApi unit test stubs """
 
     def setUp(self):
-        self.client = get_client()        
-        self.identifiers = read_json('data/developers_uid.json')
+        self.cli = get_client()        
+        self.identifiers = read_json('%s/data/developers_uid.json' %(here))
         self.endpoint = 'developers!##!uid'
 
     def tearDown(self):
@@ -37,9 +39,8 @@ class TestDevelopersApi(unittest.TestCase):
         # Load in the example data
 
         params = {'identifiers': self.identifiers}
-        response = self.client.request(endpoint=self.endpoint,
-                                       params=params)
-        
+        response = self.cli.request(endpoint=self.endpoint,
+                                    params=params)
 
 if __name__ == '__main__':
     unittest.main()
