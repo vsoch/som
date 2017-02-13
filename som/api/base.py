@@ -14,7 +14,7 @@ from som.utils import (
 )
 
 from som.api.validators.requests import (
-    validate_person,
+    validate_identifiers,
     validate_items,
     validate_item
 )
@@ -35,50 +35,40 @@ import re
 import os
 
 
-api_base = "https://api.rit.stanford.edu"
+api_base = "https://rit.med.stanford.edu/sidsvc/api"
 api_version = "v1"
 
 
-def create_identifiers(person,items=None):
-    '''create_identifiers will return a json (dict) of identifiers for a request.
-    Currently, this function servies to check that a "person" object is included 
-    (required) and allows for (optional) items.
-    :param person: the person dictionary, which must have the following:
-    '''
-    identifiers = {"person": person}
-    if items != None:
-        if not isinstance(items,list):
-            items = [items]
-        
-        identifiers['items'] = items
-    return identifiers
-
-
-def create_person(person_id,id_source,id_timestamp=None,custom_fields=None,sources=None):
-    '''create person will return a json (dict) of required elements for a person,
+def create_identifier(entity_id,id_source,id_timestamp=None,items=None,custom_fields=None,sources=None):
+    '''create_identifier will return a json (dict) of required elements for an entity,
     a field to go under an identifier. The following is required:
-    :param person_id: mandatory key for uniquely identifying the person (e.g. "1234567-8")
+    :param entity_id: mandatory key for uniquely identifying the entity (e.g. "1234567-8")
     :param id_source: mandatory issuer for the above id (e.g., "stanford")
     :param id_timestamp: when the id was looked up, to help with changed/merged ids (optional)
     :param custom_fields: not required, a dictionary of custom key pairs to include as data
     :param sources: a custom list of sources (eg, ['stanford']) to accept. If not defined, defaults
     are used
-    :returns person: a person data structure, not wrapped, or None if not valid
+    :returns entity: an entity data structure, not wrapped, or None if not valid
     '''
-    person = {"id":person_id,
+    entity = {"id":entity_id,
               "id_source":id_source}
 
     # Custom fields and id_timestamp are optional
     if custom_fields != None:
-        person['custom_fields'] = custom_fields 
+        entity['custom_fields'] = custom_fields 
 
     if id_timestamp != None:
-        person["id_timestamp"] = id_timestamp
+        entity["id_timestamp"] = id_timestamp
 
-    valid = validate_person(person=person,
-                            sources=sources)
+    if items != None:
+        if not isinstance(items,list):
+            items = [items]
+        entity['items'] = items
+
+    valid = validate_identifiers(identifiers=entity,
+                                 sources=sources)
     if valid == True:
-        return person
+        return entity
 
     return None
 
@@ -131,7 +121,7 @@ def create_items(item_ids,id_sources,sources=None,custom_fields=None,verbose=Fal
                            sources=sources,
                            verbose=verbose)
     
-        items.append({"item":item})
+        items.append(item)
     return items
 
 

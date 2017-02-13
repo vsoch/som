@@ -16,19 +16,21 @@ import os
 import sys
 import unittest
 
-from som.api.client import get_client
+from som.api.radiology import Client
 from som.api.validators.responses import receive_identifiers
+from som.api.validators.requests import validate_identifiers
 from som.utils import read_json
 
 here = os.path.dirname(os.path.realpath(__file__))
 
 class TestDevelopersApi(unittest.TestCase):
-    """ DevelopersApi unit test stubs """
+    """ DevelopersApi unit tests"""
+
 
     def setUp(self):
-        self.cli = get_client()        
+        self.client = Client()
         self.identifiers = read_json('%s/data/developers_uid.json' %(here))
-        self.endpoint = 'developers!##!uid'
+
 
     def tearDown(self):
         pass
@@ -37,14 +39,22 @@ class TestDevelopersApi(unittest.TestCase):
         '''Test case for uid
         Accepts a list of identified items, returns a list of study specific identifiers
         '''
-        # Load in the example data
 
-        params = {'identifiers': self.identifiers}
-        response = self.cli.request(endpoint=self.endpoint,
-                                    params=params)
-       
+        print("Case 1: Formatting of identifiers input is correct.")
+        self.assertTrue(validate_identifiers(self.identifiers))
+
+        print("Case 2: Respones returns status 200, json object")
+        response = self.client.deidentify(self.identifiers)
+        self.assertTrue(isinstance(response,list))       
+
         # Validate response
-        receive_identifiers(response)
+        print("Case 3: Formatting of identifiers response is correct.")
+        self.assertTrue(receive_identifiers(response))
+
+        # Assert we have the same number of inputs and outputs
+        print("Case 4: Response returns same number of identifiers as given, %s" %(len(response)))
+        self.assertEqual(len(response),len(self.identifiers))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -56,8 +56,11 @@ def get_headers(token=None):
     :param token: an optional token to add for auth
     '''
     headers = dict()
-    if token!=None:
-        headers["Authentication"] = "Token %s" %(token)
     headers["Content-Type"] = "application/json"
-    bot.logger.debug("Headers found: %s",headers)
+    if token!=None:
+        headers['token'] = token # should be removed when updated
+        headers["Authorization"] = "Bearer %s" %(token)
+
+    header_names = ",".join(list(headers.keys()))
+    bot.logger.debug("Headers found: %s",header_names)
     return headers

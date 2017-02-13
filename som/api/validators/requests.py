@@ -7,15 +7,19 @@ validators/requests.py: validation of json (dict) structures to send
 
 from som.logman import bot
 from som.api.standards import (
-    person_sources,
-    item_sources
+    identifier_sources,
+    item_sources,
+    timestamp
 )
+
+from som.api.validators.utils import validate_fields
 
 import os
 import sys
 
 from validator import (
-    Required, 
+    Required,
+    Pattern, 
     Not, 
     Truthy, 
     Blank, 
@@ -26,47 +30,63 @@ from validator import (
 )
 
 
-def validate_person(person,sources=None):
-    '''validate_person will validate a person object, intended to go in as a field to
-    a POST
-    :param person: the person object. Must include the following:
-    :param sources: a list of one or more person sources. If not default, use standards
-    defaults
+def validate_identifiers(identifiers,id_sources=None,item_sources=None,verbose=True):
+    '''validate_identifiers will validate one or more identifier objects, 
+    intended to go in as a field to a POST
+    :param identifiers: the identifiers object.
+    :param verbose: verbose output for items
+    :param identifier_sources: a list of one or more identifier sources. 
+    :param item_sources: a list of one or more item sources
+    If either not defined, default to use standards
 
     :: notes
-      "person":{
+       {
         # mandatory key for uniquely identifying the person
         "id":"1234567-8",
+       
         # the issuer for the above id
         # mandatory, or maybe optional with default of "stanford" or "unspecified"
+        
         "id_source":"stanford",
         # when the id was looked up, to help with changed/merged ids
         # optional with default of current timestamp?
+        
         "id_timestamp":"2016-01-30T17:15:23.123Z",
         # optional key/value attributes, will be stored as-is if provided, but not used or interpreted
         # values will be updated/replaced if sent multiple times (last received wins)
         # any existing values will be preserved if not explicitly set here; set empty string to remove
+        
         "custom_fields":{
           "first_name":"Joe",
           "last_name":"Smith",
           "dob":"1970-02-28"
         }
     '''
-    if sources == None:
-        sources = person_sources
+    if id_sources == None:
+        id_sources = identifier_sources
 
     # These are the rules for a person
     rules = {
         "id": [Required, Pattern("^[A-Za-z0-9_-]*$")], # pattern
-        "id_source": [Required, In(person_sources)],   # must be in person sources
-        "id_timestamp": [Required,XXX], 
-        "custom_fields":[]
+        "id_source": [Required, In(id_sources)],   # must be in person sources
+        "id_timestamp": [Required,Pattern(timestamp)], 
     }
 
-    valid,message = validate(rules, person)
-    bot.logger.debug("Person data structure valid: %s",valid)
-    if valid == False:
-        bot.logger.error(message)
+    if not isinstance(identifiers,list):
+        identifiers = [identifiers]
+  
+    for item in identifiers:
+
+        valid,message = validate(rules, item)
+        if valid == False:
+            bot.logger.error(message)
+            return valid
+
+        if "items" in item:
+            validate_items(item['items'],sources=item_sources)
+
+
+    bot.logger.debug("Identifiers data structure valid: %s",valid)
     return valid
 
 
@@ -74,6 +94,7 @@ def validate_items(items,sources=None,verbose=True):
     '''validate_items is a wrapper for "validate_item" to allow for one or more items
     to go through validation at once.
     :param items: one or more items to parse through, a dict or list of dicts
+    :param item_sources: custom list of item sources. If not provided, defaults used.
     :param verbose: if True, will output each item that is valid
     '''
     if not isinstance(items,list):
@@ -101,27 +122,25 @@ def validate_item(item,sources=None,verbose=True):
 
     :: notes
 
-      "item":{
+    {
         # generic attribute/values just to store, not interpreted
         "id":"123123123123123", // mandatory
+
         # the issuer for the above id
         # mandatory, or maybe optional with default of "stanford" or "unspecified"
         "id_source":"pacs",
+
         # when the id was looked up, to help with changed/merged ids
         # optional with default of current timestamp?
         "id_timestamp":"2016-01-30T17:15:23.123Z",
-        # optional date (format "yyyy-mm-dd") or timestamp for this item's "business date"
-        # if this is provided a "fuzzed" value for it will be returned in the response
-        # person must be provided if this is provided (because the fuzzing is an offset for the person)
-        "effective_timestamp":"2016-01-30T17:15:23.123Z",
+
         # optional key/value attributes, will be stored as-is if provided, but not used or interpreted
         # values will be updated/replaced if sent multiple times (last received wins)
         # any existing values will be preserved if not explicitly set here; set empty string to remove
         "custom_fields":{
           "image_type":"x-ray",
           "resolution":"high"
-        }
-      }
+    }
     '''
     if sources == None:
         sources = item_sources
@@ -129,15 +148,15 @@ def validate_item(item,sources=None,verbose=True):
     # These are the rules for an item
     rules = {
         "id": [Required, Pattern("^[A-Za-z0-9_-]*$")], # pattern
-        "id_source": [Required, In(item_sources)],      # must be in item sources
-        "id_timestamp": [Required,"xxx"], 
-        "effective_timestamp":[],
-        "custom_fields":[]
+        "id_source": [Required, In(sources)],      # must be in item sources
+        "id_timestamp": [Required,Pattern(timestamp)], 
     }
 
     valid,message = validate(rules, item)
     if verbose == True:
-        bot.logger.debug("Person data structure valid: %s",valid)
+        bot.logger.debug("identifier %s data structure valid: %s",item['id'],valid)
     if valid == False:
         bot.logger.error(message)
+        if verbose == True:
+            print(item)
     return valid

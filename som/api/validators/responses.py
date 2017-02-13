@@ -22,7 +22,7 @@ from validator import (
 )
 
 from som.api.standards import (
-    person_sources,
+    identifier_sources,
     item_sources,
     timestamp
 )
@@ -75,7 +75,7 @@ def receive_identifiers(response):
     rules = {
         "id": [Required, Pattern("^[A-Za-z0-9_-]*$")], # pattern
         "suid": [Required, Pattern("^[A-Za-z0-9_-]*$")], # the suid
-        "id_source": [Required, In(person_sources)],   # must be in person sources
+        "id_source": [Required, In(identifier_sources)],   # must be in identifer sources
         "jittered_timestamp": [Required,Pattern(timestamp)]
     }
 

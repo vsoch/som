@@ -8,8 +8,8 @@ standards.py: lists of standard things to be used with validators
 from som.logman import bot
 
 # Sources (lists) of valid identifiers
-person_sources = ['stanford','Stanford MRN']
-item_sources = ['pacs','Stanford PACS', 'GE PACS']
+identifier_sources = ['stanford','Stanford MRN', 'StanfordMRN']
+item_sources = ['pacs','Stanford PACS', 'GE PACS', 'GE PACS Accession Number']
 
 # Swagger api
 spec = "https://app.swaggerhub.com/apiproxy/schema/file/susanweber/UID/1.0.0/swagger.json"
