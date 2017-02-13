@@ -9,7 +9,6 @@ dependencies:
   pre:
     # update locally with:
     # openssl aes-256-cbc -e -in .secret_env -out secret-env-cipher -k $KEY
-    - openssl aes-256-cbc -d -in secret-env-cipher -k $KEY >> ~/.circlerc
     - openssl aes-256-cbc -d -in secret-env-cipher -k $KEY >> ~/.somapi
     - echo "Preparing Python 2 environment!"
     - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda2.sh
