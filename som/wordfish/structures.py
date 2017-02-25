@@ -198,7 +198,7 @@ def structure_entities(full_path):
         entity = {'id':entity_path}
 
         # Does the entity have metadata?
-        metadata = structure_metadata(full_path,"entity")
+        metadata = structure_metadata(entity_path,"entity")
         if metadata != None:
             entity['metadata'] = metadata
 
@@ -253,7 +253,7 @@ def structure_images(entity_path, acceptable_types=None):
 
 
 def structure_template(entity_path, template_type, acceptable_types):
-    '''validate_template will check an entity directory
+    '''structure_template will check an entity directory
     for an folder of a particular type, for files and metadata that
     meet a particular criteria. If needed, additional parsing
     functions can be passed to this function. 
@@ -268,20 +268,26 @@ def structure_template(entity_path, template_type, acceptable_types):
         return None
     
     # Let's keep track of each file
-    all_files = os.listdir(template_path)
-    valids = []    # valid files, loaded or not
+    entity_folders = os.listdir(template_path)
+
+    for entity_folder in entity_folders:
+        all_files = os.listdir(template_path)
+        valids = []    # valid files, loaded or not
 
     # Find all valid images
-    for single_file in all_files:
-        parts = single_file.split('.')
-        full_path = "%s/%s" %(template_path,single_file)
-        ext = '.'.join(parts[1:])
-        if ext in acceptable_types:
-            valid = {'original': full_path}
-            metadata_file = "%s/%s.json" %(template_path,parts[0])
-            if os.path.exists(metadata_file):
-                valid['metadata'] = metadata_file
-            valids.append(valid)
+    for folder in entity_folders:
+        folder_path = "%s/%s" %(template_path,folder)
+        all_files = os.listdir(folder_path)
+        for single_file in all_files:
+            parts = single_file.split('.')
+            full_path = "%s/%s" %(folder_path,single_file)
+            ext = '.'.join(parts[1:])
+            if ext in acceptable_types:
+                valid = {'original': full_path}
+                metadata_file = "%s/%s.json" %(folder_path,parts[0])
+                if os.path.exists(metadata_file):
+                    valid['metadata'] = metadata_file
+                valids.append(valid)
 
     # Warn the user about missing valid files, not logical given folder
     if len(valids) == 0:

@@ -88,7 +88,7 @@ def validate_metadata(full_path,metadata_type=None):
         metadata_type = "collection"
 
     parent_dir = os.path.dirname(full_path)
-    base_name = os.path.basename(full_path)
+    base_name = os.path.basename(full_path).split('.')[0]
     metadata = "%s/%s.json" %(parent_dir,base_name)
 
     if os.path.exists(metadata):
@@ -193,20 +193,22 @@ def validate_template(entity_path, template_type, acceptable_types):
         return None
     
     # Let's keep track of each file
-    all_files = os.listdir(template_path)
+    all_folders = os.listdir(template_path)
     valids = []    # valid files
-    metadata = []  # files accepted as metadata (don't have to exist)
     others = []    # Not valid as metadata or accepted
 
     # Find all valid images
-    for single_file in all_files:
-        parts = single_file.split('.')
-        ext = '.'.join(parts[1:])
-        if ext in acceptable_types:
-            valids.append(single_file)
-            metadata.append("%s.json" %(parts[0]))
-        else:
-            others.append(single_file)
+    for folder in all_folders:
+        folder_path = "%s/%s" %(template_path,folder)
+        all_files = os.listdir(folder_path)
+        for single_file in all_files:
+            file_path = "%s/%s" %(folder_path,single_file)
+            parts = single_file.split('.')
+            ext = '.'.join(parts[1:])
+            if ext in acceptable_types:
+                valids.append(file_path)
+            else:
+                others.append(file_path)
 
     # Warn the user about missing valid files, not logical given folder
     if len(valids) == 0:
@@ -220,19 +222,17 @@ def validate_template(entity_path, template_type, acceptable_types):
     invalid_metadata = 0
     skipped_files = 0    
 
-    # Assess other files for metadata
-    for other in others:
-        if other in metadata: # is the file considered a valid metadata file?
-            other_path = "%s/%s" %(template_path,other)
-            if validate_metadata(other_path,template_type) == False:      
-                bot.logger.error("metadata %s for entity %s is invalid" %(other,entity_name))
-                invalid_metadata +=1
-                valid = False
-            else:
-                valid_metadata +=1
+    # Assess each valid for metadata
+    for contender in valids:
+        if validate_metadata(contender,template_type) == False:      
+            bot.logger.error("metadata %s for entity %s is invalid" %(other,entity_name))
+            invalid_metadata +=1
+            valid = False
         else:
-            skipped_files +=1      
-            bot.logger.warning("%s for %s/%s is not valid for import and is ignored", other, entity_name, template_type)
+            valid_metadata +=1
+    else:
+        skipped_files +=1      
+        bot.logger.warning("%s for %s/%s is not valid for import and is ignored", other, entity_name, template_type)
 
     bot.logger.info("found %s valid metadata, %s invalid metadata, and %s skipped files for %s", valid_metadata,
                                                                                                  invalid_metadata,
