@@ -72,10 +72,20 @@ def validate_identifiers(identifiers,id_sources=None,item_sources=None,verbose=T
         "id_timestamp": [Required,Pattern(timestamp)], 
     }
 
-    if not isinstance(identifiers,list):
-        identifiers = [identifiers]
-  
-    for item in identifiers:
+    if not isinstance(identifiers,dict):
+        bot.logger.error("Identifiers data structure must be dictionary.")
+        return False
+
+    if "identifiers" not in identifiers:
+        bot.logger.error("identifiers key not found in data structure.")
+
+    items = identifiers['identifiers']
+
+    if not isinstance(items,list):
+        bot.logger.error("Items in identifiers data structure must be list.")
+        return False  
+
+    for item in items:
 
         valid,message = validate(rules, item)
         if valid == False:

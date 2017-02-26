@@ -53,7 +53,7 @@ class TestDevelopersApi(unittest.TestCase):
 
         # Assert we have the same number of inputs and outputs
         print("Case 4: Response returns same number of identifiers as given, %s" %(len(response)))
-        self.assertEqual(len(response),len(self.identifiers))
+        self.assertEqual(len(response),len(self.identifiers['identifiers']))
 
 
 if __name__ == '__main__':

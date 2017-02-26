@@ -58,7 +58,6 @@ def get_headers(token=None):
     headers = dict()
     headers["Content-Type"] = "application/json"
     if token!=None:
-        headers['token'] = token # should be removed when updated
         headers["Authorization"] = "Bearer %s" %(token)
 
     header_names = ",".join(list(headers.keys()))

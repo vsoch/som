@@ -51,7 +51,7 @@ class Client(ClientBase):
         POST https://APIBASE/VERSION/radiologydeid    
         :param identifiers: a list of identifiers (people and items)
         '''    
-        url = "%sdeid/" %(self.base)
+        url = "%sdeid" %(self.base)
         response = api_post(url,headers=self.headers,data=identifiers)
         if "results" in response:
             return response['results']

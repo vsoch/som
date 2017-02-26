@@ -1,4 +1,4 @@
-[
+{ "identifiers": [
 {   "id": "1010101-2",
       "id_source": "StanfordMRN",
       "id_timestamp": "2010-01-30T17:15:23.123Z",
@@ -42,3 +42,4 @@
       ]
    }
   ]
+}
