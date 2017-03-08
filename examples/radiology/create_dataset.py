@@ -7,8 +7,8 @@
 # would want to do the equivalent given adding another 
 # institution data, etc.
 
-from som.data.google.radiology import Client
-from som.data.google.bigquery import (
+from som.storage.google.radiology import Client
+from som.storage.google.bigquery import (
     get_dataset
     set_dataset_metadata
 )
@@ -18,9 +18,7 @@ client = Client()
 bigquery_client = client.bq
 dataset = get_dataset(bigquery_client) #default is stanford
 
-description = '''This is the metadata table for Stanford 
-              Medicine radiology, including metadata for images 
-              and text that are stored as objects in Google Storage.'''
+description = 'This is the metadata table for Stanford Medicine radiology, including metadata for images and text that are stored as objects in Google Storage.'
 friendly_name = "Stanford Medicine Images and Text Metadata"
 
 # Now we will update the metadata for it!
