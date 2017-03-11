@@ -7,6 +7,7 @@ from som.storage.google.validators import (
     validate_model
 )
 
+import google.cloud.datastore as datastore
 from som.storage.google.datastore import (
     get_key_filters,
     parse_keys,
@@ -14,6 +15,7 @@ from som.storage.google.datastore import (
 )
 
 from som.logman import bot
+import datetime
 import collections
 import sys
 import os
@@ -236,9 +238,12 @@ class BatchManager:
 class ModelBase:
 
     def __init__(self,client):
-        self.fields = self.model['fields']
-        self.key = self.model['key']
-        self.exclude_from_indexes = self.model['exclude_from_indexes'] # Can be None
+        self.fields = validate_model(self.model['fields'])
+        self.key = client.key(*self.model['key'])
+        if "exclude_from_indexes" in self.model:
+            self.exclude_from_indexes = self.model['exclude_from_indexes'] # Can be None
+        else:
+            self.exclude_from_indexes = None
 
     def __str__(self):
         return print_datastore_path(self.key)
@@ -247,13 +252,26 @@ class ModelBase:
         return print_datastore_path(self.key)
 
 
-    def update_key(self,key):
+    def get_keypath(self):
+        return list(self.key.flat_path)
+      
+
+    def get_name(self):
+        return list(self.key.flat_path)[-1]
+
+
+    def update_key(self,client,key):
         '''update key will add a key to a model, and return a 
         unique set of keys
         '''
         if key is not None:
-           self.key.append(key)
-           self.key = list(set(self.key))
+           flat_key = list(self.key.flat_path)
+           if isinstance(key,list):
+               flat_key = flat_key + key
+           else: 
+               flat_key.append(key)
+           self.key = client.key(*flat_key)
+
 
     def update_fields(self,new_fields,add_new=True):
         '''update fields will update the model's fields with an input dictionary
@@ -271,8 +289,8 @@ class ModelBase:
         '''get_or_create will get or create an object using a transaction.
         '''
         with client.transaction():
-           self.update_key(key)
-           entity = client.get(client.key(*self.key))
+           self.update_key(client,key)
+           entity = client.get(*self.key)
 
            # The entity is being created, add timestamp
            if not entity:
@@ -283,17 +301,16 @@ class ModelBase:
     def create(self,client,fields=None):
         '''create a new entity
         '''
-        key = client.key(*self.key)
         if self.exclude_from_indexes is not None:
-            entity = datastore.Entity(key=key,
+            entity = datastore.Entity(key=self.key,
                                       exclude_from_indexes=self.exclude_from_indexes)
         else:
-            entity = datastore.Entity(key)
+            entity = datastore.Entity(self.key)
         if fields is not None:
             self.fields.update(fields)
         self.fields['created'] = datetime.datetime.utcnow()
         self.fields['updated'] = datetime.datetime.utcnow()
-        for field,value in self.fields:
+        for field,value in self.fields.items():
             entity[field] = value
         client.put(entity)
         return entity
@@ -301,46 +318,42 @@ class ModelBase:
 
     def delete(self,client):
         '''delete an entity'''
-        key = client.key(*self.key)
-        client.delete(key)
+        client.delete(self.key)
         return key
 
 
     def update_or_create(self,client,fields=None):
         '''update or create will update or create an entity.
         '''
-        key = client.key(*self.key)
-        with client.transaction():
-           entity = client.get(client.key(key))
+        entity = client.get(self.key)
 
-           # The entity is being created, add timestamp
-           if not entity:
-               entity = self.create(client)            #insert
-           else: 
-               entity = self.update(client,fields) #upsert
+        # The entity is being created, add timestamp
+        if not entity:
+           entity = self.create(client)            #insert
+        else: 
+            entity = self.update(client,fields) #upsert
         return entity
 
 
     def update(self,client,fields=None,key=None):
         '''update an entity. Returns None if does not exist.'''
         entity = None
-        key = client.key(*self.key)
         with client.transaction():
-           entity = client.get(client.key(key))
+           entity = client.get(self.key)
            if entity:
                if fields is not None:
-                   update_fields(fields)
+                   self.update_fields(fields)
+
                self.fields['updated'] = datetime.datetime.utcnow()
-               for field,value in self.fields:
+
+               for field,value in self.fields.items():
                    entity[field] = value
         return entity
 
 
-    def get(self,client,fields):
+    def get(self,client):
         '''get an entity. Returns None if does not exist.'''
         entity = None
-        key = client.key(*self.key)
         with client.transaction():
-           entity = client.get(client.key(key))
+           entity = client.get(self.key)
         return entity
-

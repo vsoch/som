@@ -4,6 +4,7 @@ google/datastore.py: general storage utility functions
 '''
 
 from google.cloud import datastore as ds
+from google.cloud.datastore.key import Key
 from som.logman import bot
 import sys
 import os
@@ -33,6 +34,8 @@ def print_datastore_path(name):
     '''print_datastore path will print a complete uri for a datastore
     object, like Entity1:key1/Entity2/key2
     '''
+    if isinstance(name,Key):
+        name = list(name.flat_path)
     parts = [ name[i:i+2] for i in range(0, len(name), 2) ]
     return "/".join([":".join(x) for x in parts])
 

@@ -11,7 +11,7 @@ from som.storage.google.utils import *
 from som.logman import bot
 from som.utils import read_json
 from som.wordfish.structures import structure_dataset
-
+import six
 
 ######################################################################################
 # Specs and base data structures for each radiology model
@@ -25,6 +25,8 @@ def entity(uid,collection,metadata=None):
     fields = [{'key':'uid','required':True,'value':uid},
               {'key':'metadata','required':False,'value':metadata}]
 
+    if type(collection) not in six.string_types:
+        collection = collection.get_name()
     model = {'fields':fields,
              'key':['Collection',collection,'Entity', uid]}
 
@@ -32,17 +34,17 @@ def entity(uid,collection,metadata=None):
 
 
 
-def collection(name,description=None,metadata=None):
+def collection(uid,description=None,metadata=None):
     '''entity returns an entity object
     parent is an owner
     '''
-    fields = [{'key':'name','required':True,'value':name},
+    fields = [{'key':'uid','required':True,'value':uid},
               {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata}]
 
     model = {'fields':fields,
              'exclude_from_indexes': ['metadata','description'],
-             'key':['Collection', name]}
+             'key':['Collection', uid]}
     return model
     
 
@@ -50,7 +52,7 @@ def collection(name,description=None,metadata=None):
 def image(uid,entity,download,url,storage,description=None,metadata=None):
     '''image returns an image object. entity is the parent
     '''
-    fields = [{'key':'name','required':True,'value':uid},
+    fields = [{'key':'uid','required':True,'value':uid},
               {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata},
               {'key':'download','required':True,'value':download,
@@ -67,7 +69,7 @@ def image(uid,entity,download,url,storage,description=None,metadata=None):
 def text(uid,entity,content,description=None,metadata=None):
     '''text returns a text object. entity is the parent
     '''
-    fields = [{'key':'name','required':True,'value':uid},
+    fields = [{'key':'uid','required':True,'value':uid},
               {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata},
               {'key':'content','required':True,'value':content}]
@@ -87,22 +89,21 @@ def text(uid,entity,content,description=None,metadata=None):
 
 class Collection(ModelBase):
   
-    def __init__(self,client,collection_name,**kwargs):
-        self.model = collection(name=collection_name,**kwargs)
-        self.model['fields'] = validate_model(self.model['fields'])
+    def __init__(self,client,uid,**kwargs):
+        self.model = collection(uid=uid)
         super(Collection, self).__init__(client,**kwargs)
         self.this = self.update_or_create(client)
 
 
 class Entity(ModelBase):
 
-    def __init__(self,client,collection_name,**kwargs):
-        self.collection = collection_name
+    def __init__(self,client,collection,uid,**kwargs):
+        self.collection = collection.get_name()
         self.model = entity(uid=uid,
-                            collection_name=collection_name,**kwargs)
-        self.model['fields'] = validate_model(self.model['fields'])
+                            collection=collection,**kwargs)
+        super(Entity, self).__init__(client,**kwargs)
         self.this = self.update_or_create(client)
-        super(Entity, self).__init__(**kwargs)
+        
 
    
     def collection(self,client):
@@ -135,7 +136,6 @@ class Image(ModelBase):
                            url=url,
                            description=description,
                            metadata=metadata)
-        self.model['fields'] = validate_model(self.model['fields'])
         self.model['fields']['storage'] = storage
         if create:
             self.this = self.update_or_create(client)
@@ -155,7 +155,6 @@ class Text(ModelBase):
                           description=description,
                           metadata=metadata)
 
-        self.model['fields'] = validate_model(self.model['fields'])
         self.this = self.get_or_create(client)
         super(Text, self).__init__(**kwargs)
 
@@ -183,12 +182,11 @@ class Client(ClientBase):
         return "storage.google.%s" %self.bucket_name
 
 
-    def get_collection(self,name):
-        return Collection(client=self.datastore,
-                          collection_name=name)
+    def get_collection(self,fields):
+        return Collection(client=self.datastore,**fields)
 
-    def get_entity(self,**kwargs):
-        return Entity(client=self.datastore,**kwargs)
+    def get_entity(self,fields):
+        return Entity(client=self.datastore,**fields)
 
     def create_image(self,create=True,**kwargs):
         new_image = Image(client=self.datastore,create=create,**kwargs)
@@ -255,18 +253,19 @@ class Client(ClientBase):
         if not isinstance(structures,list):
             structures = [structures]
         for s in structures:
-            collection_name = os.path.basename(s['collection']['name'])
-            fields = {'name': collection_name }
+            uid = os.path.basename(s['collection']['name'])
+            fields = {'uid': uid }
             if 'metadata' in s['collection']:
                 fields['metadata'] = read_json(s['collection']['metadata'])        
-            c = self.get_collection(name=fields['name'])
+            col = self.get_collection(fields)
 
             # Add entities
             if 'entities' in s['collection']:
-                for entity in s['collection']['entities']:
+                for contender in s['collection']['entities']:
                     
-                    fields = {'uid': os.path.basename(entity['entity']['id'])}
-                    e = self.get_entity(collection=c.key)
+                    fields = {'uid': os.path.basename(contender['entity']['id']),
+                              'collection':col }
+                    e = self.get_entity(fields)
                    
                     # Add images and text to entities
                     if 'texts' in entity['entity']:
