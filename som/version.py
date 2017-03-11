@@ -22,7 +22,6 @@ INSTALL_REQUIRES = (
     ('urllib3',{'min_version': "1.15" }),
     ('validator.py',{'min_version': None }),
     ('google-cloud',{'min_version': None }),
-    ('google-appengine',{'min_version': None }),
     ('google-api-python-client', {'min_version': None}),
     ('google-cloud-datastore', {'min_version': None}),
     ('oauth2client', {'exact_version': '3.0'})
