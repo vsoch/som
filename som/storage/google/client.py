@@ -13,7 +13,8 @@ import datetime
 from google.cloud import datastore
 from som.storage.google.utils import (
     get_google_service, 
-    get_bucket
+    get_bucket,
+    upload_file
 )
 
 from som.logman import bot
@@ -33,3 +34,12 @@ class ClientBase(object):
   
     def get_bucket(self):
         self.bucket = get_bucket(self.storage,self.bucket_name)
+
+    def upload_object(self,bucket_folder,file_path,verbose=True):
+        '''upload_object will upload a file to path bucket_path in storage
+        '''
+        return upload_file(self.storage,self.bucket,
+                           bucket_folder=bucket_folder,
+                           file_path=file_path,
+                           verbose=verbose)
+

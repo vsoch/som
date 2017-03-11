@@ -43,6 +43,12 @@ class BatchManager:
         '''
         self.objects.push(task)
 
+    def create(self,client):
+        '''create runs a batch create, all of the objects in the queue as
+        one transaction
+        '''
+        if len(self.objects) > 0:
+        
 
     def get(self,client,keys):
         '''get will return a list of tasks based on keys, where each
@@ -66,9 +72,8 @@ class BatchManager:
                                              # (currently on airplane)
 
 
-
     def insert(self,client,clear_queue=True):
-       '''run will run a transaction for a set of tasks
+       '''insert will run a transaction for a set of tasks
        '''
        if len(self.objects) > 0:
            tasks = self.objects
@@ -290,7 +295,8 @@ class ModelBase:
             entity = datastore.Entity(key)
         self.fields['created'] = datetime.datetime.utcnow()
         self.fields['updated'] = datetime.datetime.utcnow()
-        entity.update(self.fields)
+        for field,value in self.fields:
+            entity[field] = value
         client.put(entity)
         return entity
 
@@ -317,16 +323,18 @@ class ModelBase:
         return entity
 
 
-    def update(self,client,fields,key=None):
+    def update(self,client,fields=None,key=None):
         '''update an entity. Returns None if does not exist.'''
         entity = None
         key = client.key(*self.key)
         with client.transaction():
            entity = client.get(client.key(key))
            if entity:
-               update_fields(fields)
+               if fields is not None:
+                   update_fields(fields)
                self.fields['updated'] = datetime.datetime.utcnow()
-               entity.update(self.fields)
+               for field,value in self.fields:
+                   entity[field] = value
         return entity
 
 

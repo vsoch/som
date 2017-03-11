@@ -5,48 +5,62 @@ auth.py: authentication functions for som api
 
 '''
 
+from oauth2client.client import AccessTokenCredentials
+
 from som.logman import bot
-from som.api.utils import (
-    api_base,
-    api_get,
-    api_post,
-    api_put,
-    api_version
-)
 
 from som.utils import (
-    read_file
+    read_file,
+    read_json,
+    write_json
 )
 
 import os
+import json
+import requests
 import sys
 
 
-def authenticate(domain=None,token_folder=None):
-    '''authenticate will authenticate the user with the SOM api. This means
-    either obtaining the token from the environment, and then trying to obtain
-    the token file and reading it, and then finally telling the user to get it.
-    :param domain: the domain to direct the user to for the token, default is api_base
-    :param token_folder: the location of the token file, default is $HOME (~/)
-    '''
-
-    # Attempt 1: Get token from environmental variable
-    token = os.environ.get("STANFORD_SOM_TOKEN",None)
-
-    if token == None:
-        # Is the user specifying a custom home folder?
-        if token_folder == None:
-            token_folder = os.environ["HOME"]
-
-        token_file = "%s/.somapi" %(token_folder)
+def read_client_secrets():
+    secrets = None
+    token_file = os.environ.get("STANFORD_CLIENT_SECRETS",None)
+    if token_file is not None:
         if os.path.exists(token_file):
-            token = read_file(token_file)[0].strip('\n')
-        else:
-            if domain == None:
-                domain = api_base
-            print('''Please obtain token from %s/token
-                     and save to .somtoken in your $HOME folder''' %(domain))
-            sys.exit(1)
+            secrets = read_json(token_file)
+    return secrets
+
+
+def authenticate():
+    '''get_access_token will return the currently active access token
+    from the client secrets file
+    '''
+    token = None
+    secrets = read_client_secrets(token_file)
+    if secrets is not None:
+        token = secrets['accessToken']
+    return token
+
+
+def refresh_access_token(token_file):
+    '''refresh access token reads in the client secrets from 
+    the token file, and update the tokens, and save back to file
+    '''
+    secrets = read_client_secrets(token_file)
+    token = None
+
+    # Query to update the token - must be on Stanford network
+    if secrets is not None:
+        response = requests.post(secrets['token_uri'],
+                                 data={'refreshToken':secrets['refreshToken']},
+                                 headers=get_headers())
+
+        if isinstance(response,dict):
+            secrets["accessToken"] = response['accessToken']
+            secrets["refreshToken"] = response['refreshToken']
+            print("Successfully refreshed access token.")
+            token_file = write_json(secrets,token_file)
+            token = secrets['accessToken']
+
     return token
 
 
@@ -57,7 +71,7 @@ def get_headers(token=None):
     '''
     headers = dict()
     headers["Content-Type"] = "application/json"
-    if token!=None:
+    if token is not None:
         headers["Authorization"] = "Bearer %s" %(token)
 
     header_names = ",".join(list(headers.keys()))

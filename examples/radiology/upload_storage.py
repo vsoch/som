@@ -13,7 +13,7 @@ from som.wordfish.structures import structure_dataset
 
 
 compressed_data = '../../../wordfish-standard/demo/cookies.zip'
-structures = structure_dataset(compressed_data)
+structures = structure_dataset(compressed_data,clean_up=False)
 
 radiology_client = Client()
 response = radiology_client.upload(structures)

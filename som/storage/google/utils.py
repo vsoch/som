@@ -190,6 +190,7 @@ def get_metadata(key):
 # Extensions and Files
 ######################################################################################
 
+
 def sniff_extension(file_path,verbose=True):
     '''sniff_extension will attempt to determine the file type based on the extension,
     and return the proper mimetype
