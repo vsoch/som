@@ -52,3 +52,12 @@ class Client(ClientBase):
         if "results" in response:
             return response['results']
         return response
+
+
+    def test_deidentify(self,identifiers):
+        '''test_deidentify is equivalent to deidentify, but using a testing
+        endpoint.
+        #TODO: maybe the below should be the base, with identifiers - need to test.
+        POST https://api.rit.stanford.edu/identifiers/api/v1/uid/test
+        '''
+        print('wakkawakka')
