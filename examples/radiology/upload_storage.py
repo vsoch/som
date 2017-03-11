@@ -11,23 +11,6 @@
 from som.storage.google.radiology import Client
 from som.wordfish.structures import structure_dataset
 
-
-#compressed_data = '../../../wordfish-standard/demo/cookies.zip'
-compressed_data = '../wordfish-standard/demo/cookies.zip'
+compressed_data = '../../../wordfish-standard/demo/cookies.zip'
 structures = structure_dataset(compressed_data,clean_up=False)
-
-radiology_client = Client()
-
-import os
-s=structures[0]
-collection_name = os.path.basename(s['collection']['name'])
-fields = {'uid':collection_name}
-#response = radiology_client.upload_dataset(structures)
-col = radiology_client.get_collection(uid=fields['uid'])
-
-
-# Add entities
-contender = s['collection']['entities'][0]
-fields = {'uid': os.path.basename(contender['entity']['id']),
-          'collection':col }
-entity = radiology_client.get_entity(fields)
+response = radiology_client.upload_dataset(structures)
