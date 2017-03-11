@@ -6,10 +6,6 @@ base.py: base module for working with som api
 '''
 
 from som.logman import bot
-from som.api.auth import (
-    authenticate,
-    get_headers
-)
 
 from som.api.utils import (
     api_get,
