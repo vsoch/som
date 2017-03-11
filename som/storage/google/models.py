@@ -43,11 +43,6 @@ class BatchManager:
         '''
         self.objects.push(task)
 
-    def create(self,client):
-        '''create runs a batch create, all of the objects in the queue as
-        one transaction
-        '''
-        if len(self.objects) > 0:
         
 
     def get(self,client,keys):
@@ -285,7 +280,7 @@ class ModelBase:
         return entity
 
 
-    def create(self,client):
+    def create(self,client,fields=None):
         '''create a new entity
         '''
         key = client.key(*self.key)
@@ -294,6 +289,8 @@ class ModelBase:
                                       exclude_from_indexes=self.exclude_from_indexes)
         else:
             entity = datastore.Entity(key)
+        if fields is not None:
+            self.fields.update(fields)
         self.fields['created'] = datetime.datetime.utcnow()
         self.fields['updated'] = datetime.datetime.utcnow()
         for field,value in self.fields:
@@ -309,7 +306,7 @@ class ModelBase:
         return key
 
 
-    def update_or_create(self,client,fields):
+    def update_or_create(self,client,fields=None):
         '''update or create will update or create an entity.
         '''
         key = client.key(*self.key)
