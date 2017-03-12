@@ -118,7 +118,7 @@ def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True):
     :param bucket_path: the path to upload to
     '''
     # Set up path on bucket
-    upload_path = "%s/%s" %(bucket['id'],bucket_path)
+    upload_path = "%s/%s" %(bucket_path)
     if upload_path[-1] != '/':
         upload_path = "%s/" %(upload_path)
     upload_path = "%s%s" %(upload_path,os.path.basename(file_path))
