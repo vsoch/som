@@ -84,13 +84,11 @@ def get_google_service(service_type=None,version=None):
 # GOOGLE STORAGE API #####################################################################
 ##########################################################################################
     
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def get_bucket(storage_service,bucket_name):
     req = storage_service.buckets().get(bucket=bucket_name)
     return req.execute()
 
 
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=10)
 def delete_object(storage_service,bucket_name,object_name):
     '''delete_file will delete a file from a bucket
     :param storage_service: the service obtained with get_storage_service
@@ -106,7 +104,6 @@ def delete_object(storage_service,bucket_name,object_name):
     return operation
 
 
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def upload_file(storage_service,bucket,bucket_folder,file_path,verbose=True):
     '''get_folder will return the folder with folder_name, and if create=True,
     will create it if not found. If folder is found or created, the metadata is
@@ -136,7 +133,6 @@ def upload_file(storage_service,bucket,bucket_folder,file_path,verbose=True):
 
 
 
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def list_bucket(bucket,storage_service):
     # Create a request to objects.list to retrieve a list of objects.        
     request = storage_service.objects().list(bucket=bucket['id'], 

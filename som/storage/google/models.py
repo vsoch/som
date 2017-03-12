@@ -43,7 +43,9 @@ class BatchManager:
     def add(self,task):
         '''return all objects in the set
         '''
-        self.objects.push(task)
+        if not isinstance(task,datastore.Entity):
+            task = task.this
+        self.objects.append(task)
 
         
 
@@ -298,8 +300,8 @@ class ModelBase:
         return entity
 
 
-    def create(self,client,fields=None):
-        '''create a new entity
+    def setup(self,client,fields=None):
+        '''setup will generate a new Entity without saving it (for batches)
         '''
         if self.exclude_from_indexes is not None:
             entity = datastore.Entity(key=self.key,
@@ -308,6 +310,13 @@ class ModelBase:
             entity = datastore.Entity(self.key)
         if fields is not None:
             self.fields.update(fields)
+        return entity
+
+
+    def create(self,client,fields=None):
+        '''create a new entity
+        '''
+        entity = self.setup(client,fields)
         self.fields['created'] = datetime.datetime.utcnow()
         self.fields['updated'] = datetime.datetime.utcnow()
         for field,value in self.fields.items():

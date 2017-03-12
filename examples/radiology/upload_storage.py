@@ -11,6 +11,8 @@
 from som.storage.google.radiology import Client
 from som.wordfish.structures import structure_dataset
 
-compressed_data = '../../../wordfish-standard/demo/cookies.zip'
+radiology_client = Client()
+compressed_data = '../wordfish-standard/demo/cookies.zip'
+#compressed_data = '../../../wordfish-standard/demo/cookies.zip'
 structures = structure_dataset(compressed_data,clean_up=False)
 response = radiology_client.upload_dataset(structures)

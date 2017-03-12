@@ -34,57 +34,52 @@ def entity(uid,collection,metadata=None):
 
 
 
-def collection(uid,description=None,metadata=None):
+def collection(uid,metadata=None,**fields):
     '''entity returns an entity object
     parent is an owner
     '''
     fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata}]
 
     model = {'fields':fields,
-             'exclude_from_indexes': ['metadata','description'],
              'key':['Collection', uid]}
     return model
     
 
 
-def image(uid,entity,download,url,storage,description=None,metadata=None):
+def image(uid,entity,download,url,storage,metadata=None,**fields):
     '''image returns an image object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata},
               {'key':'download','required':True,'value':download,
                'key':'url','required':True,'value': url,
                'key':'storage','required':True,'value': storage}]
 
-    # Likely the entity passed was an som.wordfish.radiology.Entity
-    if type(entity) not in six.string_types:
-        entity = entity.get_name()
+    collection = entity.collection.get_name()
+    entity = entity.get_name()
 
     model = {'fields':fields,
              'exclude_from_indexes': ['storage','download','url'],
-             'key':['Entity',entity,'Image', uid]}
+             'key':['Collection', collection, 'Entity',entity,'Image', uid]}
+
     return model
     
 
 
-def text(uid,entity,content,description=None,metadata=None):
+def text(uid,entity,content,metadata=None,**fields):
     '''text returns a text object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'description','required':False,'value':description},
               {'key':'metadata','required':False,'value':metadata},
               {'key':'content','required':True,'value':content}]
 
-    # Likely the entity passed was an som.wordfish.radiology.Entity
-    if type(entity) not in six.string_types:
-        entity = entity.get_name()
+    collection = entity.collection.get_name()
+    entity = entity.get_name()
 
     model =  {'fields':fields,
               'exclude_from_indexes': ['storage','download','url'],
-              'key':['Entity',entity,'Text', uid]}
+              'key':['Collection', collection, 'Entity',entity,'Text', uid]}
     return model
 
 
@@ -97,21 +92,25 @@ def text(uid,entity,content,description=None,metadata=None):
 
 class Collection(ModelBase):
   
-    def __init__(self,client,uid,create=True,**kwargs):
-        self.model = collection(uid=uid)
-        super(Collection, self).__init__(client,**kwargs)
+    def __init__(self,client,uid,create=True,**fields):
+        self.model = collection(uid=uid,**fields)
+        super(Collection, self).__init__(client,**fields)
         if create:
             self.this = self.update_or_create(client)
+        else:
+            self.this = self.setup(client)
 
 
 class Entity(ModelBase):
 
-    def __init__(self,client,collection,uid,create=True,**kwargs):
+    def __init__(self,client,collection,uid,create=True,**fields):
         self.collection = collection
-        self.model = entity(uid=uid, collection=collection,**kwargs)
-        super(Entity, self).__init__(client,**kwargs)
+        self.model = entity(uid=uid, collection=collection,**fields)
+        super(Entity, self).__init__(client,**fields)
         if create:
             self.this = self.update_or_create(client)
+        else:
+            self.this = self.setup(client)
         
 
     def collection(self,client):
@@ -125,7 +124,7 @@ class Entity(ModelBase):
         '''images will return images associated with the entity
         '''
         key = self.get_keypath()
-        return client.get(client.key(*key, "Images"))
+        return client.get(client.key(*key, "Image"))
     
 
     def text(self,client):
@@ -137,19 +136,16 @@ class Entity(ModelBase):
 
 class Image(ModelBase):
 
-    def __init__(self,client,uid,entity,download,url,storage,
-                 description=None,metadata=None,create=True,**kwargs):
+    def __init__(self,client,uid,entity,create=True,url=None,
+                 download=None,storage=None,**fields):
         self.entity = entity
-        self.model = image(uid=uid,
-                           entity=entity,
-                           download=download,
-                           url=url,
-                           description=description,
-                           storage=storage,
-                           metadata=metadata)
-        super(Image, self).__init__(**kwargs)
+        self.model = image(uid=uid,entity=entity,url=url,
+                           storage=storage,download=download,**fields)
+        super(Image, self).__init__(client,**fields)
         if create:
             self.this = self.update_or_create(client)
+        else:
+            self.this = self.setup(client)
 
     def __repr__(self):
         return self.this
@@ -157,19 +153,20 @@ class Image(ModelBase):
 
 class Text(ModelBase):
 
-    def __init__(self,client,uid,entity,content,create=True,**kwargs):
+    def __init__(self,client,uid,entity,content,create=True,**fields):
         self.entity = entity
-        self.model = text(uid=uid,
-                          entity=entity,
-                          content=content,
-                          description=description,
-                          metadata=metadata)
-        super(Text, self).__init__(**kwargs)
+        self.model = text(uid=uid,entity=entity,content=content,**fields)
+
+        super(Text, self).__init__(client,**fields)
         if create:
             self.this = self.get_or_create(client)
+        else:
+            self.this = self.setup(client)
+
 
     def __repr__(self):
         return self.this
+
 
 
 
@@ -202,16 +199,12 @@ class Client(ClientBase):
     def get_entity(self,fields):
         return Entity(client=self.datastore,**fields)
 
-    def create_image(self,create=True,**fields):
-        new_image = Image(client=self.datastore,create=create,**fields)
-        # TODO: need to think about how we want to also upload to storage -
-        # Add an operation to batch? have a second batch? do them in pairs?
-        # need to think abut this
 
-    def create_text(self,fields,create=True,**kwargs):
-        # STOPPED HERE - need to make sure args TO this function are ok,
-        # and the Text object below takes in the entity, etc.
-        new_text = Text(client=self.datastore,**kwargs)
+    def create_image(self,fields):
+        return Image(client=self.datastore,**fields)
+
+    def create_text(self,fields):
+        return Text(client=self.datastore,**fields)
 
     def get_storage_path(self,file_path,collection_name,return_folder=False):
         folder = file_path.split(collection_name)[1]
@@ -227,29 +220,46 @@ class Client(ClientBase):
     ## Upload #########################################################
     ###################################################################
 
-
     def upload_texts(self,texts,entity,batch=True):
         '''upload_texts will add text objects to the batch manager'''
+
+        if not isinstance(texts,list):
+            texts = [texts]
+
         new_texts = []
         for txt in texts:
-            uid = self.get_storage_path(txt['original'],collection_name)
+            uid = self.get_storage_path(txt['original'],entity.collection.get_name())
+
             with open(txt['original'],'r') as filey:
                 content = filey.read()
-            new_text = self.create_text(uid=uid,
-                                        content=content,
-                                        entity_id=entity.key,
-                                        create=not batch) # Create if not doing batch
+
+            fields = {'uid':uid,
+                      'entity':entity,
+                      'content':content,
+                      'create': not batch }
+
+            if 'metadata' in txt:
+                fields['metadata'] = read_json(txt['metadata'])
+ 
+            new_text = self.create_text(fields) # Create if not doing batch
             if batch:
                 self.batch.add(new_text)
+
+            bot.logger.debug('TEXT: %s',new_text)
             new_texts.append(new_text)
         return new_texts
 
 
-    def upload_images(self,images,entity,collection_name,batch=True):
+    def upload_images(self,images,entity,batch=True):
         '''upload_images will add image objects to the batch manager, or create
         one at a time
         '''
+        if not isinstance(images,list):
+            images = [images]
+
         new_images = []
+        collection_name = entity.collection.get_name()
+
         for img in images:
             bucket_folder = self.get_storage_path(img['original'],collection_name)
             image_obj = self.upload_object(file_path=img['original'],
@@ -257,15 +267,20 @@ class Client(ClientBase):
 
             url = self.get_storage_path(image_obj['name'],collection_name)
 
-            new_image = self.create_image(uid=image_obj['id'],
-                                          entity_id=entity.key,
-                                          download=image_obj['mediaLink'],
-                                          url=url,
-                                          storage=image_obj,
-                                          create=not batch)
+            fields = {'uid':image_obj['id'],
+                      'entity':entity,
+                      'url':url,
+                      'storage':image_obj,
+                      'download':image_obj['mediaLink'],
+                      'create': not batch }
+
+            new_image = self.create_image(fields)
             new_images.append(new_image)
+
+            bot.logger.debug('IMAGE: %s',new_image)
+
             if batch:
-                batch.add(new_image)
+                self.batch.add(new_image)
 
         return new_images
 
@@ -289,13 +304,14 @@ class Client(ClientBase):
             if 'metadata' in coll['collection']:
                 fields['metadata'] = read_json(coll['collection']['metadata'])        
             new_collection = self.get_collection(fields)
+            bot.logger.debug('GET: %s',new_collection)
 
             # Add entities
             if 'entities' in coll['collection']:
                 for ntt in coll['collection']['entities']:
                     
                     fields = {'uid': os.path.basename(ntt['entity']['id']),
-                              'collection':col }
+                              'collection':new_collection }
                     entity = self.get_entity(fields)
                    
                     # Add images and text to entities
@@ -310,4 +326,4 @@ class Client(ClientBase):
                                                         batch=batch)
 
                     # Run a transaction for put (insert) images and text, and clears queue
-                    self.batch.insert()
+                    self.batch.insert(client=self.datastore)
