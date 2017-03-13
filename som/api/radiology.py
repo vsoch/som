@@ -13,51 +13,22 @@ from som.api.utils import (
     api_put
 )
 
-from som.api.base import (
-    api_base,
-    api_version
-)
-
 from som.api.client import ClientBase
 
 
 class Client(ClientBase):
 
     def __init__(self,**kwargs):
-        self.base = self._get_radiology_base()
         super(Client, self).__init__(**kwargs)
-    
-
-    def _get_radiology_base(self,base=None,version=None):
-        '''get_radiology_base returns the base api for radiology
-        :param base: if base URL. If not defined, will use default
-        :param version: the api version, in format vX. If not defined,
-        will return default
-        '''
-        if base == None:
-            base = api_base
-        if version == None:
-            version = api_version
-
-        return "%s/%s/uid/radiology" %(base,version)
-
-
+        self.study = 'radiologydeid'
+   
     def deidentify(self,identifiers):
         '''deidentify will send a post to deidentify one or more images
         POST https://APIBASE/VERSION/radiologydeid    
         :param identifiers: a list of identifiers (people and items)
         '''    
-        url = "%sdeid" %(self.base)
+        url = "%sdeid" %(self.studybase)
         response = api_post(url,headers=self.headers,data=identifiers)
         if "results" in response:
             return response['results']
         return response
-
-
-    def test_deidentify(self,identifiers):
-        '''test_deidentify is equivalent to deidentify, but using a testing
-        endpoint.
-        #TODO: maybe the below should be the base, with identifiers - need to test.
-        POST https://api.rit.stanford.edu/identifiers/api/v1/uid/test
-        '''
-        print('wakkawakka')

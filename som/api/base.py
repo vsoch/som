@@ -34,8 +34,7 @@ import sys
 import re
 import os
 
-
-api_base = "https://rit.med.stanford.edu/sidsvc/api"
+api_base = "https://api.rit.stanford.edu/identifiers/api"
 api_version = "v1"
 
 

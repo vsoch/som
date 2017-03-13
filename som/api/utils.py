@@ -20,9 +20,6 @@ import requests
 import os
 import sys
 
-#TODO: add retrying, ask Susan/Garrick about number of times
-# (I think we should do exponential retry)
-
 
 def api_call(url,func,headers=None,token=None,data=None,return_json=True):
     '''api_call is a template that will take a post, put, or get function

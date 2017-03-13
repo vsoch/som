@@ -35,7 +35,7 @@ def authenticate():
     from the client secrets file
     '''
     token = None
-    secrets = read_client_secrets(token_file)
+    secrets = read_client_secrets()
     if secrets is not None:
         token = secrets['accessToken']
     return token
