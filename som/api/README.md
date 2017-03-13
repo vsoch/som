@@ -63,8 +63,8 @@ The user would be instructed to add a line to his or her `.bashrc` or `.profile`
 - [base.py](base.py): contains the default (current) endpoint and version of the API, along with core functions that are used across modules. Currently, we don't use many of these functions, and likely I'll be removing/adjusting some.
 - [validators](validators): contains functions (for [requests](validators/requests.py) and [responses](validators/responses.py), respectively) that serve only to validate json data structures that are intended to go into POSTs. If a data structure is valid, True is returned. If not, False is returned, and the debugger prints why the structure is not valid for the user.
 - [standards.py](standards.py): Within validation, there are certain fields that must match a particular pattern, be required, etc. This file holds lists/sets of items that are to be used as defaults for some of these items. The user has the option to define these lists with the validator functions, and if not defined, the defaults in this file are used. For example.
-- [utils.py](utils.py): contains base http utility functions to perform `GET`, `POST`, and `PUT`, and whatever other functions we need.
+- [connect.py](connect.py): contains the `ApiConnection` that manages tokens, refreshing, and making calls. This object is created and held for use by the client.
 
 
 ## Study Modules
-- [radiology.py](radiology.py): Includes functions to post messages that have a person identifier and sets of items, in this case, a list of images to be de-identified.
+- [radiology.py](radiology.py): Includes functions to post messages that have a person identifier and sets of items, in this case, a list of images to be de-identified. Currently, this function only serves to customize the study name, however specific functions for radiology can be added here.
