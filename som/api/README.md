@@ -27,6 +27,7 @@ You might want to test the functionality of the identifiers endpoint, both for s
       https://api.rit.stanford.edu/identifiers/api/v1/uid/test 
       https://api.rit.stanford.edu/identifiers/api/v1/mrn/test
 
+
 ### radiologydeid
 When you are done with development and ready for production, you would use `radiologydeid` as your endpoint. There likely will be other study endpoints (this is the only one that we've developed for radiology thus far) but the idea is that you might want to save records that are specific to a study. For radiology that means an entity and list of items. The endpoint to save records for radiology queries would be:
 

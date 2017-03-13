@@ -5,19 +5,14 @@ client.py: simple clients for som api
 
 '''
 
-from som.api.auth import (
-    authenticate,
-    get_headers
-)
-
 from som.api.base import (
     api_base,
     api_version
 )
 
-from som.logman import bot
+from som.api.connect import ApiConnection
 from som.api.standards import spec
-
+from som.logman import bot
 
 class ClientBase(object):
 
@@ -38,11 +33,7 @@ class ClientBase(object):
         if spec != None:
             self.spec = spec
 
-        if token == None:
-            token = authenticate()
-
-        self.token = token
-        self.headers = get_headers(token=token)
+        self.api = ApiConnection(token)
 
 
     def get_base(self,study=None):
@@ -60,7 +51,7 @@ class ClientBase(object):
         return self.deidentify(identifiers,test=test,save_records=True)
 
 
-    def deidentify(self,identifiers,test=False,save_records=False):
+    def deidentify(self,ids,test=False,save_records=False):
         '''deidentify will take a list of identifiers, and return the deidentified.
         if save_records is True, will save records. If False (default) only
         returns identifiers.
@@ -81,21 +72,9 @@ class ClientBase(object):
         if test == True:
             study = 'test'
 
-        #TODOL we need a way to get//update the token and carry it
-        # around with the client. THEN test this endpoint. 
-        #STOPPING HERE FOR NOW
         url = "%s/%s/%s/%s" %(api_base,api_version,action,study)
 
-        response = api_post(url,headers=self.headers,data=identifiers)
+        response = self.api.post(url,data=ids)
         if "results" in response:
             return response['results']
         return response
-        
-
-
-    def update_headers(self, headers):
-        '''update_headers will add headers to the client
-        :param headers: should be a dictionary of key,value to update/add to header
-        '''
-        for key,value in headers.items():
-            self.client.headers[key] = item

@@ -5,12 +5,10 @@ auth.py: authentication functions for som api
 
 '''
 
-from oauth2client.client import AccessTokenCredentials
 
 from som.logman import bot
 
 from som.utils import (
-    read_file,
     read_json,
     write_json
 )
@@ -27,6 +25,9 @@ def read_client_secrets():
     if token_file is not None:
         if os.path.exists(token_file):
             secrets = read_json(token_file)
+    if secrets is None:
+        bot.logger.error('Cannot find STANFORD_CLIENT_SECRETS credential file path in environment.')
+        sys.exit(1)
     return secrets
 
 
@@ -41,11 +42,12 @@ def authenticate():
     return token
 
 
-def refresh_access_token(token_file):
+def refresh_access_token():
     '''refresh access token reads in the client secrets from 
     the token file, and update the tokens, and save back to file
     '''
-    secrets = read_client_secrets(token_file)
+    token_file = os.environ.get("STANFORD_CLIENT_SECRETS",None)
+    secrets = read_client_secrets()
     token = None
 
     # Query to update the token - must be on Stanford network
@@ -62,18 +64,3 @@ def refresh_access_token(token_file):
             token = secrets['accessToken']
 
     return token
-
-
-def get_headers(token=None):
-    '''get_headers will return a simple default header for a json
-    post. This function will be adopted as needed.
-    :param token: an optional token to add for auth
-    '''
-    headers = dict()
-    headers["Content-Type"] = "application/json"
-    if token is not None:
-        headers["Authorization"] = "Bearer %s" %(token)
-
-    header_names = ",".join(list(headers.keys()))
-    bot.logger.debug("Headers found: %s",header_names)
-    return headers

@@ -7,12 +7,6 @@ base.py: base module for working with som api
 
 from som.logman import bot
 
-from som.utils import (
-    get_installdir, 
-    read_file, 
-    write_file
-)
-
 from som.api.validators.requests import (
     validate_identifiers,
     validate_items,
@@ -23,13 +17,6 @@ from som.api.validators.utils import (
     get_universal_source
 )
 
-import subprocess
-import tempfile
-import zipfile
-import inspect
-import shutil
-import requests
-import imp
 import sys
 import re
 import os
