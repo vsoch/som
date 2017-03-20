@@ -8,7 +8,7 @@
 # client to upload the structures to storage and datastore.
 
 
-from som.storage.google.radiology import Client
+from som.api.google.storage.radiology import Client
 from som.wordfish.structures import structure_dataset
 
 radiology_client = Client()

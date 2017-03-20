@@ -6,7 +6,7 @@
 import os
 import sys
 
-from som.api.radiology import Client
+from som.api.base.study.radiology import Client
 from som.api.validators.requests import validate_identifiers
 from som.utils import read_json
 
