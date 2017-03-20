@@ -8,10 +8,10 @@
 # client to upload the structures to storage and datastore.
 
 
-from som.api.google.dlp.client import DlpApiConnection
+from som.api.google.dlp.client import DLPApiConnection
 import pandas
 
-dlp = DlpApiConnection()
+dlp = DLPApiConnection()
 
 def run_cleaning_example(texts):
     df = pandas.DataFrame()
