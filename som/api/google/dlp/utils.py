@@ -27,7 +27,7 @@ def clean_text(text,findings):
     :param text: the original text sent to the content.inspect DLP endpoint
     :param findings: the full response for the text.
     '''
-    if 'findings' in result:
+    if 'findings' in findings:
         for finding in result['findings']:
             label = "**%s**" %finding['infoType']['name']
             # Note sure if this is best strategy, we can start with it
