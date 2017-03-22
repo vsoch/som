@@ -1,9 +1,9 @@
 test:
   override:
     - echo "Testing Python 3 -------------------------------------------------"
-    - $HOME/miniconda3/bin/python -m unittest som.api.tests.test_developers_api
-    - echo "Testing Python 2 -------------------------------------------------"
-    - $HOME/miniconda2/bin/python -m unittest som.api.tests.test_developers_api
+    #- $HOME/miniconda3/bin/python -m unittest som.api.tests.test_developers_api
+    #- echo "Testing Python 2 -------------------------------------------------"
+    #- $HOME/miniconda2/bin/python -m unittest som.api.tests.test_developers_api
 
 dependencies:
   pre:
