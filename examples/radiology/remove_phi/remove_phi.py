@@ -1,17 +1,17 @@
 #!/bin/env python
 
-# This is an example script to upload data (images, text, metadata) to
-# google cloud storage and datastore. We use the wordfish standard,
-# assuming the data has been de-identified. The first step 
-# below we structure our dataset. This also validates that it's
-# formatted correctly. In the second step, we use the radiology
-# client to upload the structures to storage and datastore.
-
+# This is an example script to use the SOM client endpoint for
+# Google's "Data Loss Prevention" (DLP) API that does simple
+# identification of finding phone numbers, etc. in texty things. 
+# The text entities are submitted as a single string or list, and
+# submit to the endpoint in batches of 100.
 
 from som.api.google.dlp.client import DLPApiConnection
 
+# This is creating the API client
 dlp = DLPApiConnection()
 
+# Here are some text "reports" with data
 texts = ["The secret phone number is (603) 333-4444", # found
          "(603) 333-4444 is the number to call!",     # found
          "(603) 333-4444 is the name of the game.",   # found
@@ -19,6 +19,7 @@ texts = ["The secret phone number is (603) 333-4444", # found
          "Dr. John Smith will be performing the task!",
          "The MRN is 1234567."]
 
+# We can use dlp.inspect to find complete metadata about findings
 findings = dlp.inspect(texts=texts)
 
 '''
@@ -44,7 +45,13 @@ findings = dlp.inspect(texts=texts)
 
 '''
 
+# And dlp.remove_phi to remove it from the text
 cleaned = dlp.remove_phi(texts=texts)
+
+# Yes, phi is probably not the most accurate description, 
+# but it's not clear what level of de-id this will support,
+# so let's start with that goal.
+
 
 '''
 ['The secret phone number is **PHONE_NUMBER**',
