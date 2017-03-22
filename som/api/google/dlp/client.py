@@ -18,6 +18,9 @@ from apiclient.discovery import build
 class DLPApiConnection(ApiConnection):
 
     def __init__(self,get_service=True,**kwargs):
+        self.token = None
+        if 'token' in kwargs:
+            self.token = token
         super(DLPApiConnection, self).__init__(**kwargs)
         if get_service is True:
             self.get_service()
@@ -26,7 +29,7 @@ class DLPApiConnection(ApiConnection):
         credentials = GoogleCredentials.get_application_default()
         self.service = build('dlp', api_version, credentials=credentials)
 
-    def inspect(texts,include_quote=True,min_level=None):
+    def inspect(self,texts,include_quote=True,min_level=None):
         '''inspect will inspect a dump of text for identifiers
         :param include_quote: include quotes in the query?
         :param min_level: the minimum likilihood level to return
@@ -52,7 +55,7 @@ class DLPApiConnection(ApiConnection):
         
         results = []
         for idx in range(len(groups)):
-            bot.logger.debug("inspecting for %s of %s",idx,len(groups))
+            bot.logger.debug("inspecting for %s of %s",idx+1,len(groups))
             items = groups[idx]
             body = {'inspectConfig': config,
                     'items': items }
@@ -61,12 +64,15 @@ class DLPApiConnection(ApiConnection):
         return results
 
 
-    def remove_phi(texts,include_quote=True,min_level=None):
+    def remove_phi(self,texts,include_quote=True,min_level=None):
         '''remove_phi will first use inspect to find PHI, and then
         prepare the equivalent text with the phi removed.
         :param include_quote: include quotes in the query?
         :param min_level: the minimum likilihood level to return
         '''
+        if not isinstance(texts,list):
+            texts = [texts]
+
         results =  self.inspect(texts=texts,
                                 include_quote=include_quote,
                                 min_level=min_level)
