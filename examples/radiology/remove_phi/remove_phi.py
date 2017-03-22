@@ -9,31 +9,48 @@
 
 
 from som.api.google.dlp.client import DLPApiConnection
-import pandas
 
 dlp = DLPApiConnection()
 
-def run_cleaning_example(texts):
-    df = pandas.DataFrame()
-    df['cleaned'] = dlp.remove_phi(texts=texts)
-    df['original'] = texts
-    return df
+texts = ["The secret phone number is (603) 333-4444", # found
+         "(603) 333-4444 is the number to call!",     # found
+         "(603) 333-4444 is the name of the game.",   # found
+         "Why hello, Dr. Xavier Zanderpuss.",         # not found
+         "Dr. John Smith will be performing the task!",
+         "The MRN is 1234567."]
 
+findings = dlp.inspect(texts=texts)
 
-# Knees
-knee_reports = pandas.read_csv('Knee_UniqueID_ReportOnly.csv') 
-knee_reports.columns = ['exam', 'modality', 'unique_id', 'report_text']
-texts = knee_reports.report_text.tolist()
-df = run_cleaning_example(texts)
-df.to_csv('knees_scrubbed.tsv',sep="\t")
+'''
+[{'findings': [{'createTime': '2017-03-22T18:05:04.937Z',
+    'infoType': {'name': 'PHONE_NUMBER'},
+    'likelihood': 'VERY_LIKELY',
+    'location': {'byteRange': {'end': '41', 'start': '27'},
+     'codepointRange': {'end': '41', 'start': '27'}},
+    'quote': '(603) 333-4444'}]},
+ {'findings': [{'createTime': '2017-03-22T18:05:04.949Z',
+    'infoType': {'name': 'PHONE_NUMBER'},
+    'likelihood': 'LIKELY',
+    'location': {'byteRange': {'end': '14'}, 'codepointRange': {'end': '14'}},
+    'quote': '(603) 333-4444'}]},
+ {'findings': [{'createTime': '2017-03-22T18:05:04.942Z',
+    'infoType': {'name': 'PHONE_NUMBER'},
+    'likelihood': 'LIKELY',
+    'location': {'byteRange': {'end': '14'}, 'codepointRange': {'end': '14'}},
+    'quote': '(603) 333-4444'}]},
+ {},
+ {},
+ {}]
 
+'''
 
-# Shoulders
-shoulder_reports = pandas.read_csv('Shoulder_UniqueID_ReportOnly.csv') 
-shoulder_reports.columns = ['exam', 'modality', 'unique_id', 'report_text']
-texts = shoulder_reports.report_text.tolist()
+cleaned = dlp.remove_phi(texts=texts)
 
-df = pandas.DataFrame()
-df['cleaned'] = dlp.remove_phi(texts=texts)
-df['original'] = texts
-df.to_csv('shoulders_scrubbed.tsv',sep="\t")
+'''
+['The secret phone number is **PHONE_NUMBER**',
+ '**PHONE_NUMBER** is the number to call!',
+ '**PHONE_NUMBER** is the name of the game.',
+ 'Why hello, Dr. Xavier Zanderpuss.',
+ 'Dr. John Smith will be performing the task!',
+ 'The MRN is 1234567.']
+'''

@@ -28,7 +28,7 @@ def clean_text(text,findings):
     :param findings: the full response for the text.
     '''
     if 'findings' in findings:
-        for finding in result['findings']:
+        for finding in findings['findings']:
             label = "**%s**" %finding['infoType']['name']
             # Note sure if this is best strategy, we can start with it
             text = text.replace(finding['quote'],label)
