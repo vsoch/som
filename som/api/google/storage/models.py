@@ -302,7 +302,7 @@ class ModelBase:
     def setup(self,client,fields=None):
         '''setup will generate a new Entity without saving it (for batches)
         '''
-        if self.exclude_from_indexes is not None:
+        if self._exclude_from_indexes is not None:
             self._Entity = datastore.Entity(key=self._key,
                                             exclude_from_indexes=self._exclude_from_indexes)
         else:
@@ -326,7 +326,7 @@ class ModelBase:
         self._Entity['created'] = datetime.datetime.utcnow()
         self._Entity['updated'] = datetime.datetime.utcnow()
         # Add initial fields, if defined
-        for field,value in self.fields.items():
+        for field,value in self._fields.items():
             self._Entity[field] = value
         if save:
             self.save(client)
