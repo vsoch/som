@@ -61,11 +61,11 @@ def image(uid,entity,url):
     
 
 
-def text(uid,entity,content):
+def text(uid,entity,url):
     '''text returns a text object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'content','required':True,'value':content}]
+              {'key':'url','required':True,'value':url}]
 
     collection = entity.collection.get_name()
     entity = entity.get_name()
@@ -144,9 +144,9 @@ class Image(ModelBase):
 
 class Text(ModelBase):
 
-    def __init__(self,client,uid,entity,content,create=True,fields=None):
+    def __init__(self,client,uid,entity,url,create=True,fields=None):
         self.entity = entity
-        self.model = text(uid=uid,entity=entity,content=content)
+        self.model = text(uid=uid,entity=entity,url=url)
         super(Text, self).__init__(client)
         if create:
             self.this = self.update_or_create(client,fields=fields)
@@ -205,11 +205,11 @@ class Client(ClientBase):
                      fields=fields)
 
 
-    def create_text(self,uid,entity,content,create=True,fields=None):
+    def create_text(self,uid,url,entity,create=True,fields=None):
         return Text(client=self.datastore, 
                     uid=uid,
                     entity=entity,
-                    content=content,
+                    url=url,
                     create=create,
                     fields=fields)
 
@@ -230,12 +230,18 @@ class Client(ClientBase):
         '''upload_text will add a text object to the batch manager'''
 
         uid = self.get_storage_path(text,entity)
+        bucket_folder = self.get_storage_path(image,entity,return_folder=True)
 
-        with open(text,'r') as filey:
-            content = filey.read()
+        text_obj = self.upload_object(file_path=text,
+                                      bucket_folder=bucket_folder)
 
-        new_text = self.create_text(uid=uid,entity=entity,
-                                    content=content,create=not batch)
+        url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
+                                                       text_obj['name'])
+
+        new_text = self.create_text(uid=uid,
+                                    entity=entity,
+                                    url=url,
+                                    create=not batch)
 
         bot.logger.debug('TEXT: %s',new_text)
 
