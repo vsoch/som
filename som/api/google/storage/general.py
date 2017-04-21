@@ -284,7 +284,7 @@ class Client(ClientBase):
 
         if metadata is not None:
             entity.update(client=self.datastore,
-                          fields=metdata)
+                          fields=metadata)
        
         if texts is not None:
             for text in texts:
