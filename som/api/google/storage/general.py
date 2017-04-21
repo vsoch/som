@@ -220,7 +220,7 @@ class Client(ClientBase):
     def upload_text(self,text,entity,batch=True,metadata=None):
         '''upload_text will add a text object to the batch manager'''
 
-        uid = self.get_storage_path(text,entity.collection.get_name())
+        uid = self.get_storage_path(text,entity)
 
         with open(text,'r') as filey:
             content = filey.read()
@@ -244,12 +244,12 @@ class Client(ClientBase):
     def upload_image(self,image,entity,batch=True,metadata=None):
         '''upload_images will add an image object to the batch manager
         '''
-        bucket_folder = self.get_storage_path(image,entity.collection.get_name(),
-                                              return_folder=True)
+        bucket_folder = self.get_storage_path(image,entity,return_folder=True)
+
         image_obj = self.upload_object(file_path=image,
                                        bucket_folder=bucket_folder)
 
-        url = "https://storage.googleapis.com/%s/%s" %(bucket['name'],
+        url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
                                                        image_obj['name'])
                                                     
         fields = {'uid':image_obj['id'],
