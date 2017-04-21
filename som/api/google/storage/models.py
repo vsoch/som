@@ -313,11 +313,12 @@ class ModelBase:
         return entity
 
 
-    def create(self,client,fields=None):
+    def create(self,client,fields=None,creation=True):
         '''create a new entity
         '''
         entity = self.setup(client,fields)
-        self.fields['created'] = datetime.datetime.utcnow()
+        if creation == True:
+            self.fields['created'] = datetime.datetime.utcnow()
         self.fields['updated'] = datetime.datetime.utcnow()
         for field,value in self.fields.items():
             entity[field] = value
@@ -340,25 +341,13 @@ class ModelBase:
         if not entity:
            entity = self.create(client,fields)         #insert
         else: 
-            entity = self.update(client,fields) #upsert
+            entity = self.update(client,fields)        #upsert
         return entity
 
 
-    def update(self,client,fields=None,key=None):
-        '''update an entity. Returns None if does not exist.'''
-        entity = None
-        with client.transaction():
-           entity = client.get(self.key)
-           if entity:
-               if fields is not None:
-                   self.update_fields(fields)
-
-               self.fields['updated'] = datetime.datetime.utcnow()
-
-               for field,value in self.fields.items():
-                   entity[field] = value
-        client.put(entity)
-        return entity
+    def update(self,client,fields=None):
+        '''update an entity.'''
+        return self.create(client,fields=fields,creation=False)
 
 
     def get(self,client):
