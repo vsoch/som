@@ -217,7 +217,7 @@ class Client(ClientBase):
     ## Upload #########################################################
     ###################################################################
 
-    def upload_text(self,text,entity,batch=True,metadata=None):
+    def upload_text(self,text,entity,batch=True):
         '''upload_text will add a text object to the batch manager'''
 
         uid = self.get_storage_path(text,entity)
@@ -229,9 +229,6 @@ class Client(ClientBase):
                   'entity': entity,
                   'content':content,
                   'create': not batch }
-
-        if 'metadata' is not None:
-            fields['metadata'] = metadata
  
         new_text = self.create_text(fields) # Create if not doing batch
         bot.logger.debug('TEXT: %s',new_text)
@@ -241,7 +238,7 @@ class Client(ClientBase):
         return new_text
 
 
-    def upload_image(self,image,entity,batch=True,metadata=None):
+    def upload_image(self,image,entity,batch=True):
         '''upload_images will add an image object to the batch manager
         '''
         bucket_folder = self.get_storage_path(image,entity,return_folder=True)
