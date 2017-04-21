@@ -153,7 +153,7 @@ class Image(ModelBase):
 
 class Text(ModelBase):
 
-    def __init__(self,client,uid,entity,content,create=True,fields):
+    def __init__(self,client,uid,entity,content,create=True,fields=None):
         self.entity = entity
         self.model = text(uid=uid,entity=entity,content=content)
         super(Text, self).__init__(client)
