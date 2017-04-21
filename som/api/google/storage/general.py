@@ -230,7 +230,7 @@ class Client(ClientBase):
         '''upload_text will add a text object to the batch manager'''
 
         uid = self.get_storage_path(text,entity)
-        bucket_folder = self.get_storage_path(image,entity,return_folder=True)
+        bucket_folder = self.get_storage_path(text,entity,return_folder=True)
 
         text_obj = self.upload_object(file_path=text,
                                       bucket_folder=bucket_folder)
