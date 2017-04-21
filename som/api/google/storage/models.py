@@ -361,10 +361,13 @@ class ModelBase:
         (saving) to the datastore. This overrides the datastore version
         by default. To simply get the datastore version and override
         the local, use get'''
+        if self._Entity is None:
+            self._Entity = client.get(self._key)
         self._Entity['updated'] = datetime.datetime.utcnow()
         # Update any fields
-        for field,value in fields.items():
-            self._Entity[field] = value
+        if fields is not None:
+            for field,value in fields.items():
+                self._Entity[field] = value
         if save:
             self.save(client)
         return self._Entity
