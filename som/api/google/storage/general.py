@@ -192,16 +192,16 @@ class Client(ClientBase):
     ###################################################################
 
     def get_collection(self,fields):
-        return Collection(client=self.datastore,fields=fields)
+        return Collection(client=self.datastore,**fields)
 
     def get_entity(self,fields):
-        return Entity(client=self.datastore,fields=fields)
+        return Entity(client=self.datastore,**fields)
 
     def create_image(self,fields):
-        return Image(client=self.datastore,fields=fields)
+        return Image(client=self.datastore,**fields)
 
     def create_text(self,fields):
-        return Text(client=self.datastore,fields=fields)
+        return Text(client=self.datastore,**fields)
 
     def get_storage_path(self,file_path,entity,return_folder=False):
         folder = '/'.join(entity.get_keypath())

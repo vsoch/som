@@ -140,10 +140,7 @@ pmc = get_pubmed()
 from som.api.google.storage.general import Client
 general_client = Client(bucket_name='pmc-stanford')
 
-timeouts = []
 for row in pmc.iterrows():
-    try:
-        signal.alarm(30)
         journal_name = row[1].JOURNAL
         date_match = re.search("\d{4}",journal_name)
         publication_date = journal_name[date_match.start():]
@@ -151,5 +148,4 @@ for row in pmc.iterrows():
         collection = general_client.get_collection(fields={"uid":journal_name})
         metadata = get_metadata(row)
         article = create_article(metadata)
-    except:
-        timeouts.append(row[0])
+
