@@ -36,7 +36,7 @@ class ClientBase(ApiConnection):
     def get_bucket(self):
         self.bucket = get_bucket(self.storage,self.bucket_name)
 
-    def upload_object(self,bucket_folder,file_path,verbose=True):
+    def put_object(self,bucket_folder,file_path,verbose=True):
         '''upload_object will upload a file to path bucket_path in storage
         '''
         return upload_file(storage_service=self.storage,

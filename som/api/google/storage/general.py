@@ -203,8 +203,8 @@ class Client(ClientBase):
         uid = self.get_storage_path(file_path,entity)
         bucket_folder = self.get_storage_path(file_path,entity,return_folder=True)
 
-        storage_obj = self.upload_object(file_path=file_path,
-                                         bucket_folder=bucket_folder)
+        storage_obj = self.put_object(file_path=file_path,
+                                      bucket_folder=bucket_folder)
 
         fields = get_storage_fields(storage_obj)
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
