@@ -190,7 +190,8 @@ class Client(ClientBase):
 
 
     def get_entity(self,collection,uid,create=True,fields=None):
-        return Entity(client=self.datastore,collection=collection,
+        return Entity(client=self.datastore,
+                      collection=collection,
                       uid=uid,
                       create=create,
                       fields=fields)
@@ -278,12 +279,10 @@ class Client(ClientBase):
         :param collection: should be the collection to add the entity to
         :param batch: add entities in batches (recommended, default True)
         '''
-        
-        fields = {'uid': uid }
-        fields['collection'] = collection
-        
+                
         # Add entity
-        entity = self.get_entity(fields)
+        entity = self.get_entity(collection=collection,
+                                 uid=uid)
 
         if metadata is not None:
             entity.update(client=self.datastore,
