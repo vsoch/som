@@ -357,6 +357,7 @@ class ModelBase:
 
                for field,value in self.fields.items():
                    entity[field] = value
+        client.put(entity)
         return entity
 
 
