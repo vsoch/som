@@ -17,12 +17,11 @@ import six
 ######################################################################################
 
 
-def entity(uid,collection,metadata=None):
+def entity(uid,collection):
     '''entity returns an entity object
     parent is a collection
     '''
-    fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'metadata','required':False,'value':metadata}]
+    fields = [{'key':'uid','required':True,'value':uid}]
 
     if type(collection) not in six.string_types:
         collection = collection.get_name()
@@ -33,12 +32,11 @@ def entity(uid,collection,metadata=None):
 
 
 
-def collection(uid,metadata=None):
+def collection(uid):
     '''entity returns an entity object
     parent is an owner
     '''
-    fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'metadata','required':False,'value':metadata}]
+    fields = [{'key':'uid','required':True,'value':uid}]
 
     model = {'fields':fields,
              'key':['Collection', uid]}
@@ -46,38 +44,33 @@ def collection(uid,metadata=None):
     
 
 
-def image(uid,entity,download,url,storage,metadata=None):
+def image(uid,entity,url):
     '''image returns an image object. entity is the parent
     '''
-    fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'metadata','required':False,'value':metadata},
-              {'key':'download','required':True,'value':download,
-               'key':'url','required':True,'value': url,
-               'key':'storage','required':True,'value': storage}]
+    fields = [{'key':'uid','required':True,'value': uid},
+              {'key':'url','required':True,'value': url}]
 
     collection = entity.collection.get_name()
     entity = entity.get_name()
 
     model = {'fields':fields,
-             'exclude_from_indexes': ['storage','download','url'],
+             'exclude_from_indexes': ['url'],
              'key':['Collection', collection, 'Entity',entity,'Image', uid]}
 
     return model
     
 
 
-def text(uid,entity,content,metadata=None):
+def text(uid,entity,content):
     '''text returns a text object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'metadata','required':False,'value':metadata},
               {'key':'content','required':True,'value':content}]
 
     collection = entity.collection.get_name()
     entity = entity.get_name()
 
     model =  {'fields':fields,
-              'exclude_from_indexes': ['storage','download','url'],
               'key':['Collection', collection, 'Entity',entity,'Text', uid]}
     return model
 
@@ -104,7 +97,7 @@ class Entity(ModelBase):
 
     def __init__(self,client,collection,uid,create=True,fields=None):
         self.collection = collection
-        self.model = entity(uid=uid, collection=collection)
+        self.model = entity(uid,collection)
         super(Entity, self).__init__(client)
         if create:
             self.this = self.update_or_create(client,fields=fields)
@@ -135,16 +128,14 @@ class Entity(ModelBase):
 
 class Image(ModelBase):
 
-    def __init__(self,client,uid,entity,create=True,url=None,
-                 download=None,storage=None,fields=None):
+    def __init__(self,client,uid,entity,url,create=True,fields=None):
         self.entity = entity
-        self.model = image(uid=uid,entity=entity,url=url,
-                           storage=storage,download=download)
+        self.model = image(uid=uid,entity=entity,url=url)
         super(Image, self).__init__(client)
         if create:
             self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=fields)
+            self.this = self.setup(client,fields=metadata)
 
     def __repr__(self):
         return str(self.this)
@@ -191,17 +182,35 @@ class Client(ClientBase):
     ## Create and get #################################################
     ###################################################################
 
-    def get_collection(self,fields):
-        return Collection(client=self.datastore,**fields)
+    def get_collection(self,uid,create=True,fields=None):
+        return Collection(client=self.datastore,
+                          uid=uid,
+                          create=create,
+                          fields=fields)
 
-    def get_entity(self,fields):
-        return Entity(client=self.datastore,**fields)
 
-    def create_image(self,fields):
-        return Image(client=self.datastore,**fields)
+    def get_entity(self,collection,uid,create=True,fields=None):
+        return Entity(client=self.datastore,collection=collection,
+                      uid=uid,
+                      create=create,
+                      fields=fields)
 
-    def create_text(self,fields):
-        return Text(client=self.datastore,**fields)
+    def create_image(self,uid,entity,url,create=True,fields=None):
+        return Image(client=self.datastore,
+                     uid=uid,
+                     entity=entity,
+                     url=url,
+                     create=create,
+                     fields=fields)
+
+
+    def create_text(self,uid,entity,content,create=True,fields=None):
+        return Text(client=self.datastore, 
+                    uid=uid,
+                    entity=entity,
+                    content=content,
+                    create=create,
+                    fields=fields)
 
     def get_storage_path(self,file_path,entity,return_folder=False):
         folder = '/'.join(entity.get_keypath())
@@ -224,12 +233,9 @@ class Client(ClientBase):
         with open(text,'r') as filey:
             content = filey.read()
 
-        fields = {'uid':uid,
-                  'entity': entity,
-                  'content':content,
-                  'create': not batch }
- 
-        new_text = self.create_text(fields) # Create if not doing batch
+        new_text = self.create_text(uid=uid,entity=entity,
+                                    content=content,create=not batch)
+
         bot.logger.debug('TEXT: %s',new_text)
 
         if batch:
@@ -248,14 +254,15 @@ class Client(ClientBase):
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
                                                        image_obj['name'])
                                                     
-        fields = {'uid':image_obj['id'],
-                  'entity':entity,
-                  'url':url,
-                  'storage':image_obj,
-                  'download':image_obj['mediaLink'],
-                  'create': not batch }
+        fields = {'storage':image_obj,
+                  'download':image_obj['mediaLink']}
 
-        new_image = self.create_image(fields)
+        new_image = self.create_image(uid=image_obj['id'],
+                                      entity=entity,
+                                      url=url,
+                                      fields=fields,
+                                      create=not batch)
+
         bot.logger.debug('IMAGE: %s',new_image)
 
         if batch:
