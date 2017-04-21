@@ -145,7 +145,7 @@ for row in pmc.iterrows():
         date_match = re.search("\d{4}",journal_name)
         publication_date = journal_name[date_match.start():]
         journal_name = format_name(journal_name[:date_match.start()].strip())
-        collection = general_client.get_collection(fields={"uid":journal_name})
+        collection = general_client.get_collection({"uid":journal_name})
         metadata = get_metadata(row)
         article = create_article(metadata)
 
