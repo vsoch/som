@@ -288,15 +288,15 @@ class Client(ClientBase):
        
         if texts is not None:
             for text in texts:
-                self.upload_texts(text=text,
-                                  entity=entity,
-                                  batch=batch)
+                self.upload_text(text=text,
+                                 entity=entity,
+                                 batch=batch)
 
         if images is not None:
             for img in images:
-                self.upload_images(image=img,
-                                   entity=entity,
-                                   batch=batch)
+                self.upload_image(image=img,
+                                  entity=entity,
+                                  batch=batch)
 
         # Run a transaction for put (insert) images and text, and clears queue
         self.batch.insert(client=self.datastore)

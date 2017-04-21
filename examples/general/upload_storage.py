@@ -93,6 +93,7 @@ def get_metadata(row):
 def create_article(metadata):
     tmpdir = tempfile.mkdtemp()
     pmc_file = '%s/article.tar.gz' %(tmpdir)
+    print('Downloading: %s' %(metadata['uid']))
     urllib.request.urlretrieve(metadata['download_url'], pmc_file)
     tar = tarfile.open(pmc_file, "r:gz")
     tar.extractall(tmpdir)
