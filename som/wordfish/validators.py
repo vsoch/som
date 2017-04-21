@@ -225,14 +225,14 @@ def validate_template(entity_path, template_type, acceptable_types):
     # Assess each valid for metadata
     for contender in valids:
         if validate_metadata(contender,template_type) == False:      
-            bot.logger.error("metadata %s for entity %s is invalid" %(other,entity_name))
+            bot.logger.error("metadata %s for entity %s is invalid" %(contender,entity_name))
             invalid_metadata +=1
             valid = False
         else:
             valid_metadata +=1
     else:
         skipped_files +=1      
-        bot.logger.warning("%s for %s/%s is not valid for import and is ignored", other, entity_name, template_type)
+        bot.logger.warning("%s for %s/%s is not valid for import and is ignored", contender, entity_name, template_type)
 
     bot.logger.info("found %s valid metadata, %s invalid metadata, and %s skipped files for %s", valid_metadata,
                                                                                                  invalid_metadata,

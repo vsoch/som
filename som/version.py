@@ -1,4 +1,4 @@
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 AUTHOR = 'Vanessa Sochat'
 AUTHOR_EMAIL = 'vsochat@stanford.edu'
 NAME = 'som'
@@ -22,6 +22,7 @@ INSTALL_REQUIRES = (
     ('urllib3',{'min_version': "1.15" }),
     ('validator.py',{'min_version': None }),
     ('google-api-python-client', {'min_version': None}),
+    ('google-cloud-datastore', {'min_version': None}),
     ('oauth2client', {'exact_version': '3.0'})
 
 )

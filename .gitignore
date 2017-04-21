@@ -1,4 +1,6 @@
 *.pyc
 build
 dist
+OLD
+som/static
 pypi.sh

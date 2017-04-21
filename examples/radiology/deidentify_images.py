@@ -1,29 +1,19 @@
 #!/bin/env python
 
-# This is an example script to generate a list of identifiers to send to the api.
+# This is an example of sending a list of identifiers to the API
 
-from som.api.base import (
-    create_identifiers,
-    create_items
-)
 
-#TODO: will write complete example with dummy data when API endpoint finished
+import os
+import sys
 
-from som.api.validation.requests import validate_identifiers
+from som.api.base.study.radiology import Client
+from som.api.validators.requests import validate_identifiers
+from som.utils import read_json
 
-# Here is how to create items
-items = create_items(item_ids=item_ids,
-                     id_sources=item_id_sources,
-                     sources=item_sources,
-                     custom_fields=item_custom_fields,
-                     verbose=True)
+client = Client()
+identifiers = read_json('../../som/api/tests/data/developers_uid.json')
+validate_identifiers(identifiers)
 
-# Here is how to create an entity
-entity = create_identifiers(entity_id=person_id,
-                            id_source=person_id_source,
-                            id_timestamp=id_timestamp,
-                            items = items.
-                            custom_fields=person_custom_fields) #verbose True
-
-# And validate
-validate_identifiers(entity)
+# Note that you must be on Stanford VPN
+# deidentify(identifiers,test=False,save_records=False)
+response = client.deidentify(ids=identifiers) # Default uses mrn endpoint, doesn't save

@@ -1,0 +1,93 @@
+'''
+api.google.dlp: the base connection to the google DLP API
+
+'''
+
+api_base = "https://dlp.googleapis.com"
+api_version = "v2beta1"
+
+from som.logman import bot
+from som.api import ApiConnection
+from som.api.google.dlp.utils import *
+
+import datetime
+
+from oauth2client.client import GoogleCredentials
+from apiclient.discovery import build
+
+class DLPApiConnection(ApiConnection):
+
+    def __init__(self,get_service=True,**kwargs):
+        self.token = None
+        if 'token' in kwargs:
+            self.token = token
+        super(DLPApiConnection, self).__init__(**kwargs)
+        if get_service is True:
+            self.get_service()
+        
+    def get_service(self):
+        credentials = GoogleCredentials.get_application_default()
+        self.service = build('dlp', api_version, credentials=credentials)
+
+    def inspect(self,texts,include_quote=True,min_level=None):
+        '''inspect will inspect a dump of text for identifiers
+        :param include_quote: include quotes in the query?
+        :param min_level: the minimum likilihood level to return
+        '''
+        if not isinstance(texts,list):
+            texts = [texts]
+
+        if min_level is None:
+            min_level = 'LIKELIHOOD_UNSPECIFIED'
+
+        config = {'includeQuote': include_quote,
+                  'infoTypes': [],
+                  'maxFindings': 0,
+                  'minLikelihood': min_level }
+        
+        items = []
+        for text in texts:
+            new_item = {'type': 'text/plain',
+                        'value': text }
+            items.append(new_item)
+
+        groups = paginate_items(items,size=100)
+        
+        results = []
+        for idx in range(len(groups)):
+            bot.logger.debug("inspecting for %s of %s",idx+1,len(groups))
+            items = groups[idx]
+            body = {'inspectConfig': config,
+                    'items': items }
+            result = self.service.content().inspect(body=body).execute()
+            results = results + result['results']
+        return results
+
+
+    def remove_phi(self,texts,include_quote=True,min_level=None):
+        '''remove_phi will first use inspect to find PHI, and then
+        prepare the equivalent text with the phi removed.
+        :param include_quote: include quotes in the query?
+        :param min_level: the minimum likilihood level to return
+        '''
+        if not isinstance(texts,list):
+            texts = [texts]
+
+        results =  self.inspect(texts=texts,
+                                include_quote=include_quote,
+                                min_level=min_level)
+
+        # We will return an equivalent list with phi removed
+        cleaned = []
+
+        for idx in range(len(results)):
+            result = results[idx]
+            original = texts[idx]
+ 
+            if len(result) is not 0:
+                scrubbed = clean_text(text=original,
+                                      findings=result)
+                cleaned.append(scrubbed)
+            else:
+                cleaned.append(original)
+        return cleaned
