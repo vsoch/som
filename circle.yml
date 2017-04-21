@@ -1,9 +1,7 @@
 test:
   override:
-    - echo "Testing Python 3 -------------------------------------------------"
     - echo "Tests are currently disabled given need for new strategy to get auth tokens."
     #- $HOME/miniconda3/bin/python -m unittest som.api.tests.test_developers_api
-    - echo "Testing Python 2 -------------------------------------------------"
     #- $HOME/miniconda2/bin/python -m unittest som.api.tests.test_developers_api
 
 #dependencies:

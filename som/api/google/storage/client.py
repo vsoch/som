@@ -26,7 +26,7 @@ class ClientBase(ApiConnection):
         super(ApiConnection, self).__init__(**kwargs)
         self.datastore = self.datastore_client()
         self.storage = get_google_service('storage', 'v1')
-        if self.bucket_name != None:
+        if self.bucket_name is not None:
             self.get_bucket()
 
     def datastore_client(self):

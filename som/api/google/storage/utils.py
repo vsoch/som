@@ -117,12 +117,10 @@ def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True):
     :param file_path: the path to the file to upload
     :param bucket_path: the path to upload to
     '''
-    # Set up path on bucket
-    upload_path = "%s/%s" %(bucket_path)
-    if upload_path[-1] != '/':
-        upload_path = "%s/" %(upload_path)
-    upload_path = "%s%s" %(upload_path,os.path.basename(file_path))
-    body = {'name': upload_path }
+    if bucket_path[-1] != '/':
+        bucket_path = "%s/" %(bucket_path)
+    bucket_path = "%s%s" %(bucket_path,os.path.basename(file_path))
+    body = {'name': bucket_path }
 
     # Create media object with correct mimetype
     mimetype = sniff_extension(file_path,verbose=verbose)
