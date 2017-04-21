@@ -293,7 +293,7 @@ class ModelBase:
         If an entity object already exists with the object, it is overridden
         '''
         with client.transaction():
-           self._Entity = client.get(*self.key)
+           self._Entity = client.get(*self._key)
            if not self._Entity:
                self._Entity = self.create(client)
         return self._Entity
@@ -346,7 +346,7 @@ class ModelBase:
     def update_or_create(self,client,fields=None,save=True):
         '''update or create will update or create an entity.
         '''
-        entity = client.get(self.key)
+        entity = client.get(self._key)
 
         # The entity is being created, add timestamp
         if not entity:
@@ -376,5 +376,5 @@ class ModelBase:
         '''
         if self._Entity is None:
             with client.transaction():
-                self._Entity = client.get(*self.key)
+                self._Entity = client.get(*self._key)
         return self._Entity
