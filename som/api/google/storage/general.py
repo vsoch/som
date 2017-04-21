@@ -135,7 +135,7 @@ class Image(ModelBase):
         if create:
             self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=metadata)
+            self.this = self.setup(client,fields=fields)
 
     def __repr__(self):
         return str(self.this)
