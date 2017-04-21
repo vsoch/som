@@ -298,5 +298,5 @@ class Client(ClientBase):
                                    entity=entity,
                                    batch=batch)
 
-       # Run a transaction for put (insert) images and text, and clears queue
-       self.batch.insert(client=self.datastore)
+        # Run a transaction for put (insert) images and text, and clears queue
+        self.batch.insert(client=self.datastore)
