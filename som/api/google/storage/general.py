@@ -307,4 +307,5 @@ class Client(ClientBase):
                                   batch=batch)
 
         # Run a transaction for put (insert) images and text, and clears queue
-        self.batch.insert(client=self.datastore)
+        if batch:
+            self.batch.insert(client=self.datastore)
