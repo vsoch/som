@@ -106,8 +106,7 @@ def create_article(metadata):
                                   texts=xml_file,
                                   collection=collection,
                                   uid=metadata['uid'],
-                                  metadata=metadata,
-                                  batch=False)
+                                  metadata=metadata)
     shutil.rmtree(tmpdir)
      
 

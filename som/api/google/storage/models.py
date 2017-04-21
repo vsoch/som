@@ -10,8 +10,7 @@ from som.api.google.storage.validators import (
 import google.cloud.datastore as datastore
 from som.api.google.storage.datastore import (
     get_key_filters,
-    parse_keys,
-    print_datastore_path
+    parse_keys
 )
 
 from som.logman import bot
@@ -44,7 +43,7 @@ class BatchManager:
         '''return all objects in the set
         '''
         if not isinstance(task,datastore.Entity):
-            task = task.this
+            task = task._Entity
         self.objects.append(task)
 
         
@@ -240,119 +239,142 @@ class BatchManager:
 class ModelBase:
 
     def __init__(self,client):
-        self.fields = validate_model(self.model['fields'])
-        self.key = client.key(*self.model['key'])
+        '''A ModelBase is a controller for a general DataStore
+        Entity. Most of the variables in init are for initial
+        validation, and further fields etc are stored with
+        the Entity itself (_Entity)
+        :param _fields: intiial fields to validate on model creation
+        :param _key: the initial key used for the entity
+        :param _Entity: the final generated (validated) entity
+        '''
+        self._fields = validate_model(self.model['fields'])
+        self._key = client.key(*self.model['key'])
+        self._Entity = None
         if "exclude_from_indexes" in self.model:
-            self.exclude_from_indexes = self.model['exclude_from_indexes'] # Can be None
+            self._exclude_from_indexes = self.model['exclude_from_indexes'] # Can be None
         else:
-            self.exclude_from_indexes = None
-
-    def __str__(self):
-        return print_datastore_path(self.key)
+            self._exclude_from_indexes = None
 
     def __repr__(self):
-        return print_datastore_path(self.key)
+        if self._Entity is None:
+            return "Entity:None"
+        return str(self._Entity.key)
+
+    def __str__(self):
+        if self._Entity is None:
+            return "Entity:None"
+        return str(self._Entity.key)
 
 
     def get_keypath(self):
-        return list(self.key.flat_path)
+        return list(self._Entity.key.flat_path)
       
-
     def get_name(self):
-        return list(self.key.flat_path)[-1]
-
-
-    def update_key(self,client,key):
-        '''update key will add a key to a model, and return a 
-        unique set of keys
-        '''
-        if key is not None:
-           flat_key = list(self.key.flat_path)
-           if isinstance(key,list):
-               flat_key = flat_key + key
-           else: 
-               flat_key.append(key)
-           self.key = client.key(*flat_key)
+        return list(self._Entity._key.flat_path)[-1]
 
 
     def update_fields(self,new_fields,add_new=True):
         '''update fields will update the model's fields with an input dictionary
-        new fields are added if add_new=True (default)
+        new fields are added if add_new=True (default). This does not by default save
+        the entity.
         '''
         for key,value in new_fields.items():
-            if key in self.fields:
-                self.fields[key] = value
+            if key not in self._Entity.keys():
+                bot.logger.debug("adding %s to Entity" %(key))
+                self._Entity[key] = value
             else:
                 if add_new == True:
-                    self.fields[key] = value
+                    bot.logger.debug("%s found existing in Entity, overwriting" %(key))
+                    self._Entity[key] = value
 
 
-    def get_or_create(self,client,key=None):
+    def get_or_create(self,client):
         '''get_or_create will get or create an object using a transaction.
+        If an entity object already exists with the object, it is overridden
         '''
         with client.transaction():
-           self.update_key(client,key)
-           entity = client.get(*self.key)
-
-           # The entity is being created, add timestamp
-           if not entity:
-               entity = self.create(client)
-        return entity
+           self._Entity = client.get(*self.key)
+           if not self._Entity:
+               self._Entity = self.create(client)
+        return self._Entity
 
 
     def setup(self,client,fields=None):
         '''setup will generate a new Entity without saving it (for batches)
         '''
         if self.exclude_from_indexes is not None:
-            entity = datastore.Entity(key=self.key,
-                                      exclude_from_indexes=self.exclude_from_indexes)
+            self._Entity = datastore.Entity(key=self._key,
+                                            exclude_from_indexes=self._exclude_from_indexes)
         else:
-            entity = datastore.Entity(self.key)
+            self._Entity = datastore.Entity(self._key)
         if fields is not None:
-            self.fields.update(fields)
-        return entity
+            self.update_fields(fields)
 
 
-    def create(self,client,fields=None,creation=True):
+    def save(self,client):
+        '''save just calls put for the current _Entity'''
+        client.put(self._Entity)
+
+
+    def create(self,client,fields=None,save=True):
         '''create a new entity
+        :param client: the datastore client
+        :param fields: additional fields to add
+        :param save: save the entity to datastore (default True)
         '''
-        entity = self.setup(client,fields)
-        if creation == True:
-            self.fields['created'] = datetime.datetime.utcnow()
-        self.fields['updated'] = datetime.datetime.utcnow()
+        self.setup(client,fields)
+        self._Entity['created'] = datetime.datetime.utcnow()
+        self._Entity['updated'] = datetime.datetime.utcnow()
+        # Add initial fields, if defined
         for field,value in self.fields.items():
-            entity[field] = value
-        client.put(entity)
-        return entity
+            self._Entity[field] = value
+        if save:
+            self.save(client)
+        return self._Entity
 
 
     def delete(self,client):
         '''delete an entity'''
-        client.delete(self.key)
+        key = None
+        if self._Entity is not None:
+            key = self._Entity.key
+            client.delete(key)
+            bot.logger.debug("Deleting %s" %(key))
         return key
 
 
-    def update_or_create(self,client,fields=None):
+    def update_or_create(self,client,fields=None,save=True):
         '''update or create will update or create an entity.
         '''
         entity = client.get(self.key)
 
         # The entity is being created, add timestamp
         if not entity:
-           entity = self.create(client,fields)         #insert
+           entity = self.create(client,fields,save)         #insert
         else: 
-            entity = self.update(client,fields)        #upsert
-        return entity
+            entity = self.update(client,fields,save)        #upsert
+        return self._Entity
 
 
-    def update(self,client,fields=None):
-        '''update an entity.'''
-        return self.create(client,fields=fields,creation=False)
+    def update(self,client,fields=None,save=True):
+        '''update an entity, meaning updating the local and then pushing
+        (saving) to the datastore. This overrides the datastore version
+        by default. To simply get the datastore version and override
+        the local, use get'''
+        self._Entity['updated'] = datetime.datetime.utcnow()
+        # Update any fields
+        for field,value in fields.items():
+            self._Entity[field] = value
+        if save:
+            self.save(client)
+        return self._Entity
 
 
     def get(self,client):
-        '''get an entity. Returns None if does not exist.'''
-        entity = None
-        with client.transaction():
-           entity = client.get(self.key)
-        return entity
+        '''get an entity, and override the currently set _Entity in the model
+        if it is not retrieved yet. If already retrieved, does not update.
+        '''
+        if self._Entity is None:
+            with client.transaction():
+                self._Entity = client.get(*self.key)
+        return self._Entity

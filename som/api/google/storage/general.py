@@ -88,9 +88,11 @@ class Collection(ModelBase):
         self.model = collection(uid=uid)
         super(Collection, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client,fields=fields)
+            self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=fields)
+            self.update_or_create(client,
+                                  fields=fields,
+                                  save=False)
 
 
 class Entity(ModelBase):
@@ -100,9 +102,11 @@ class Entity(ModelBase):
         self.model = entity(uid,collection)
         super(Entity, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client,fields=fields)
+            self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=fields)
+            self.update_or_create(client,
+                                  fields=fields,
+                                  save=False)
         
 
     def collection(self,client):
@@ -133,13 +137,11 @@ class Image(ModelBase):
         self.model = image(uid=uid,entity=entity,url=url)
         super(Image, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client,fields=fields)
+            self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=fields)
-
-    def __repr__(self):
-        return str(self.this)
-
+            self.update_or_create(client,
+                                  fields=fields,
+                                  save=False)
 
 
 class Text(ModelBase):
@@ -149,13 +151,11 @@ class Text(ModelBase):
         self.model = text(uid=uid,entity=entity,url=url)
         super(Text, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client,fields=fields)
+            self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client,fields=fields)
-
-    def __repr__(self):
-        return str(self.this)
-
+            self.update_or_create(client,
+                                  fields=fields,
+                                  save=False)
 
 
 
