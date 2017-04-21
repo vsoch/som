@@ -338,7 +338,7 @@ class ModelBase:
 
         # The entity is being created, add timestamp
         if not entity:
-           entity = self.create(client)            #insert
+           entity = self.create(client,fields)         #insert
         else: 
             entity = self.update(client,fields) #upsert
         return entity

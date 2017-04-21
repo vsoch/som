@@ -33,7 +33,7 @@ def entity(uid,collection,metadata=None):
 
 
 
-def collection(uid,metadata=None,**fields):
+def collection(uid,metadata=None):
     '''entity returns an entity object
     parent is an owner
     '''
@@ -46,7 +46,7 @@ def collection(uid,metadata=None,**fields):
     
 
 
-def image(uid,entity,download,url,storage,metadata=None,**fields):
+def image(uid,entity,download,url,storage,metadata=None):
     '''image returns an image object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
@@ -66,7 +66,7 @@ def image(uid,entity,download,url,storage,metadata=None,**fields):
     
 
 
-def text(uid,entity,content,metadata=None,**fields):
+def text(uid,entity,content,metadata=None):
     '''text returns a text object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value':uid},
@@ -91,25 +91,25 @@ def text(uid,entity,content,metadata=None,**fields):
 
 class Collection(ModelBase):
   
-    def __init__(self,client,uid,create=True,**fields):
-        self.model = collection(uid=uid,**fields)
-        super(Collection, self).__init__(client,**fields)
+    def __init__(self,client,uid,create=True,fields=None):
+        self.model = collection(uid=uid)
+        super(Collection, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client)
+            self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client)
+            self.this = self.setup(client,fields=fields)
 
 
 class Entity(ModelBase):
 
-    def __init__(self,client,collection,uid,create=True,**fields):
+    def __init__(self,client,collection,uid,create=True,fields=None):
         self.collection = collection
-        self.model = entity(uid=uid, collection=collection,**fields)
-        super(Entity, self).__init__(client,**fields)
+        self.model = entity(uid=uid, collection=collection)
+        super(Entity, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client)
+            self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client)
+            self.this = self.setup(client,fields=fields)
         
 
     def collection(self,client):
@@ -136,32 +136,31 @@ class Entity(ModelBase):
 class Image(ModelBase):
 
     def __init__(self,client,uid,entity,create=True,url=None,
-                 download=None,storage=None,**fields):
+                 download=None,storage=None,fields=None):
         self.entity = entity
         self.model = image(uid=uid,entity=entity,url=url,
-                           storage=storage,download=download,**fields)
-        super(Image, self).__init__(client,**fields)
+                           storage=storage,download=download)
+        super(Image, self).__init__(client)
         if create:
-            self.this = self.update_or_create(client)
+            self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client)
+            self.this = self.setup(client,fields=fields)
 
     def __repr__(self):
         return str(self.this)
 
 
+
 class Text(ModelBase):
 
-    def __init__(self,client,uid,entity,content,create=True,**fields):
+    def __init__(self,client,uid,entity,content,create=True,fields):
         self.entity = entity
-        self.model = text(uid=uid,entity=entity,content=content,**fields)
-
-        super(Text, self).__init__(client,**fields)
+        self.model = text(uid=uid,entity=entity,content=content)
+        super(Text, self).__init__(client)
         if create:
-            self.this = self.get_or_create(client)
+            self.this = self.update_or_create(client,fields=fields)
         else:
-            self.this = self.setup(client)
-
+            self.this = self.setup(client,fields=fields)
 
     def __repr__(self):
         return str(self.this)
@@ -193,16 +192,16 @@ class Client(ClientBase):
     ###################################################################
 
     def get_collection(self,fields):
-        return Collection(client=self.datastore,**fields)
+        return Collection(client=self.datastore,fields=fields)
 
     def get_entity(self,fields):
-        return Entity(client=self.datastore,**fields)
+        return Entity(client=self.datastore,fields=fields)
 
     def create_image(self,fields):
-        return Image(client=self.datastore,**fields)
+        return Image(client=self.datastore,fields=fields)
 
     def create_text(self,fields):
-        return Text(client=self.datastore,**fields)
+        return Text(client=self.datastore,fields=fields)
 
     def get_storage_path(self,file_path,entity,return_folder=False):
         folder = '/'.join(entity.get_keypath())
