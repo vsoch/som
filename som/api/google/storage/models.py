@@ -270,7 +270,7 @@ class ModelBase:
         return list(self._Entity.key.flat_path)
       
     def get_name(self):
-        return list(self._Entity._key.flat_path)[-1]
+        return list(self._Entity.key.flat_path)[-1]
 
 
     def update_fields(self,new_fields,add_new=True):
