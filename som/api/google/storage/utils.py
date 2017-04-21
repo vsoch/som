@@ -165,6 +165,24 @@ def get_image_path(repo_url,commit):
 # METADATA
 #####################################################################################
 
+def get_storage_fields(obj):
+    '''get_storage_fields will return a subset of storage object
+    fields, to be saved as strings with a datastore object.
+    '''                                   
+    fields = {'storage_bucket':obj['bucket'],
+              'storage_md5Hash':obj['md5Hash'],
+              'storage_updated':obj['updated'],
+              'storage_download':obj['mediaLink'],
+              'storage_metadataLink':obj['selfLink'],
+              'storage_crc32c':obj['crc32c'],
+              'storage_etag':obj['etag'],
+              'storage_owner':obj['owner']['entity'],
+              'storage_name':obj['name'],
+              'storage_id':obj['id'],
+              'storage_contentType':obj['contentType'],
+              'storage_size':obj['size']}
+    return fields
+
 
 def get_metadata(key):
     '''get_metadata will return metadata about an instance from within it.

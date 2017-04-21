@@ -44,7 +44,7 @@ def collection(uid):
     
 
 
-def image(uid,entity,url):
+def storageObject(uid,entity,url,storage_type):
     '''image returns an image object. entity is the parent
     '''
     fields = [{'key':'uid','required':True,'value': uid},
@@ -53,28 +53,14 @@ def image(uid,entity,url):
     collection = entity.collection.get_name()
     entity = entity.get_name()
 
+    storage_type = storage_type.replace(' ','-').lower().capitalize()
+
     model = {'fields':fields,
              'exclude_from_indexes': ['url'],
-             'key':['Collection', collection, 'Entity',entity,'Image', uid]}
+             'key':['Collection', collection, 'Entity',entity, storage_type, uid]}
 
     return model
     
-
-
-def text(uid,entity,url):
-    '''text returns a text object. entity is the parent
-    '''
-    fields = [{'key':'uid','required':True,'value':uid},
-              {'key':'url','required':True,'value':url}]
-
-    collection = entity.collection.get_name()
-    entity = entity.get_name()
-
-    model =  {'fields':fields,
-              'key':['Collection', collection, 'Entity',entity,'Text', uid]}
-    return model
-
-
 
 
 ######################################################################################
@@ -130,26 +116,13 @@ class Entity(ModelBase):
         return client.get(client.key(*key, "Text"))
 
 
-class Image(ModelBase):
 
-    def __init__(self,client,uid,entity,url,create=True,fields=None):
+class Object(ModelBase):
+
+    def __init__(self,client,uid,entity,url,object_type,create=True,fields=None):
         self.entity = entity
-        self.model = image(uid=uid,entity=entity,url=url)
-        super(Image, self).__init__(client)
-        if create:
-            self.update_or_create(client,fields=fields)
-        else:
-            self.update_or_create(client,
-                                  fields=fields,
-                                  save=False)
-
-
-class Text(ModelBase):
-
-    def __init__(self,client,uid,entity,url,create=True,fields=None):
-        self.entity = entity
-        self.model = text(uid=uid,entity=entity,url=url)
-        super(Text, self).__init__(client)
+        self.model = storageObject(uid=uid,entity=entity,url=url,storage_type=object_type)
+        super(Object, self).__init__(client)
         if create:
             self.update_or_create(client,fields=fields)
         else:
@@ -196,22 +169,16 @@ class Client(ClientBase):
                       create=create,
                       fields=fields)
 
-    def create_image(self,uid,entity,url,create=True,fields=None):
-        return Image(client=self.datastore,
-                     uid=uid,
-                     entity=entity,
-                     url=url,
-                     create=create,
-                     fields=fields)
+    def create_object(self,uid,entity,url,object_type,create=True,fields=None):
+        '''Object type should be one in Image or Text'''
+        return Object(client=self.datastore,
+                      object_type=object_type,
+                      uid=uid,
+                      entity=entity,
+                      url=url,
+                      create=create,
+                      fields=fields)
 
-
-    def create_text(self,uid,url,entity,create=True,fields=None):
-        return Text(client=self.datastore, 
-                    uid=uid,
-                    entity=entity,
-                    url=url,
-                    create=create,
-                    fields=fields)
 
     def get_storage_path(self,file_path,entity,return_folder=False):
         folder = '/'.join(entity.get_keypath())
@@ -226,56 +193,54 @@ class Client(ClientBase):
     ## Upload #########################################################
     ###################################################################
 
-    def upload_text(self,text,entity,batch=True):
-        '''upload_text will add a text object to the batch manager'''
+    def upload_object(self,file_path,entity,object_type=None,batch=True):
+        '''upload_object will add a general object to the batch manager'''
 
-        uid = self.get_storage_path(text,entity)
-        bucket_folder = self.get_storage_path(text,entity,return_folder=True)
+        if object_type is None:
+            bot.logger.warning("You must specify object_type. Image or Text.")
+            return None
 
-        text_obj = self.upload_object(file_path=text,
-                                      bucket_folder=bucket_folder)
+        uid = self.get_storage_path(file_path,entity)
+        bucket_folder = self.get_storage_path(file_path,entity,return_folder=True)
 
+        storage_obj = self.upload_object(file_path=file_path,
+                                         bucket_folder=bucket_folder)
+
+        fields = get_storage_fields(storage_obj)
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
-                                                       text_obj['name'])
+                                                       storage_obj['name'])
 
-        new_text = self.create_text(uid=uid,
-                                    entity=entity,
-                                    url=url,
-                                    create=not batch)
-
-        bot.logger.debug('TEXT: %s',new_text)
+        new_object = self.create_object(uid=uid,
+                                        entity=entity,
+                                        url=url,
+                                        fields=fields,
+                                        object_type=object_type,
+                                        create=not batch)
 
         if batch:
-            self.batch.add(new_text)
-        return new_text
+            self.batch.add(new_object)
+        return new_object
+
+
+    def upload_text(self,text,entity,batch=True):
+        '''upload_text will add a text object to the batch manager'''
+        new_object = self.upload_object(file_path=text,
+                                        entity=entity,
+                                        object_type="Text",
+                                        batch=batch)
+        bot.logger.debug('TEXT: %s',new_object)
+        return new_object
 
 
     def upload_image(self,image,entity,batch=True):
         '''upload_images will add an image object to the batch manager
         '''
-        bucket_folder = self.get_storage_path(image,entity,return_folder=True)
-
-        image_obj = self.upload_object(file_path=image,
-                                       bucket_folder=bucket_folder)
-
-        url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
-                                                       image_obj['name'])
-                                                    
-        fields = {'storage':image_obj,
-                  'download':image_obj['mediaLink']}
-
-        new_image = self.create_image(uid=image_obj['id'],
-                                      entity=entity,
-                                      url=url,
-                                      fields=fields,
-                                      create=not batch)
-
-        bot.logger.debug('IMAGE: %s',new_image)
-
-        if batch:
-            self.batch.add(new_image)
-
-        return new_image
+        new_object = self.upload_object(file_path=image,
+                                        entity=entity,
+                                        object_type="Image",
+                                        batch=batch)
+        bot.logger.debug('IMAGE: %s',new_object)
+        return new_object
 
 
     def upload_dataset(self,uid,collection,images=None,texts=None,metadata=None,batch=True):

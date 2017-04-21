@@ -76,10 +76,10 @@ class BatchManager:
        if len(self.objects) > 0:
            tasks = self.objects
            with client.transaction():
-               client.put_multi(tasks)
-               if clear_queue:
-                   self.objects = []
-               return tasks
+                   client.put_multi(tasks)
+           if clear_queue:
+               self.objects = []
+           return tasks
        return None
 
 
