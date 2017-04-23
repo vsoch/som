@@ -108,32 +108,32 @@ class Entity(ModelBase):
         self.model = entity(uid,collection)
         super(Entity, self).__init__(client)
         if create:
-            self.update_or_create(client,fields=fields)
+            self.update_or_create(fields=fields)
         else:
-            self.update_or_create(client,
-                                  fields=fields,
+            self.update_or_create(fields=fields,
                                   save=False)
         
-
-    def collection(self,client):
+     #TODO: need to write these functions to work with right references
+     # to client
+    def collection(self):
         '''collection will return the collection associated with
         the entity
         '''
-        return client.get(collection.key)
+        return self.client.get(self.collection.key)
 
 
-    def images(self,client):
+    def images(self):
         '''images will return images associated with the entity
         '''
         key = self.get_keypath()
-        return client.get(client.key(*key, "Image"))
+        return self.client.get(client.key(*key, "Image"))
     
 
-    def text(self,client):
+    def text(self):
         '''text will return text associated with the entity
         '''
         key = self.get_keypath()
-        return client.get(client.key(*key, "Text"))
+        return self.client.get(self.client.key(*key, "Text"))
 
 
 
@@ -144,10 +144,9 @@ class Object(ModelBase):
         self.model = storageObject(uid=uid,entity=entity,url=url,storage_type=object_type)
         super(Object, self).__init__(client)
         if create:
-            self.update_or_create(client,fields=fields)
+            self.update_or_create(fields=fields)
         else:
-            self.update_or_create(client,
-                                  fields=fields,
+            self.update_or_create(fields=fields,
                                   save=False)
 
 
@@ -161,7 +160,6 @@ class Client(ClientBase):
 
     def __init__(self,bucket_name,**kwargs):
         self.bucket_name = bucket_name
-        self.batch = BatchManager()
         super(Client, self).__init__(**kwargs)
     
     def __str__(self):
@@ -276,8 +274,7 @@ class Client(ClientBase):
                                  uid=uid)
 
         if metadata is not None:
-            entity.update(client=self.datastore,
-                          fields=metadata)
+            entity.update(fields=metadata)
        
         if texts is not None:
             for text in texts:
@@ -293,4 +290,4 @@ class Client(ClientBase):
 
         # Run a transaction for put (insert) images and text, and clears queue
         if batch:
-            self.batch.insert(client=self.datastore)
+            self.batch.insert()

@@ -45,16 +45,20 @@ import os
 
 class BatchManager:
     '''a batch manager is bucket to hold multiple objects to filter, query, etc.
-    It a way to compile a set, and then run through a transaction.
+    It a way to compile a set, and then run through a transaction. It must either
+    be instantiated with a client, or one is generated dynamically.
     '''
 
-    def __init__(self):
+    def __init__(self,client=None):
+        if client is None:
+            client = datastore.Client()
+        self.client = client
         self.objects = []
 
 
-    def get_kinds(self,client):
+    def get_kinds(self):
         '''get_kinds'''
-        query = client.query(kind='__kind__')
+        query = self.client.query(kind='__kind__')
         query.keys_only()
         return [entity.key.id_or_name for entity in query.fetch()]
 
@@ -68,7 +72,7 @@ class BatchManager:
 
         
 
-    def get(self,client,keys):
+    def get(self,keys):
         '''get will return a list of tasks based on keys, where each
         key is a single key or a model key type (eg "Collection") and
         corresponding identifier Eg:
@@ -77,33 +81,33 @@ class BatchManager:
 
         '''
         with parse_keys(keys) as keys:
-            return client.get_multi(keys)
+            return self.client.get_multi(keys)
 
 
 
-    def delete(self,client,keys):
+    def delete(self,keys):
         '''delete a set of model objects based on user provided keys'''
         with parse_keys(keys) as keys:
-            return client.delete_multi(keys) # note sure if returning this 
-                                             # returns a status or nothing
-                                             # same for get, need to test
-                                             # (currently on airplane)
+            return self.client.delete_multi(keys) # note sure if returning this 
+                                                  # returns a status or nothing
+                                                  # same for get, need to test
+                                                  # (currently on airplane)
 
 
-    def insert(self,client,clear_queue=True):
+    def insert(self,clear_queue=True):
        '''insert will run a transaction for a set of tasks
        '''
        if len(self.objects) > 0:
            tasks = self.objects
-           with client.transaction():
-                   client.put_multi(tasks)
+           with self.client.transaction():
+                   self.client.put_multi(tasks)
            if clear_queue:
                self.objects = []
            return tasks
        return None
 
 
-    def query(self,client,kind=None,filters=None,order=None,projections=None,
+    def query(self,kind=None,filters=None,order=None,projections=None,
               run=True,limit=None,keys_only=False,distinct_on=None,query=None,
               ancestor=None):
         '''query will run a query for some kind of model (eg 'Collection')
@@ -126,18 +130,18 @@ class BatchManager:
         '''
         if ancestor is not None:
             if isinstance(ancestor,list) or isinstance(ancestor,str):
-                ancestor = client.key(*ancestor)
+                ancestor = self.client.key(*ancestor)
 
         if query == None:
             if kind is None:
                 bot.logger.error("You must define 'kind' to run a query.")
                 sys.exit(1)
-            query = client.query(kind=kind.upper(),ancestor=ancestor) # uppercase first letter
+            query = self.client.query(kind=kind.capitalize(),ancestor=ancestor) # uppercase first letter
 
-        if distinct_on != None:
+        if distinct_on is not None:
             if not isinstance(distinct_on,list):
                 distinct_on = [distinct_on]
-            query.distinct_on = ['category', 'priority']
+            query.distinct_on = distinct_on
 
         # Add filters to the query
         if filters is not None:
@@ -148,13 +152,14 @@ class BatchManager:
         if order is not None:
             if not isinstance(order,list):
                 order = [order]
+            order = [x.lower() for x in order]
             query.order = order
 
         # Return a projection, an extraction of fields from a set
         if projections is not None:
-            return self.projection(client,query,projections)
+            return self.projection(query,projections)
 
-        if keys_only:
+        if keys_only is True:
             query.keys_only()
   
         # Do we not want to run the query?
@@ -164,10 +169,7 @@ class BatchManager:
         result = None
 
         try:
-            if keys_only:
-                result = list([e.key for e in query.fetch(limit=limit)])
-            else:
-                result = list(query.fetch(limit=limit))
+            result = query.fetch(limit=limit)
 
         except (google.cloud.exceptions.BadRequest,
                 google.cloud.exceptions.GrpcRendezvous):
@@ -177,7 +179,7 @@ class BatchManager:
         return result
 
 
-    def query_key(self,client,kind,keys,**kwargs):
+    def query_key(self,kind,keys,**kwargs):
         '''query_key is an entry to query that adds a key filter to the query
         '''
         if operator == None:
@@ -188,15 +190,15 @@ class BatchManager:
             sys.exit(1)
 
         keys = parse_keys(keys)
-        query = client.query(kind=kind)
+        query = self.client.query(kind=kind)
         for key in keys:
             query.key_filter(key, operator)
 
-        return self.query(client,**kwargs)
+        return self.query(**kwargs)
 
 
 
-    def query_date(self,client,kind,startyear=None,startday=None,startmonth=None,
+    def query_date(self,kind,startyear=None,startday=None,startmonth=None,
                    endyear=None,endday=None,endmonth=None,**kwargs):
         '''query_date is an entry to query that sets up a date filter.
         '''
@@ -210,16 +212,16 @@ class BatchManager:
             bot.logger.warning('''Both start date and end date are null, did you provide
                                   year, month, day for one or both?''')
      
-        query = client.query(kind=kind)
+        query = self.client.query(kind=kind)
         if start_date is not None:
             query.add_filter('created', '>', start_date)
         if end_date is not None:
             query.add_filter('created', '<', end_date)
      
-        return self.query(client,**kwargs)
+        return self.query(**kwargs)
         
 
-    def projection(self,client,query,projections,add_loners=False):
+    def projection(self,query,projections,add_loners=False):
         '''extract a subset of a query, meaning a dictionary with key value
         pairs for field/results lists. By default, to preserve indexing,
         only objects with all projection fields are added to the result.
@@ -258,17 +260,21 @@ class BatchManager:
 
 class ModelBase:
 
-    def __init__(self,client):
+    def __init__(self,client=None):
         '''A ModelBase is a controller for a general DataStore
         Entity. Most of the variables in init are for initial
         validation, and further fields etc are stored with
         the Entity itself (_Entity)
+        :param client: the datastore client, should be passed on init
         :param _fields: intiial fields to validate on model creation
         :param _key: the initial key used for the entity
         :param _Entity: the final generated (validated) entity
         '''
+        if client is None:
+            client = datastore.Client()
+        self.client = client
         self._fields = validate_model(self.model['fields'])
-        self._key = client.key(*self.model['key'])
+        self._key = self.client.key(*self.model['key'])
         self._Entity = None
         if "exclude_from_indexes" in self.model:
             self._exclude_from_indexes = self.model['exclude_from_indexes'] # Can be None
@@ -308,18 +314,18 @@ class ModelBase:
                     self._Entity[key] = value
 
 
-    def get_or_create(self,client):
+    def get_or_create(self):
         '''get_or_create will get or create an object using a transaction.
         If an entity object already exists with the object, it is overridden
         '''
-        with client.transaction():
-           self._Entity = client.get(*self._key)
+        with self.client.transaction():
+           self._Entity = self.client.get(*self._key)
            if not self._Entity:
-               self._Entity = self.create(client)
+               self._Entity = self.create()
         return self._Entity
 
 
-    def setup(self,client,fields=None):
+    def setup(self,fields=None):
         '''setup will generate a new Entity without saving it (for batches)
         '''
         if self._exclude_from_indexes is not None:
@@ -331,73 +337,72 @@ class ModelBase:
             self.update_fields(fields)
 
 
-    def save(self,client):
+    def save(self):
         '''save just calls put for the current _Entity'''
-        client.put(self._Entity)
+        self.client.put(self._Entity)
 
 
-    def create(self,client,fields=None,save=True):
+    def create(self,fields=None,save=True):
         '''create a new entity
-        :param client: the datastore client
         :param fields: additional fields to add
         :param save: save the entity to datastore (default True)
         '''
-        self.setup(client,fields)
+        self.setup(fields)
         self._Entity['created'] = datetime.datetime.utcnow()
         self._Entity['updated'] = datetime.datetime.utcnow()
         # Add initial fields, if defined
         for field,value in self._fields.items():
             self._Entity[field] = value
         if save:
-            self.save(client)
+            self.save()
         return self._Entity
 
 
-    def delete(self,client):
+    def delete(self):
         '''delete an entity'''
         key = None
         if self._Entity is not None:
             key = self._Entity.key
-            client.delete(key)
+            self.client.delete(key)
             bot.logger.debug("Deleting %s" %(key))
         return key
 
 
-    def update_or_create(self,client,fields=None,save=True):
+    def update_or_create(self,fields=None,save=True):
         '''update or create will update or create an entity.
         '''
-        entity = client.get(self._key)
+        entity = self.client.get(self._key)
 
         # The entity is being created, add timestamp
         if not entity:
-           entity = self.create(client,fields,save)         #insert
+           entity = self.create(fields,save)         #insert
         else: 
-            entity = self.update(client,fields,save)        #upsert
+            entity = self.update(fields,save)        #upsert
         return self._Entity
 
 
-    def update(self,client,fields=None,save=True):
+    def update(self,fields=None,save=True):
         '''update an entity, meaning updating the local and then pushing
         (saving) to the datastore. This overrides the datastore version
         by default. To simply get the datastore version and override
         the local, use get'''
         if self._Entity is None:
-            self._Entity = client.get(self._key)
+            self._Entity = self.client.get(self._key)
         self._Entity['updated'] = datetime.datetime.utcnow()
         # Update any fields
         if fields is not None:
             for field,value in fields.items():
                 self._Entity[field] = value
         if save:
-            self.save(client)
+            self.save()
         return self._Entity
 
 
-    def get(self,client):
+    def get(self):
         '''get an entity, and override the currently set _Entity in the model
         if it is not retrieved yet. If already retrieved, does not update.
         '''
         if self._Entity is None:
-            with client.transaction():
-                self._Entity = client.get(*self._key)
+            with self.client.transaction():
+                self._Entity = self.client.get(*self._key)
         return self._Entity

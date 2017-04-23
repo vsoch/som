@@ -45,14 +45,11 @@ class ClientBase(ApiConnection):
 
     def __init__(self,**kwargs):
         super(ApiConnection, self).__init__(**kwargs)
-        self.datastore = self.datastore_client()
+        self.datastore = datastore.Client()
+        self.batch = BatchManager(client=self.datastore)
         self.storage = get_google_service('storage', 'v1')
         if self.bucket_name is not None:
             self.get_bucket()
-
-    def datastore_client(self):
-        '''create a datastore client to work with'''
-        return datastore.Client()
   
     def get_bucket(self):
         self.bucket = get_bucket(self.storage,self.bucket_name)
