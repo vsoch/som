@@ -140,12 +140,20 @@ pmc = get_pubmed()
 from som.api.google.storage.general import Client
 general_client = Client(bucket_name='pmc-stanford')
 
+timeouts = []
+current = 625
 for row in pmc.iterrows():
-    journal_name = row[1].JOURNAL
-    date_match = re.search("\d{4}",journal_name)
-    publication_date = journal_name[date_match.start():]
-    journal_name = format_name(journal_name[:date_match.start()].strip())
-    collection = general_client.get_collection(uid=journal_name)
-    metadata = get_metadata(row)
-    article = create_article(metadata)
-
+    if row[0] >= current:
+        try:
+            signal.alarm(30)
+            journal_name = row[1].JOURNAL
+            date_match = re.search("\d{4}",journal_name)
+            publication_date = journal_name[date_match.start():]
+            journal_name = format_name(journal_name[:date_match.start()].strip())
+            collection = general_client.get_collection(uid=journal_name)
+            metadata = get_metadata(row)
+            article = create_article(metadata)
+        except:
+            timeouts.append(row[0])
+            general_client = Client(bucket_name='pmc-stanford')
+    current+=1
