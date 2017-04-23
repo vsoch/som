@@ -20,13 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-__version__ = "0.0.8"
+__version__ = "0.0.9"
 AUTHOR = 'Vanessa Sochat'
 AUTHOR_EMAIL = 'vsochat@stanford.edu'
 NAME = 'som'
-PACKAGE_URL = "https://github.com/radinformatics/somtools"
-KEYWORDS = 'medical-images, stanford, school of medicine, api, validator'
-DESCRIPTION = "python tools for school of medicine"
+PACKAGE_URL = "https://github.com/vsoch/som"
+KEYWORDS = 'open source, stanford, python, google, gce, storage, api, validator'
+DESCRIPTION = "stanford open modules for python"
 LICENSE = "LICENSE"
 
 INSTALL_REQUIRES = (
