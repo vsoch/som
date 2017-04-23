@@ -6,7 +6,7 @@ These are basic Python based tools for working with data (likely images and text
 
 ## Installation
 
-      pip install git+git://github.com/vsoch/som-tools.git
+      pip install git+git://github.com/vsoch/som.git
 
 
 For (sometimes) more stable releases:
