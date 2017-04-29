@@ -42,6 +42,7 @@ from som.api.google.storage.models import BatchManager
 from som.api import ApiConnection
 from som.logman import bot
 
+
 class ClientBase(ApiConnection):
 
     def __init__(self,**kwargs):
@@ -52,8 +53,10 @@ class ClientBase(ApiConnection):
         if self.bucket_name is not None:
             self.get_bucket()
   
+
     def get_bucket(self):
         self.bucket = get_bucket(self.storage,self.bucket_name)
+
 
     def put_object(self,bucket_folder,file_path,verbose=True):
         '''upload_object will upload a file to path bucket_path in storage

@@ -103,7 +103,7 @@ class Collection(ModelBase):
 
 class Entity(ModelBase):
 
-    def __init__(self,client,collection,uid,create=True,fields=None):
+    def __init__(self,client,collection,uid,create=False,fields=None):
         self.collection = collection
         self.model = entity(uid,collection)
         super(Entity, self).__init__(client)
@@ -113,29 +113,6 @@ class Entity(ModelBase):
             self.update_or_create(fields=fields,
                                   save=False)
         
-     #TODO: need to write these functions to work with right references
-     # to client
-    def collection(self):
-        '''collection will return the collection associated with
-        the entity
-        '''
-        return self.client.get(self.collection.key)
-
-
-    def images(self):
-        '''images will return images associated with the entity
-        '''
-        key = self.get_keypath()
-        return self.client.get(client.key(*key, "Image"))
-    
-
-    def text(self):
-        '''text will return text associated with the entity
-        '''
-        key = self.get_keypath()
-        return self.client.get(self.client.key(*key, "Text"))
-
-
 
 class Object(ModelBase):
 
@@ -169,23 +146,25 @@ class Client(ClientBase):
         return "storage.google.%s" %self.bucket_name
 
 
+
     ###################################################################
-    ## Create and get #################################################
+    ## Create #########################################################
     ###################################################################
 
-    def get_collection(self,uid,create=True,fields=None):
+    def create_collection(self,uid,create=True,fields=None):
         return Collection(client=self.datastore,
                           uid=uid,
                           create=create,
                           fields=fields)
 
 
-    def get_entity(self,collection,uid,create=True,fields=None):
+    def create_entity(self,collection,uid,create=True,fields=None):
         return Entity(client=self.datastore,
                       collection=collection,
                       uid=uid,
                       create=create,
                       fields=fields)
+
 
     def create_object(self,uid,entity,url,object_type,create=True,fields=None):
         '''Object type should be one in Image or Text'''
@@ -198,12 +177,55 @@ class Client(ClientBase):
                       fields=fields)
 
 
+    def create_object(self,uid,entity,url,object_type,create=True,fields=None):
+        '''Object type should be one in Image or Text'''
+        return Object(client=self.datastore,
+                      object_type=object_type,
+                      uid=uid,
+                      entity=entity,
+                      url=url,
+                      create=create,
+                      fields=fields)
+
+    ###################################################################
+    ## Get ############################################################
+    ###################################################################
+
     def get_storage_path(self,file_path,entity,return_folder=False):
         folder = '/'.join(entity.get_keypath())
         bucket_path = "%s/%s" %(folder,os.path.basename(file_path))
         if return_folder:
             return os.path.dirname(bucket_path)
         return bucket_path
+
+
+    def get_collections(self,uids=None,limit=None,keys_only=False):
+        return self.batch.get(kind="Collection",
+                              keys=uids,
+                              limit=limit,
+                              keys_only=keys_only)
+
+
+    def get_entities(self,collection=None,uids=None,limit=None,keys_only=False):
+        ancestor = None
+        if collection is not None:
+            ancestor = self.batch.client.key("Collection", collection) 
+        return self.batch.get(kind="Entity",
+                              limit=limit,
+                              ancestor=ancestor,
+                              keys_only=keys_only)
+
+
+    def get(self,kind,keys=None,limit=None,keys_only=False):
+        if keys is None:
+            return self.query(kind=kind,
+                              limit=limit,
+                              keys_only=keys_only)
+        else:
+            if not isinstance(keys,list):
+                keys = [keys]
+            keys = [self.client.key(kind,k) for k in keys]
+            return self.client.get_multi(keys)
 
 
 
@@ -270,8 +292,8 @@ class Client(ClientBase):
         '''
                 
         # Add entity
-        entity = self.get_entity(collection=collection,
-                                 uid=uid)
+        entity = self.create_entity(collection=collection,
+                                    uid=uid)
 
         if metadata is not None:
             entity.update(fields=metadata)
@@ -290,4 +312,4 @@ class Client(ClientBase):
 
         # Run a transaction for put (insert) images and text, and clears queue
         if batch:
-            self.batch.insert()
+            self.batch.runInsert()

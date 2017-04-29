@@ -53,36 +53,44 @@ class BatchManager:
         if client is None:
             client = datastore.Client()
         self.client = client
-        self.objects = []
-
+        self.tasks = []
+        self.queries = []
 
     def get_kinds(self):
-        '''get_kinds'''
         query = self.client.query(kind='__kind__')
         query.keys_only()
         return [entity.key.id_or_name for entity in query.fetch()]
 
 
+    def get(self,kind,keys=None,limit=None,field=None,keys_only=False,ancestor=None):
+        if keys is None:
+            return self.query(kind=kind,
+                              limit=limit,
+                              ancestor=ancestor,
+                              keys_only=keys_only)
+        else:
+            if not isinstance(keys,list):
+                keys = [keys]
+            if field is None:
+                keys = [self.client.key(kind,k) for k in keys]
+                return self.client.get_multi(keys)
+            else:
+                for key in keys:
+                    query = self.client.query(kind=kind.capitalize())
+                    query.add_filter(field,'=',key)
+                    self.add(query)
+                return self.runQueries()                    
+
+
     def add(self,task):
-        '''return all objects in the set
+        '''return all tasks in the set
         '''
-        if not isinstance(task,datastore.Entity):
-            task = task._Entity
-        self.objects.append(task)
-
-        
-
-    def get(self,keys):
-        '''get will return a list of tasks based on keys, where each
-        key is a single key or a model key type (eg "Collection") and
-        corresponding identifier Eg:
-
-          keys = ["Collection",["Entity",12345]]
-
-        '''
-        with parse_keys(keys) as keys:
-            return self.client.get_multi(keys)
-
+        if isinstance(task,datastore.query):
+            self.queries.append(task)
+        else:
+            if not isinstance(task,datastore.Entity):
+                task = task._Entity
+            self.tasks.append(task)
 
 
     def delete(self,keys):
@@ -94,17 +102,30 @@ class BatchManager:
                                                   # (currently on airplane)
 
 
-    def insert(self,clear_queue=True):
-       '''insert will run a transaction for a set of tasks
+
+    def runInsert(self,clear_queue=True):
+       '''runInsert will run a transaction for a set of tasks
        '''
-       if len(self.objects) > 0:
-           tasks = self.objects
+       tasks = None
+       if len(self.tasks) > 0:
+           tasks = self.tasks
            with self.client.transaction():
-                   self.client.put_multi(tasks)
+               self.client.put_multi(tasks)
            if clear_queue:
-               self.objects = []
-           return tasks
-       return None
+               self.tasks = []
+       return tasks
+       
+
+    def runQueries(self,clear_queue=True):
+       results = None
+       if len(self.queries) > 0:
+           results = []
+           for query in self.queries:
+               result = [x for x in query.fetch()]
+               results = results + result
+           if clear_queue:
+               self.queries = []
+       return results
 
 
     def query(self,kind=None,filters=None,order=None,projections=None,
@@ -112,7 +133,11 @@ class BatchManager:
               ancestor=None):
         '''query will run a query for some kind of model (eg 'Collection')
         :param kind: the kind of model to query
-        :param filters: a list of lists of tuples, each length 3, with 
+        :param filters: a list of lists of tuples, each length 3, with
+
+             FIELD OPERATOR VALUE
+             "description" "=' "this is a description" 
+ 
         :param order: optional one or more orderings -descending / ascending
         :param projections: if defined, return a dictionary of lists of each
         :param run: Default true to execute query. False returns query object
@@ -120,10 +145,7 @@ class BatchManager:
         :param distinct_on: one or more fields to make distinct
         :param query: if provided, will not start with basic query
         :param ancestor: if provided, query for the provided ancestor
-                       
-             FIELD OPERATOR VALUE
-             "description" "=' "this is a description" 
-         
+                                
              ANCESTOR EXAMPLE
              ancestor = client.key('TaskList', 'default')
 
@@ -169,7 +191,7 @@ class BatchManager:
         result = None
 
         try:
-            result = query.fetch(limit=limit)
+            result = [x for x in query.fetch(limit=limit)]
 
         except (google.cloud.exceptions.BadRequest,
                 google.cloud.exceptions.GrpcRendezvous):
@@ -375,7 +397,7 @@ class ModelBase:
 
         # The entity is being created, add timestamp
         if not entity:
-           entity = self.create(fields,save)         #insert
+            entity = self.create(fields,save)         #insert
         else: 
             entity = self.update(fields,save)        #upsert
         return self._Entity
