@@ -38,6 +38,7 @@ from som.api.google.storage.utils import (
     upload_file
 )
 
+from som.api.google.storage.models import BatchManager
 from som.api import ApiConnection
 from som.logman import bot
 
