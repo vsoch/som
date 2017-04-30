@@ -210,7 +210,7 @@ class Client(ClientBase):
         '''eg:     pmc_articles = client.get_entities(uids=pmc_keys,field="pmcid")
         '''  
         ancestor = None
-        elif collection is not None:
+        if collection is not None:
             ancestor = self.batch.client.key("Collection", collection) 
         return self.batch.get(kind="Entity",
                               limit=limit,
