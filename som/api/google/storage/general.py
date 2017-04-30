@@ -206,7 +206,7 @@ class Client(ClientBase):
                               keys_only=keys_only)
 
 
-    def get_entities(self,collection=None,field=None,uids=None,field=None,limit=None,keys_only=False):
+    def get_entities(self,collection=None,field=None,uids=None,limit=None,keys_only=False):
         '''eg:     pmc_articles = client.get_entities(uids=pmc_keys,field="pmcid")
         '''  
         ancestor = None
