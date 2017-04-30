@@ -72,7 +72,6 @@ class BatchManager:
             if not isinstance(keys,list):
                 keys = [keys]
             if field is None:
-                keys = [self.client.key(kind,k) for k in keys]
                 return self.client.get_multi(keys)
             else:
                 for key in keys:

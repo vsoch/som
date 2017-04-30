@@ -53,9 +53,14 @@ class ClientBase(ApiConnection):
         if self.bucket_name is not None:
             self.get_bucket()
   
-
     def get_bucket(self):
         self.bucket = get_bucket(self.storage,self.bucket_name)
+
+    def make_key(self,key,ancestor=None):
+        if ancestor is not None:
+            ancestor = list(ancestor.key._flat_path)
+            key = ancestor + key
+        return self.datastore.key(*key)
 
 
     def put_object(self,bucket_folder,file_path,verbose=True):

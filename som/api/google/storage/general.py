@@ -206,29 +206,34 @@ class Client(ClientBase):
                               keys_only=keys_only)
 
 
-    def get_entities(self,collection=None,uids=None,limit=None,keys_only=False):
+    def get_entities(self,collection=None,field=None,uids=None,field=None,limit=None,keys_only=False):
+        '''eg:     pmc_articles = client.get_entities(uids=pmc_keys,field="pmcid")
+        '''  
         ancestor = None
-        if collection is not None:
+        elif collection is not None:
             ancestor = self.batch.client.key("Collection", collection) 
         return self.batch.get(kind="Entity",
                               limit=limit,
+                              field=field,
                               ancestor=ancestor,
+                              keys=uids,
                               keys_only=keys_only)
 
 
-    def get(self,kind,keys=None,limit=None,keys_only=False):
-        if keys is None:
-            return self.query(kind=kind,
-                              limit=limit,
-                              keys_only=keys_only)
-        else:
-            if not isinstance(keys,list):
-                keys = [keys]
-            keys = [self.client.key(kind,k) for k in keys]
-            return self.client.get_multi(keys)
+    def get_images(self,entity,limit=None,keys_only=False):
+        return self.batch.query(kind="Image",
+                                limit=limit,
+                                keys_only=keys_only,
+                                ancestor=entity.key)
 
 
+    def get_text(self,entity,limit=None,keys_only=False):
+        return self.batch.query(kind="Text",
+                                limit=limit,
+                                keys_only=keys_only,
+                                ancestor=entity.key)
 
+  
     ###################################################################
     ## Upload #########################################################
     ###################################################################
