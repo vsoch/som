@@ -84,7 +84,7 @@ class BatchManager:
     def add(self,task):
         '''return all tasks in the set
         '''
-        if isinstance(task,datastore.query):
+        if isinstance(task,datastore.query.Query):
             self.queries.append(task)
         else:
             if not isinstance(task,datastore.Entity):
