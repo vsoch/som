@@ -31,7 +31,9 @@ class SomApiConnection(ApiConnection):
         :param data: additional data to add to the request
         :param return_json: return json if successful
         '''
-        response = func(url,self.headers,data=data)
+        response = func(url=url,
+                        headers=self.headers,
+                        data=data)
 
         # Errored response, try again with refresh
         if response.status_code == 401:

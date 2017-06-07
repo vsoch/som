@@ -5,6 +5,7 @@ som.api: base template for making a connection to an API
 '''
 
 from som.logger import bot
+import requests
 import sys
 import re
 import os

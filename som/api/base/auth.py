@@ -74,7 +74,7 @@ def refresh_access_token():
     if secrets is not None:
         response = requests.post(secrets['token_uri'],
                                  data={'refreshToken':secrets['refreshToken']},
-                                 headers=get_headers())
+                                 headers=self.get_headers())
 
         if isinstance(response,dict):
             secrets["accessToken"] = response['accessToken']

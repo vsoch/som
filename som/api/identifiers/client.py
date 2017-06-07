@@ -38,13 +38,22 @@ api_version = "v1"
 class Client(SomApiConnection):
 
     def __init__(self, token=None, study=None):
- 
+
+        if study is None:
+            study = "test"
+        bot.info("Client: <study:%s>" %(study))
         self.base = api_base
         self.version = api_version
         self.study = study
         self.spec = spec
         self.token = token
         super(Client, self).__init__()
+
+    def __str__(self):
+        return "Client: <study:%s>" %(self.study)
+
+    def __repr__(self):
+        return "Client: <study:%s>" %(self.study)
 
 
     def deidentifiy_update(self,identifiers,test=False):
@@ -54,15 +63,15 @@ class Client(SomApiConnection):
         return self.deidentify(identifiers,test=test,save_records=True)
 
 
-    def deidentify(self,ids,test=False,save_records=False):
+    def deidentify(self,ids,save_records=False,study=None):
         '''deidentify will take a list of identifiers, and return the deidentified.
-        if save_records is True, will save records. If False (default) only
-        returns identifiers.
+        :param save_records: if True, will use mrn endpoint and and save data.
+                             if False, will use uid endpoint and not save data.
         :param identifiers: a list of identifiers
         '''    
 
         # Saving records (uid) or not (mrn) changes the endpoint
-        if save_records == True:
+        if not save_records:
             action = "uid"
             bot.debug("[uid]: save_records is %s, no new data will be saved.")
         else:
@@ -70,9 +79,8 @@ class Client(SomApiConnection):
             bot.debug("[mrn]: save_records is %s, data will be saved.")
 
         # Testing overrides all other specifications
-        study = self.study
-        if test == True or study is None:
-            study = 'test'
+        if study is None:
+            study = self.study
         study = study.lower()
 
         # Did the user provide a valid study id?
@@ -86,9 +94,7 @@ class Client(SomApiConnection):
                               self.version,
                               action,study)
 
-        response = self.call(url=url,
-                             data=ids,
-                             func=self.post)
+        response = self.post(url=url,data=ids)
 
         if "results" in response:
             return response['results']

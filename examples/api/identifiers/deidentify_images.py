@@ -16,10 +16,12 @@ from som.utils import (
 client = Client()
 
 identifiers = read_json(get_dataset('developers_uid'))
-
-
-identifiers = read_json('../../som/api/base/tests/data/developers_uid.json')
 validate_identifiers(identifiers)
+# In [8]: validate_identifiers(identifiers)
+# DEBUG identifier A654321 data structure valid: True
+# DEBUG identifier B654321 data structure valid: True
+# DEBUG Identifiers data structure valid: True
+# Out[8]: True
 
 # Note that you must be on Stanford VPN
 # deidentify(identifiers,test=False,save_records=False)
