@@ -26,7 +26,7 @@ SOFTWARE.
 '''
 
 
-from som.logman import bot
+from som.logger import bot
 
 from som.utils import (
     read_json,
@@ -46,7 +46,7 @@ def read_client_secrets():
         if os.path.exists(token_file):
             secrets = read_json(token_file)
     if secrets is None:
-        bot.logger.error('Cannot find STANFORD_CLIENT_SECRETS credential file path in environment.')
+        bot.error('Cannot find STANFORD_CLIENT_SECRETS credential file path in environment.')
         sys.exit(1)
     return secrets
 

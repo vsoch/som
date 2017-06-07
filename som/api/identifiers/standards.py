@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
 '''
-base.py: base module for working with som api
+standards.py: standards for the identifiers API
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -22,15 +20,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
 '''
 
-from som.logman import bot
-from som.api.base import ClientBase
+# Swagger api
+spec = "https://app.swaggerhub.com/apiproxy/schema/file/susanweber/UID/1.0.0/swagger.json"
 
-class Client(ClientBase):
-
-    def __init__(self,**kwargs):
-        super(Client, self).__init__(**kwargs)
-        self.study = 'radiologydeid'
+# Valid study ids
+studies = ['radiologydeid','test']

@@ -6,7 +6,7 @@ validators.py: validation of folders and compressed objects for wordfish standar
 
 '''
 
-from som.logman import bot
+from som.logger import bot
 import tempfile
 import shutil
 import os
@@ -64,10 +64,10 @@ def validate_folder(folder):
     # validate images, text, and metadata of the entities
     valid_entities = validate_entities(full_path)
     if valid_entities == None:
-        bot.logger.error("found invalid collection: does not have entities.")
+        bot.error("found invalid collection: does not have entities.")
         valid = False        
     elif valid_entities == False:
-        bot.logger.error("found invalid collection: invalid entities.")
+        bot.error("found invalid collection: invalid entities.")
         valid = False        
     else:
         print("collection %s is valid." %folder)        
@@ -92,16 +92,16 @@ def validate_metadata(full_path,metadata_type=None):
     metadata = "%s/%s.json" %(parent_dir,base_name)
 
     if os.path.exists(metadata):
-        bot.logger.debug('found %s metadata: %s', metadata_type, base_name)
+        bot.debug('found %s metadata: %s' %(metadata_type, base_name))
         try:
             md = read_json(metadata)
-            bot.logger.info('%s %s metadata is valid', metadata_type, base_name)
+            bot.info('%s %s metadata is valid' %(metadata_type, base_name))
         except:
-            bot.logger.error('%s %s has invalid json metadata %s', metadata_type, base_name, metadata)
+            bot.error('%s %s has invalid json metadata %s' %(metadata_type, base_name, metadata))
             return False
  
     else:
-        bot.logger.info('%s %s does not have metadata file %s.json', metadata_type, base_name, base_name)
+        bot.info('%s %s does not have metadata file %s.json' %(metadata_type, base_name, base_name))
         return None
 
     return True
@@ -115,7 +115,7 @@ def validate_entities(full_path):
     '''
     valid = True
     entities = os.listdir(full_path)
-    bot.logger.info("Found %s entities in collection.", len(entities))
+    bot.info("Found %s entities in collection." %len(entities))
     if len(entities) == 0:
         return None
      
@@ -131,12 +131,12 @@ def validate_entities(full_path):
 
         # If images and text are empty for a collection, invalid
         if entity_texts == None and entity_images == None:
-            bot.logger.error("found invalid entity: does not have images or text.")
+            bot.error("found invalid entity: does not have images or text.")
             valid = False
 
         # if either text or images are not valid, entities considered invalid
         if entity_texts == False or entity_images == False:
-            bot.logger.error("entity %s does not have valid images or text." %(entity))
+            bot.error("entity %s does not have valid images or text." %(entity))
             valid = False
 
     return valid
@@ -189,7 +189,7 @@ def validate_template(entity_path, template_type, acceptable_types):
     template_path = "%s/%s" %(entity_path,template_type)
     entity_name = os.path.basename(entity_path)
     if not os.path.exists(template_path):
-        bot.logger.info("entity %s does not have %s.", entity_name, template_type)
+        bot.info("entity %s does not have %s." %(entity_name, template_type))
         return None
     
     # Let's keep track of each file
@@ -212,10 +212,10 @@ def validate_template(entity_path, template_type, acceptable_types):
 
     # Warn the user about missing valid files, not logical given folder
     if len(valids) == 0:
-        bot.logger.warning("entity %s does not have %s.", entity_name, template_type)
+        bot.warning("entity %s does not have %s." %(entity_name, template_type))
         return None
     else:
-        bot.logger.info("entity %s has %s %s", entity_name, len(valids), template_type)
+        bot.info("entity %s has %s %s" %(entity_name, len(valids), template_type))
 
     # Parse through the "others" and alert user about invalid file
     valid_metadata = 0
@@ -225,19 +225,19 @@ def validate_template(entity_path, template_type, acceptable_types):
     # Assess each valid for metadata
     for contender in valids:
         if validate_metadata(contender,template_type) == False:      
-            bot.logger.error("metadata %s for entity %s is invalid" %(contender,entity_name))
+            bot.error("metadata %s for entity %s is invalid" %(contender,entity_name))
             invalid_metadata +=1
             valid = False
         else:
             valid_metadata +=1
     else:
         skipped_files +=1      
-        bot.logger.warning("%s for %s/%s is not valid for import and is ignored", contender, entity_name, template_type)
+        bot.warning("%s for %s/%s is not valid for import and is ignored" %(contender, entity_name, template_type))
 
-    bot.logger.info("found %s valid metadata, %s invalid metadata, and %s skipped files for %s", valid_metadata,
-                                                                                                 invalid_metadata,
-                                                                                                 skipped_files,
-                                                                                                 entity_name)
+    bot.info("found %s valid metadata, %s invalid metadata, and %s skipped files for %s" %(valid_metadata,
+                                                                                           invalid_metadata,
+                                                                                           skipped_files,
+                                                                                           entity_name))
     return valid
 
 
@@ -261,16 +261,16 @@ def validate_compressed(compressed_file,testing_base=None,clean_up=True):
         test_folder = unzip_dir(compressed_file,dest_dir)
 
     else:
-        bot.logger.error("Invalid compressed file type: %s, exiting.", compressed_file)
+        bot.error("Invalid compressed file type: %s, exiting." %compressed_file)
         sys.exit(1)
 
     # Each object in the folder (a collection)
     collections = os.listdir(test_folder)
-    bot.logger.info("collections found: %s", len(collections))
+    bot.info("collections found: %s" %len(collections))
     for collection in collections:
         collection_path = "%s/%s" %(test_folder,collection)
         if validate_folder(collection_path) == False:
-            bot.logger.error("collection %s is invalid.", collection)
+            bot.error("collection %s is invalid." %collection)
 
     if clean_up == True:
         shutil.rmtree(dest_dir)

@@ -1,6 +1,5 @@
 '''
-
-client.py: simple clients for som api
+client.py: client for working with identifiers API
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -23,43 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from som.api.base.connect import (
-    api_base,
-    api_version,
-    SomApiConnection
+from som.api.base import SomApiConnection
+from .standards import (
+    spec,
+    studies
 )
 
-from som.api.base.standards import spec
-from som.logman import bot
+from som.logger import bot
+import sys
+import os
 
-class ClientBase(object):
+api_base = "https://api.rit.stanford.edu/identifiers/api"
+api_version = "v1"
 
+class Client(SomApiConnection):
 
-    def __init__(self, spec=None, token=None, base=None, version=None):
+    def __init__(self, token=None, study=None):
  
-        # Base and version consistent across
-        if base == None:
-            base = api_base
-
-        if version == None:
-            version = api_version
-
-        self.base = base
-        self.version = version
-        self.study = None
-
-        if spec != None:
-            self.spec = spec
-
-        self.api = SomApiConnection(token)
-
-
-    def get_base(self,study=None):
-        '''get_base returns the base api for a particular study
-        '''
-        if study is None:
-            study = self.study
-        return "%s/%s/%s" %(self.base,self.version,study)
+        self.base = api_base
+        self.version = api_version
+        self.study = study
+        self.spec = spec
+        self.token = token
+        super(Client, self).__init__()
 
 
     def deidentifiy_update(self,identifiers,test=False):
@@ -73,26 +58,38 @@ class ClientBase(object):
         '''deidentify will take a list of identifiers, and return the deidentified.
         if save_records is True, will save records. If False (default) only
         returns identifiers.
-        :param identifiers: a list of identifiers (e.g., people)
+        :param identifiers: a list of identifiers
         '''    
-        # Default is production endpoint particular to the study
-        study = self.study
 
         # Saving records (uid) or not (mrn) changes the endpoint
-        action = "mrn"
         if save_records == True:
-            bot.logger.debug("save_records is %s, no new data will be saved.")
             action = "uid"
+            bot.debug("[uid]: save_records is %s, no new data will be saved.")
         else:
-            bot.logger.debug("save_records is %s, data will be saved.")
+            action = "mrn"
+            bot.debug("[mrn]: save_records is %s, data will be saved.")
 
         # Testing overrides all other specifications
-        if test == True:
+        study = self.study
+        if test == True or study is None:
             study = 'test'
+        study = study.lower()
 
-        url = "%s/%s/%s/%s" %(api_base,api_version,action,study)
+        # Did the user provide a valid study id?
+        if study not in studies:
+            bot.error("%s is not a valid study. Valid ids include %s" %(study,",".join(studies)))
+            sys.exit(1)
 
-        response = self.api.post(url,data=ids)
+        bot.debug("study: %s" %study)
+
+        url = "%s/%s/%s/%s" %(self.base,
+                              self.version,
+                              action,study)
+
+        response = self.call(url=url,
+                             data=ids,
+                             func=self.post)
+
         if "results" in response:
             return response['results']
         return response

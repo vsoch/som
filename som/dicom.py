@@ -32,7 +32,7 @@ import nibabel
 import numpy
 from glob import glob
 import os
-from som.logman import bot
+from som.logger import bot
 
 
 def find_dicoms(folder,extension=None):
@@ -51,7 +51,7 @@ def find_dicoms(folder,extension=None):
             dicoms.append(os.path.join(dirpath, filename))
         if len(dicoms) > 0:
             folders[dirpath] = dicoms
-    bot.logger.debug('Found %s directories with dicom.', len(folders))
+    bot.debug('Found %s directories with dicom.' %len(folders))
     return folders
 
 
@@ -82,7 +82,7 @@ def read_series(dicoms,return_nifti=True):
     ydim = params['ydim']   
     windom_center = params['window_center']
  
-    bot.logger.debug("First dicom found with dimension %s by %s, using as standard.", xdim,ydim)
+    bot.debug("First dicom found with dimension %s by %s, using as standard." %(xdim,ydim))
 
     # Let's get ordering of images based on InstanceNumber
     ordered = dict()
@@ -127,7 +127,7 @@ def dicom2nifti(folders,outdir=None,extension=None):
                 outfile = "%s/%s.nii.gz" %(outdir,os.path.basename(base))
             else:
                 outfile = "%s/%s.nii.gz" %(base,os.path.basename(base))
-            bot.logger.info("Saving %s", outfile)
+            bot.info("Saving %s" %outfile)
             nibabel.save(nii,outfile)
             outfiles.append(outfile)
     return outfiles

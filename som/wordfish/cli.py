@@ -65,9 +65,9 @@ def run(args):
     print("--- starting som-validator ---")
 
     if args.quiet == True:
-        os.environ['MESSAGELEVEL'] = "CRITICAL"
+        os.environ['SOM_MESSAGELEVEL'] = "CRITICAL"
 
-    from som.logman import bot
+    from som.logger import bot
     from som.utils import detect_compressed
     from som.wordfish.base import run_validation
 

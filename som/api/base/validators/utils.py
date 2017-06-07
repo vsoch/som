@@ -25,7 +25,7 @@ SOFTWARE.
 '''
 
 
-from som.logman import bot
+from som.logger import bot
 import os
 import sys
 
@@ -36,7 +36,7 @@ def validate_fields(acceptable_fields,actual_fields):
     checking = [x for x in actual_fields if x not in acceptable_fields]
     if len(checking) == 0:
         return True
-    bot.logger.error("Fields not allowed: ",", ".join(checking))
+    bot.error("Fields not allowed: %s" %", ".join(checking))
     return False
 
 
@@ -52,8 +52,8 @@ def get_universal_source(source,comparator):
     universal_source = None
     if isinstance(source,list):
         if len(source) != len(comparator):
-            bot.logger.error("Mismatch in length of source (%s) and comparator (%s). Exiting",
-                                                               len(source),len(comparator))
+            bot.error("Mismatch in length of source (%s) and comparator (%s). Exiting"
+                                                            %(len(source),len(comparator)))
             sys.exit(1)
     else:
         # Otherwise, we assume a common source

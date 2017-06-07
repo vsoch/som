@@ -34,7 +34,7 @@ import requests
 import shutil
 import simplejson
 import som.__init__ as hello
-from som.logman import bot
+from som.logger import bot
 import sys
 
 import subprocess
@@ -57,6 +57,23 @@ def get_installdir():
     '''get_installdir returns the installation directory of the application
     '''
     return os.path.abspath(os.path.dirname(hello.__file__))
+
+
+def get_dataset(dataset=None):
+    '''get_dataset will return some data provided by the application,
+    based on a user-provided label. In the future, we can add https endpoints
+    to retrieve online datasets.
+    '''
+    here = get_installdir()
+    valid_datasets = {'developers_uid':'%s/api/base/tests/data/developers_uid.json' %here}
+    if dataset is not None:
+
+        # In case the user gave an extension
+        dataset = os.path.splitext(dataset)[0].lower()
+        if dataset in valid_datasets:
+            return valid_datasets[dataset]
+
+    bot.info("Valid datasets include: %s" %(','.join(list(valid_datasets.keys()))))
 
 
 def run_command(cmd,error_message=None,sudopw=None,suppress=False):
@@ -83,9 +100,9 @@ def run_command(cmd,error_message=None,sudopw=None,suppress=False):
             output, err = process.communicate()
         except OSError as error: 
             if error.errno == os.errno.ENOENT:
-                bot.logger.error(error_message)
+                bot.error(error_message)
             else:
-                bot.logger.error(err)
+                bot.error(err)
             return None
     
     return output
@@ -152,13 +169,13 @@ def detect_compressed(folder,compressed_types=None):
     compressed = []
     if compressed_types == None:
         compressed_types = ["*.tar.gz",'*zip']
-    bot.logger.debug("Searching for %s",", ".join(compressed_types))
+    bot.debug("Searching for %s" %", ".join(compressed_types))
 
     for filey in os.listdir(folder):
         for compressed_type in compressed_types:
             if fnmatch.fnmatch(filey, compressed_type):
                 compressed.append("%s/%s" %(folder,filey))
-    bot.logger.debug("Found %s compressed files in %s",len(compressed),folder)
+    bot.debug("Found %s compressed files in %s" %len(compressed),folder)
     return compressed
 
 

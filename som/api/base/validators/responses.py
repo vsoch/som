@@ -26,7 +26,7 @@ SOFTWARE.
 
 '''
 
-from som.logman import bot
+from som.logger import bot
 import os
 import sys
 
@@ -42,13 +42,13 @@ from validator import (
     validate
 )
 
-from som.api.standards import (
+from som.api.base.standards import (
     identifier_sources,
     item_sources,
     timestamp
 )
 
-from som.api.validators.utils import validate_fields
+from .utils import validate_fields
 
 
 def receive_identifiers(response):
@@ -89,7 +89,7 @@ def receive_identifiers(response):
                        'custom_fields']
 
     if not isinstance(response,list):
-        bot.logger.error("Response must be a list")
+        bot.error("Response must be a list")
         return False
 
     # These are the rules for each uidEntity
@@ -105,7 +105,7 @@ def receive_identifiers(response):
         # Validate required fields
         valid,message = validate(rules, item)
         if valid == False:
-            bot.logger.error(message)
+            bot.error(message)
             return valid
 
         # Validate fields returned in response
@@ -117,7 +117,7 @@ def receive_identifiers(response):
             if not receive_items(item['items']):
                 return False
             
-    bot.logger.debug("Identifiers data structure valid: %s",valid)
+    bot.debug("Identifiers data structure valid: %s" %valid)
     return valid
 
 
@@ -144,7 +144,7 @@ def receive_items(items):
                        'custom_fields']
 
     if not isinstance(items,list):
-        bot.logger.error("Items must be a list")
+        bot.error("Items must be a list")
         return False
 
     # These are the rules for each uidEntity
@@ -160,7 +160,7 @@ def receive_items(items):
         # Validate required fields
         valid,message = validate(rules, item)
         if valid == False:
-            bot.logger.error(message)
+            bot.error(message)
             return valid
 
         # Validate fields returned in response

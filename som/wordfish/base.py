@@ -5,7 +5,7 @@ wordfish.base.py: base module for working with wordfish standard
 
 '''
 
-from som.logman import bot
+from som.logger import bot
 
 from som.utils import (
     get_installdir, 
@@ -49,7 +49,7 @@ def run_validation(inputs,test_dir=None,clean_up=True,fail_exit=True):
     if not isinstance(inputs,list):
         inputs = [inputs]
 
-    bot.logger.debug("Found %s inputs to test using som-validator.", len(inputs))
+    bot.debug("Found %s inputs to test using som-validator." %len(inputs))
     
     # Where are we testing?
     if test_dir == None:
@@ -59,7 +59,7 @@ def run_validation(inputs,test_dir=None,clean_up=True,fail_exit=True):
     message = "Testing folder will be %s"
     if clean_up == True:
         message = "%s, and will be removed upon completion." %(message)
-    bot.logger.debug(message, test_dir)
+    bot.debug(message %test_dir)
 
     for testing in inputs:
         if os.path.isdir(testing):
@@ -72,9 +72,9 @@ def run_validation(inputs,test_dir=None,clean_up=True,fail_exit=True):
         # Always exit or return False if input is not valid
         if valid == False:
             if fail_exit == True:
-                bot.logger.error("Input %s is not valid, please fix and retest. Exiting.", testing)
+                bot.error("Input %s is not valid, please fix and retest. Exiting." %testing)
                 sys.exit(1)
-            bot.logger.error("Input %s is not valid, please fix and retest. Returning False.", testing)
+            bot.error("Input %s is not valid, please fix and retest. Returning False." %testing)
             return valid
 
     return valid
@@ -96,7 +96,7 @@ def get_structures(inputs,build_dir=None,clean_up=True,fail_exit=True):
     if not isinstance(inputs,list):
         inputs = [inputs]
 
-    bot.logger.debug("Found %s inputs to structure using som-validator.", len(inputs))
+    bot.debug("Found %s inputs to structure using som-validator." %len(inputs))
     
     # Where are we testing?
     if build_dir == None:
@@ -109,7 +109,7 @@ def get_structures(inputs,build_dir=None,clean_up=True,fail_exit=True):
     message = "Building folder will be %s"
     if clean_up == True:
         message = "%s, and will be removed upon completion." %(message)
-    bot.logger.debug(message, build_dir)
+    bot.debug(message %build_dir)
 
     for testing in inputs:
         valid = validate_dataset(dataset=testing,
@@ -119,9 +119,9 @@ def get_structures(inputs,build_dir=None,clean_up=True,fail_exit=True):
         # We only structure input that is valid
         if valid == False:
             if fail_exit == True:
-                bot.logger.error("Input %s is not valid, please fix. Exiting.", testing)
+                bot.error("Input %s is not valid, please fix. Exiting." %testing)
                 sys.exit(1)
-            bot.logger.error("Input %s is not valid, skipping.")
+            bot.error("Input %s is not valid, skipping.")
         else:
             structures[dataset] = structure_dataset(dataset=testing,
                                                     testing_base=build_dir,

@@ -6,12 +6,19 @@
 import os
 import sys
 
-from som.api.base.study.radiology import Client
-from som.api.validators.requests import validate_identifiers
-from som.utils import read_json
+from som.api.identifiers import Client
+from som.api.base.validators import validate_identifiers
+from som.utils import (
+    read_json,
+    get_dataset
+)
 
 client = Client()
-identifiers = read_json('../../som/api/tests/data/developers_uid.json')
+
+identifiers = read_json(get_dataset('developers_uid'))
+
+
+identifiers = read_json('../../som/api/base/tests/data/developers_uid.json')
 validate_identifiers(identifiers)
 
 # Note that you must be on Stanford VPN

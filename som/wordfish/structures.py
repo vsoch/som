@@ -6,7 +6,7 @@ structures.py: generate json (dict) structures to represent folders, etc.
 
 '''
 
-from som.logman import bot
+from som.logger import bot
 import tempfile
 import shutil
 import os
@@ -67,15 +67,15 @@ def structure_metadata(full_path,metadata_type=None):
     metadata = "%s/%s.json" %(parent_dir,base_name)
 
     if os.path.exists(metadata):
-        bot.logger.debug('found %s metadata: %s', metadata_type, base_name)
+        bot.debug('found %s metadata: %s' %(metadata_type, base_name))
         try:
             return read_json(metadata)
         except:
-            bot.logger.error('%s %s has invalid json metadata %s', metadata_type, base_name, metadata)
+            bot.error('%s %s has invalid json metadata %s' %(metadata_type, base_name, metadata))
             return False
  
     else:
-        bot.logger.info('%s %s does not have metadata file %s.json', metadata_type, base_name, base_name)
+        bot.info('%s %s does not have metadata file %s.json' %(metadata_type, base_name, base_name))
         return None
 
 
@@ -99,12 +99,12 @@ def structure_compressed(compressed_file,testing_base=None,clean_up=False):
         test_folder = unzip_dir(compressed_file,dest_dir)
 
     else:
-        bot.logger.error("Invalid compressed file type: %s, exiting.", compressed_file)
+        bot.error("Invalid compressed file type: %s, exiting." %compressed_file)
         sys.exit(1)
 
     # Each object in the folder (a collection)
     collection_paths = os.listdir(test_folder)
-    bot.logger.info("collections found: %s", len(collection_paths))
+    bot.info("collections found: %s" %len(collection_paths))
 
     # We will return a list of structures, only of valid
     collections = []
@@ -164,9 +164,9 @@ def structure_folder(folder,relative_path=False):
     # validate images, text, and metadata of the entities
     entities = structure_entities(full_path)
     if entities == None:
-        bot.logger.info("no entities found for collection %s." %(folder))              
+        bot.info("no entities found for collection %s." %(folder))              
     else:
-        bot.logger.info("adding %s valid entities to collection %s." %(len(entities),folder))              
+        bot.info("adding %s valid entities to collection %s." %(len(entities),folder))              
         collection['entities'] = entities
 
     return {"collection" : collection}
@@ -189,7 +189,7 @@ def structure_entities(full_path):
     '''
     entities = []
     contenders = os.listdir(full_path)
-    bot.logger.info("Found %s entity folders in collection.", len(contenders))
+    bot.info("Found %s entity folders in collection." %len(contenders))
     if len(contenders) == 0:
         return None
      
@@ -207,7 +207,7 @@ def structure_entities(full_path):
 
         # If images and text are empty for a collection, invalid
         if entity_texts == None and entity_images == None:
-            bot.logger.error("found invalid entity: does not have images or text.")
+            bot.error("found invalid entity: does not have images or text.")
             continue
     
         # if either text or images are not valid, entities considered invalid
@@ -264,7 +264,7 @@ def structure_template(entity_path, template_type, acceptable_types):
     template_path = "%s/%s" %(entity_path,template_type)
     entity_name = os.path.basename(entity_path)
     if not os.path.exists(template_path):
-        bot.logger.info("entity %s does not have %s.", entity_name, template_type)
+        bot.info("entity %s does not have %s." %(entity_name, template_type))
         return None
     
     # Let's keep track of each file
@@ -291,9 +291,9 @@ def structure_template(entity_path, template_type, acceptable_types):
 
     # Warn the user about missing valid files, not logical given folder
     if len(valids) == 0:
-        bot.logger.warning("entity %s does not have %s.", entity_name, template_type)
+        bot.warning("entity %s does not have %s." %(entity_name, template_type))
         return None
     else:
-        bot.logger.info("entity %s has %s %s", entity_name, len(valids), template_type)
+        bot.info("entity %s has %s %s" %(entity_name, len(valids), template_type))
 
     return valids

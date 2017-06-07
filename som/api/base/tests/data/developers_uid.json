@@ -1,0 +1,45 @@
+{ "identifiers": [
+{   "id": "1010101-2",
+      "id_source": "StanfordMRN",
+      "id_timestamp": "2010-01-30T17:15:23.123Z",
+      "custom_fields": [
+        {  "key": "FirstName", "value": "Sam" },
+        {  "key": "LastName", "value": "Smith" }
+      ]
+},
+{   "id": "10234567",
+      "id_source": "StanfordMRN",
+      "id_timestamp": "2010-01-30T17:15:23.123Z",
+      "custom_fields": [
+        {  "key": "FirstName", "value": "Joan" },
+        {  "key": "LastName", "value": "Baez" }
+      ]
+},
+  {   "id": "98765432",
+      "id_source": "StanfordMRN",
+      "id_timestamp": "2010-01-30T17:15:23.123Z",
+      "custom_fields": [
+        {  "key": "FirstName", "value": "James" },
+        {  "key": "LastName", "value": "Dean" }
+      ],
+      "items": [
+       {
+        "id": "A654321",
+        "id_source": "GE PACS Accession Number",
+        "id_timestamp": "2016-01-30T17:15:23.123Z",
+        "custom_fields": [
+          { "key": "studySiteID",   "value": "12345"}
+         ]
+       },
+       {
+        "id": "B654321",
+        "id_source": "GE PACS Accession Number",
+        "id_timestamp": "2016-01-30T17:15:23.123Z",
+        "custom_fields": [
+          { "key": "studySiteID",   "value": "22345"}
+         ]
+       }
+      ]
+   }
+  ]
+}

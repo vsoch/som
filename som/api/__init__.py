@@ -4,7 +4,7 @@ som.api: base template for making a connection to an API
 
 '''
 
-from som.logman import bot
+from som.logger import bot
 import sys
 import re
 import os
@@ -44,14 +44,14 @@ class ApiConnection(object):
                 headers[key] = value
 
         header_names = ",".join(list(headers.keys()))
-        bot.logger.debug("Headers found: %s",header_names)
+        bot.debug("Headers found: %s" %header_names)
         self.headers = headers
 
 
     def put(self,url,data=None,return_json=True):
         '''put request
         '''
-        bot.logger.debug("PUT %s",url)
+        bot.debug("PUT %s" %url)
         return self.call(url,
                          func=requests.put,
                          data=data,
@@ -62,7 +62,7 @@ class ApiConnection(object):
     def post(self,url,data=None,return_json=True):
         '''post will use requests to get a particular url
         '''
-        bot.logger.debug("POST %s",url)
+        bot.debug("POST %s" %url)
         return self.call(url,
                         func=requests.post,
                         data=data,
@@ -73,7 +73,7 @@ class ApiConnection(object):
     def get(self,url,headers=None,token=None,data=None, return_json=True):
         '''get will use requests to get a particular url
         '''
-        bot.logger.debug("GET %s",url)
+        bot.debug("GET %s" %url)
         return self.call(url,
                         func=requests.get,
                         data=data,

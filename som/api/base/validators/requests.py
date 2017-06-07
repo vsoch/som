@@ -25,14 +25,14 @@ SOFTWARE.
 
 '''
 
-from som.logman import bot
-from som.api.standards import (
+from som.logger import bot
+from som.api.base.standards import (
     identifier_sources,
     item_sources,
     timestamp
 )
 
-from som.api.validators.utils import validate_fields
+from .utils import validate_fields
 
 import os
 import sys
@@ -93,30 +93,30 @@ def validate_identifiers(identifiers,id_sources=None,item_sources=None,verbose=T
     }
 
     if not isinstance(identifiers,dict):
-        bot.logger.error("Identifiers data structure must be dictionary.")
+        bot.error("Identifiers data structure must be dictionary.")
         return False
 
     if "identifiers" not in identifiers:
-        bot.logger.error("identifiers key not found in data structure.")
+        bot.error("identifiers key not found in data structure.")
 
     items = identifiers['identifiers']
 
     if not isinstance(items,list):
-        bot.logger.error("Items in identifiers data structure must be list.")
+        bot.error("Items in identifiers data structure must be list.")
         return False  
 
     for item in items:
 
         valid,message = validate(rules, item)
         if valid == False:
-            bot.logger.error(message)
+            bot.error(message)
             return valid
 
         if "items" in item:
             validate_items(item['items'],sources=item_sources)
 
 
-    bot.logger.debug("Identifiers data structure valid: %s",valid)
+    bot.debug("Identifiers data structure valid: %s" %valid)
     return valid
 
 
@@ -184,9 +184,9 @@ def validate_item(item,sources=None,verbose=True):
 
     valid,message = validate(rules, item)
     if verbose == True:
-        bot.logger.debug("identifier %s data structure valid: %s",item['id'],valid)
+        bot.debug("identifier %s data structure valid: %s" %(item['id'],valid))
     if valid == False:
-        bot.logger.error(message)
+        bot.error(message)
         if verbose == True:
             print(item)
     return valid
