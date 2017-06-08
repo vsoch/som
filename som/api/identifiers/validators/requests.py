@@ -115,7 +115,6 @@ def validate_identifiers(identifiers,id_sources=None,item_sources=None,verbose=T
         if "items" in item:
             validate_items(item['items'],sources=item_sources)
 
-
     bot.debug("Identifiers data structure valid: %s" %valid)
     return valid
 

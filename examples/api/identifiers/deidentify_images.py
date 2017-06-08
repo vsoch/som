@@ -6,8 +6,11 @@
 import os
 import sys
 
-from som.api.identifiers import Client
-from som.api.base.validators import validate_identifiers
+from som.api.identifiers import (
+    Client,
+    validators
+)
+
 from som.utils import (
     read_json,
     get_dataset
@@ -16,7 +19,7 @@ from som.utils import (
 client = Client()
 
 identifiers = read_json(get_dataset('developers_uid'))
-validate_identifiers(identifiers)
+validators.validate_identifiers(identifiers)
 # In [8]: validate_identifiers(identifiers)
 # DEBUG identifier A654321 data structure valid: True
 # DEBUG identifier B654321 data structure valid: True

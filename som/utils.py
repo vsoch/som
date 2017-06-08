@@ -65,7 +65,7 @@ def get_dataset(dataset=None):
     to retrieve online datasets.
     '''
     here = get_installdir()
-    valid_datasets = {'developers_uid':'%s/api/base/tests/data/developers_uid.json' %here}
+    valid_datasets = {'developers_uid':'%s/api/identifiers/data/developers_uid.json' %here}
     if dataset is not None:
 
         # In case the user gave an extension

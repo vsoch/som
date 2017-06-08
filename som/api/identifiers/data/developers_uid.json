@@ -1,0 +1,30 @@
+{
+  "identifiers": [
+    [
+      {
+        "id": 12345678,
+        "id_source": "Stanford MRN",
+        "id_timestamp": {},
+        "custom_fields": [
+          {
+            "key": "studySiteID",
+            "value": 78329
+          }
+        ],
+        "items": [
+          {
+            "id": "A654321",
+            "id_source": "GE PACS",
+            "id_timestamp": {},
+            "custom_fields": [
+              {
+                "key": "studySiteID",
+                "value": 78329
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  ]
+}
