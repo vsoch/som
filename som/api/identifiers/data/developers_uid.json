@@ -1,30 +1,32 @@
-{
-  "identifiers": [
-    [
-      {
-        "id": 12345678,
-        "id_source": "Stanford MRN",
-        "id_timestamp": {},
-        "custom_fields": [
-          {
-            "key": "studySiteID",
-            "value": 78329
-          }
-        ],
-        "items": [
-          {
-            "id": "A654321",
-            "id_source": "GE PACS",
-            "id_timestamp": {},
-            "custom_fields": [
-              {
-                "key": "studySiteID",
-                "value": 78329
-              }
-            ]
-          }
-        ]
+{  
+   "identifiers":[  
+      {  
+         "id":"14953772",
+         "id_source":"Stanford MRN",
+         "id_timestamp":"1961-07-27T00:00:00Z",
+         "custom_fields":[  
+            {  
+               "key":"firstName",
+               "value":"MICKEY"
+            },
+            {  
+               "key":"lastName",
+               "value":"MOUSE"
+            }
+         ],
+         "items":[  
+            {  
+               "id":"MCH",
+               "id_source":"Lab Result",
+               "id_timestamp":"2010-02-04T11:50:00Z",
+               "custom_fields":[  
+                  {  
+                     "key":"ordValue",
+                     "value":"33.1"
+                  }
+               ]
+            }
+         ],
       }
-    ]
-  ]
+   ]
 }

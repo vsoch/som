@@ -10,6 +10,9 @@ api_version = "v1"
 
 If you need specific details about the endpoints or implementations, please see our [Swagger Specification](https://app.swaggerhub.com/api/susanweber/UID/1.0.0).
 
+## Dicom
+The folder called [dicom](dicom) is an example plugin/template that provides a set of rules for how the API should read, and deal with identifiers in a standard dicom image. The functions for doing so are in the file called [tasks.py](dicom/tasks.py), and the rules provided in the associated json data structure [config.json](dicom/config.json). This means that, as a user, you could use the functions but provide a different config.json with your own rules. As a developer, you can copy this folder for a different data type, and write the corresponding functions for your datatype. Please [post an issue](https://www.github.com/vsoch/som/issues) if you have questionsor need help with this task.
+
 
 ## What would you use this client for?
 - If you are looking to give a set of identifiers (MRN) and get de-identified stuffs back, then there are two ways to go about this. 
