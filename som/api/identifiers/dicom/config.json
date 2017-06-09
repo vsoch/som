@@ -93,13 +93,13 @@
             "name":"PatientIdentityRemoved",
             "value":"Yes"
          }
-      ]
-   },
-   "actions": {
+      ],
+   
+      "actions": {
 
-     "*":"blank",
-     "PatientID":"coded",
-     "SOPInstanceUID":"coded"
-
-   }
+         "*":"blank",
+         "PatientID":"coded",
+         "SOPInstanceUID":"coded"
+       }
+    }
 }
