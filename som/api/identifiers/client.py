@@ -67,7 +67,7 @@ class Client(SomApiConnection):
         '''deidentify will take a list of identifiers, and return the deidentified.
         :param save_records: if True, will use mrn endpoint and and save data.
                              if False, will use uid endpoint and not save data.
-        :param identifiers: a list of identifiers
+        :param ids: a list of identifiers
         '''    
 
         # Saving records (uid) or not (mrn) changes the endpoint

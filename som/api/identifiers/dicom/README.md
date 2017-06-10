@@ -167,10 +167,10 @@ If you are writing a new data type module (eg, dicom), your function called `get
 
 ```
 from som.utils import read_json
-config = read_json('config.json')
+config = read_json('config.json')['request']
 ```
 
-and then we have the following specification for the id:
+Note that we are subsetting to the `request` section where the fields entity and item are. Then we have the following specification for the id:
 
 
 ```
@@ -209,7 +209,125 @@ custom_fields
  {'key': 'ReferringPhysicianName', 'value': '^^^^'}]
 ```
 
-We are returned a list of dict, each with key/value pairs.
+We are returned a list of dict, each with key/value pairs. We can run this in full, with debug output, for one dicom image, and see first the response in the terminal interface:
+
+```
+DEBUG entity id: 12SC1
+DEBUG entity source_id: PatientID
+DEBUG item id: 1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457
+DEBUG entity custom_fields: [{'key': 'PatientID', 'value': '12SC1'}, {'key': 'PatientName', 'value': 'CompressedSamples^SC1'}, {'key': 'ReferringPhysicianName', 'value': '^^^^'}]
+DEBUG item source: SOPInstanceUID
+DEBUG item custom_fields: [{'key': 'ContentDate', 'value': '19970706'}, {'key': 'ImageComments', 'value': 'Uncompressed'}, {'key': 'InstanceCreationDate', 'value': '20040826'}, {'key': 'InstanceCreationTime', 'value': '185744'}, {'key': 'InstanceCreatorUID', 'value': '1.3.6.1.4.1.5962.3'}, {'key': 'SeriesDate', 'value': '19950705'}, {'key': 'SeriesInstanceUID', 'value': '1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457'}, {'key': 'SeriesNumber', 'value': '1'}, {'key': 'SOPClassUID', 'value': '1.2.840.10008.5.1.4.1.1.7'}, {'key': 'SOPInstanceUID', 'value': '1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457'}, {'key': 'StudyDate', 'value': '20040826'}, {'key': 'StudyID', 'value': '12SC1'}, {'key': 'StudyInstanceUID', 'value': '1.3.6.1.4.1.5962.1.2.12.20040826185059.5457'}, {'key': 'StudyTime', 'value': '185059'}]
+```
+
+and the final data structure produced (note that this example is for one entity that one one item, or dicom image):
+```
+{
+   "12SC1":{
+      "identifiers":{
+         "custom_fields":[
+            {
+               "key":"PatientID",
+               "value":"12SC1"
+            },
+            {
+               "key":"PatientBirthDate",
+               "value":""
+            },
+            {
+               "key":"PatientName",
+               "value":"CompressedSamples^SC1"
+            },
+            {
+               "key":"ReferringPhysicianName",
+               "value":"^^^^"
+            }
+         ],
+         "id":"12SC1"
+      },
+      "items":[
+         {
+            "custom_fields":[
+               {
+                  "key":"ContentDate",
+                  "value":"19970706"
+               },
+               {
+                  "key":"ImageComments",
+                  "value":"Uncompressed"
+               },
+               {
+                  "key":"InstanceCreationDate",
+                  "value":"20040826"
+               },
+               {
+                  "key":"InstanceCreationTime",
+                  "value":"185744"
+               },
+               {
+                  "key":"InstanceCreatorUID",
+                  "value":"1.3.6.1.4.1.5962.3"
+               },
+               {
+                  "key":"SeriesDate",
+                  "value":"19950705"
+               },
+               {
+                  "key":"SeriesInstanceUID",
+                  "value":"1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457"
+               },
+               {
+                  "key":"SeriesNumber",
+                  "value":"1"
+               },
+               {
+                  "key":"SOPClassUID",
+                  "value":"1.2.840.10008.5.1.4.1.1.7"
+               },
+               {
+                  "key":"SOPInstanceUID",
+                  "value":"1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457"
+               },
+               {
+                  "key":"StudyDate",
+                  "value":"20040826"
+               },
+               {
+                  "key":"StudyID",
+                  "value":"12SC1"
+               },
+               {
+                  "key":"StudyInstanceUID",
+                  "value":"1.3.6.1.4.1.5962.1.2.12.20040826185059.5457"
+               },
+               {
+                  "key":"StudyTime",
+                  "value":"185059"
+               }
+            ],
+            "id_source":"SOPInstanceUID"
+         }
+      ]
+   }
+}
+```
+
+Note that the response is indexed by the `entity_id`, and so if different entities were found in the list of dicom files, the result would contain multiple calls to the API. For example, if we import the client to make the request, it would go something like:
+
+```
+from som.api.identifiers.dicom import get_identifiers
+from som.api.identifiers import Client
+
+som_client = Client()
+
+ids = get_identifiers(dicom_files)
+
+for entity_id,data in ids.items():
+    response = client.deidentify(ids=data)
+```
+
+In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. After this, the application would handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module (more below). Next, let's talk about how we know how to deal with the response to properly de-identify the data.
+
 
 #### Responses
 A Response is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`:

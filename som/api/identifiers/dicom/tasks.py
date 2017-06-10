@@ -89,8 +89,7 @@ def get_identifier(tag,dicom,template):
         # Extracted from data
         if action == "data":
             if isinstance(value,list):
-                result = [{"key":x,"value":dicom.get(x)} for x in value if 
-                          dicom.get(x,None) is not None]
+                result = [{"key":x,"value":dicom.get(x)} for x in value if dicom.get(x) not in [None,""]]
             else:
                 result = dicom.get(value)
 
@@ -109,6 +108,9 @@ def get_identifier(tag,dicom,template):
                           os.environ.get(x) is not None]
             else:
                 result = os.environ.get(value)
+
+    if result == "":
+        result = None
     return result
 
 
@@ -126,6 +128,9 @@ def get_identifiers(dicom_files,force=True,config=None):
     if not os.path.exists(config):
         bot.error("Cannot find config %s, exiting" %(config))
 
+    # get_identifiers needs to know about request
+    config = read_json(config)['request'] 
+
     if not isinstance(dicom_files,list):
         dicom_files = [dicom_files]
 
@@ -139,26 +144,35 @@ def get_identifiers(dicom_files,force=True,config=None):
         entity_id = get_identifier(tag='id',
                                    dicom=dicom,
                                    template=config['entity'])
+        bot.debug('entity id: %s' %(entity_id))
 
         source_id = get_identifier(tag='id_source',
                                    dicom=dicom,
                                    template=config['entity'])
+        bot.debug('entity source_id: %s' %(source_id))
 
         item_id = get_identifier('id',
                                  dicom=dicom,
                                  template=config['item'])
+        bot.debug('item id: %s' %(item_id))
 
-        entity_fields = get_identifer('custom_fields',
+
+        entity_fields = get_identifier('custom_fields',
                                       dicom=dicom,
                                       template=config['entity'])
+        bot.debug('entity custom_fields: %s' %(entity_fields))
+
 
         item_source = get_identifier('id_source',
                                      dicom=dicom,
                                      template=config['item'])
+        bot.debug('item source: %s' %(item_source))
+
 
         item_fields = get_identifer('custom_fields',
                                      dicom=dicom,
                                      template=config['item'])
+        bot.debug('item custom_fields: %s' %(item_fields))
 
         # Skip images without patient id or item id
         if entity_id is not None and item_id is not None:
