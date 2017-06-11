@@ -17,14 +17,15 @@ from som.utils import (
 )
 
 client = Client()
+# Client: <study:test>
 
 identifiers = read_json(get_dataset('developers_uid'))
 validators.validate_identifiers(identifiers)
-# In [8]: validate_identifiers(identifiers)
-# DEBUG identifier A654321 data structure valid: True
-# DEBUG identifier B654321 data structure valid: True
+# DEBUG Headers found: Content-Type
+# DEBUG Headers found: Content-Type,Authorization
+# DEBUG identifier MCH data structure valid: True
 # DEBUG Identifiers data structure valid: True
-# Out[8]: True
+# Out[2]: True
 
 # Note that you must be on Stanford VPN
 # deidentify(identifiers,test=False,save_records=False)

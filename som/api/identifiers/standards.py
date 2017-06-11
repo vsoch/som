@@ -22,6 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+# Sources (lists) of valid identifiers
+identifier_sources = ['stanford','Stanford MRN', 'StanfordMRN']
+item_sources = ['pacs','Stanford PACS', 'GE PACS', 'GE PACS Accession Number', 'Lab Result']
+
+# Regular expressions # '1961-07-27T00:00:00Z'
+timestamp = '\d{4}-\d{2}-[A-Za-z0-9]{5}:\d{2}:\d{2}Z$'
+
 # Swagger api
 spec = "https://app.swaggerhub.com/apiproxy/schema/file/susanweber/UID/1.0.0/swagger.json"
 

@@ -26,7 +26,7 @@ SOFTWARE.
 '''
 
 from som.logger import bot
-from som.api.base.standards import (
+from som.api.identifiers.standards import (
     identifier_sources,
     item_sources,
     timestamp
