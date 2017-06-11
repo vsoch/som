@@ -29,11 +29,25 @@ from som.utils import (
     read_json
 )
 
+from som.api.identifiers.standards import (
+    valid_actions
+)
+
+from som.api.identifiers.utils import (
+    create_lookup
+)
+
+
 from pydicom import read_file
 from pydicom.errors import InvalidDicomError
 import dateutil.parser
+import tempfile
 
 here = os.path.dirname(os.path.abspath(__file__))
+
+######################################################################
+# HELPERS
+######################################################################
 
 def get_func(function_name):
     '''get_func will return a function that is defined from a string.
@@ -43,6 +57,7 @@ def get_func(function_name):
     if function_name in env:
         return env[function_name]
     return None
+
 
 ######################################################################
 # CONFIG DEFINED FUNCS
@@ -116,7 +131,9 @@ def get_identifier(tag,dicom,template):
 
 def get_identifiers(dicom_files,force=True,config=None):
     '''extract and validate identifiers from a dicom image that conform
-    to the expected request to the identifiers api.
+    to the expected request to the identifiers api. This function cannot be
+    sure if more than one source_id is present in the data, so it returns
+    a lookup dictionary by patient id.
     :param dicom_files: the dicom file(s) to extract from
     :param force: force reading the file (default True)
     :param config: if None, uses default in provided module folder
@@ -196,15 +213,17 @@ def get_identifiers(dicom_files,force=True,config=None):
 
 
 
-def replace_identifiers(response,dicom_files,force=True,config=None):
+def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=True):
     '''replace identifiers will replace dicom_files with a response
-    from the identifiers API
-    :param response: the response from the API
+    from the identifiers API. 
+    :param response: the response from the API, or a list of identifiers
     :param dicom_files: the dicom file(s) to extract from
     :param force: force reading the file (default True)
     :param config: if None, uses default in provided module folder
+    :param overwrite: if False, save updated files to temporary directory
     '''
-    ## FUNCTION NOT FINISHED YET
+    if overwrite is False:
+        save_base = tempfile.mkdtemp()
 
     if config is None:
         config = "%s/config.json" %(here)
@@ -212,16 +231,64 @@ def replace_identifiers(response,dicom_files,force=True,config=None):
     if not os.path.exists(config):
         bot.error("Cannot find config %s, exiting" %(config))
 
+    config = read_json(config)
+
     if not isinstance(dicom_files,list):
         dicom_files = [dicom_files]
 
-    ##TODO: write when I have a working response.
+    # We should have a list of responses
+    lookup = create_lookup(response)
 
-    ## Actions for each come from config
+    ## Actions/Additions for each come from config
     actions = config['response']['actions']
-
-    # Add fields from 
     additions = config['response']['additions']
+
+    # Does the config want additions?
+    has_additions = False
+    if len(additions) > 0:
+        has_additions = True
+        for addition in additions:
+            bot.debug("%s will be added as %s to all datasets." %(addition['name'],
+                                                                  addition['value']))
+
+    default_action = "blank"
+    if "*" in actions:
+        if actions['*'].lower() in valid_actions:
+            default_action = actions['*'].lower()
+        else:
+            bot.warning("%s is not a valid action. Using default of blank for headers not specified in config",
+                        %(actions['*'].lower()))
+
+    bot.debug("Default action for header de-id set to %s" %(default_action))
+    
+    # Parse through dicom files, update headers, and save
+    updated_files = []
+
+    for dicom_file in dicom_files:
+
+        dicom = read_file(dicom_file,force=True)
+
+        # Read in / calculate preferred values
+        entity_id = get_identifier(tag='id',
+                                   dicom=dicom,
+                                   template=config['request']['entity'])
+
+
+        # Is the entity_id in the data structure given to de-identify?
+        if entity_id in lookup:
+            result = lookup[entity_id]['results']
+            # STOPPED HERE - need to iterate through result, and replace for file
+            # need to add to config how to specify an old field (eg id) to have new (eg suid)
+
+        else:
+            bot.warning("%s not found in identifiers lookup. Skipping" %(entity_id))
+
+valid_actions = ['blank',    # use API response to code the item. If no response is provided, blank it.
+                 'coded',    # blank the response (meaning replace with an empty string)
+                 'original', # do not touch the original header value
+                 'removed']  # completely remove the field and value from the data/header
+
+
     default = actions['*']
 
     ##TODO: go through fields of data, if in actions, do action

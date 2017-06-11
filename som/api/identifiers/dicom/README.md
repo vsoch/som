@@ -19,7 +19,7 @@ for key,entry in DicomDictionary.items():
 
 Since there are so many, it's recommended to have a conservative default for replacements (under section [Response](#Response) below, so you don't need to code every single field into the [config.json](config.json). Speaking of, let's talk about that.
 
-### Config.json
+## Config.json
 The base of the json has two classes, and they correspond with the API actions of `request` and `response`. Here they are, completely empty:
 
 ```
@@ -29,7 +29,7 @@ The base of the json has two classes, and they correspond with the API actions o
 }
 ```
 
-#### Requests
+### Requests
 Requests require knowing how to generate a request to the API from a dicom dataset, or more specifically, how to get identifiers from the data. This means that we need to extract information about some entity and one or more items belonging to it, and this is why the fields under `requests` are `entity` and `item`. We can recall a traditional request made by the identifiers API:
 
 ```
@@ -126,7 +126,7 @@ Thus, for the `request` section of any [config.json](config.json), we will have 
 
 The job of the configuration file is to tell the software how to deal with each of those fields for each attribute. Thus, we will be adding a dictionary with fields `type` and `value` under each of the attributes (id, id_source, custom_fields) shown above.
 
-##### Defining Values
+#### Defining Values
 For any attribute with a type/value pair, type will correspond one of `default`, `data`,`env`, or `func`. A **default** means that the value provided should be used by default. In the example below, we will set `id_source` to be `PatientID` by default:
 
 ```
@@ -162,7 +162,7 @@ If we want to get a value set in the environment (retrieved via `os.environ`) th
 Finally, it could be that we want to have some custom action that is not supported with such simple terms. A good example is generating a UTC timestamp from the Dicom data - we in fact need to use two dicom headers, and add a lot of custom operations to them. For this, we have the `func` type, and we should expect the function to be found in `tasks.py`.
 
 
-### Obtaining Values
+#### Obtaining Identifiers
 If you are writing a new data type module (eg, dicom), your function called `get_identifiers` in the [tasks.py](tasks.py) should understand how to take the [config.json](config.json) and the data structure (eg, a dicom file) and return a valid request to the API. For this default for dicom, I made this approach modular, meaning that the main function `get_identifiers` uses a helper function, `get_identifier`, to parse a configuration file paired with a dicom image and return the correct data. For example, let' say that we read in the config file:
 
 ```
@@ -312,7 +312,8 @@ and the final data structure produced (note that this example is for one entity 
 }
 ```
 
-Note that the response is indexed by the `entity_id`, and so if different entities were found in the list of dicom files, the result would contain multiple calls to the API. For example, if we import the client to make the request, it would go something like:
+#### Giving Identifiers to API
+Our next task is to take the data structure above, amd give it to some API client that can send it to DASHER to return the de-identifiers to replace in the data. First note that the return of the `get_identifiers` function is indexed by the `entity_id`, and this is done in the case that different entities were found in the list of dicom files. For each of these found entities, we want to do one call to the API (note the API or client might support a list, so this is apt to change). For the current single call expectation, here is an example of how we might import the client to make the request:
 
 ```
 from som.api.identifiers.dicom import get_identifiers
@@ -320,13 +321,50 @@ from som.api.identifiers import Client
 
 som_client = Client()
 
+# Here is the function we walked through above, returns a dict
 ids = get_identifiers(dicom_files)
 
+deids = []
 for entity_id,data in ids.items():
     response = client.deidentify(ids=data)
+    deids.append(response)
 ```
 
-In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. After this, the application would handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module (more below). Next, let's talk about how we know how to deal with the response to properly de-identify the data.
+In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. We save the response (one call per each entity_id to the api endpoint, and note this may change so that `deidentify` can handle the list, either within the function or in the API itself) to a list, and it is this list that we will then use to replace identifiers in the data with the function `replace_identifiers`, also provided in [tasks.py](tasks.py).
+
+#### Replacing Identifiers in Data
+We now have generated data structures to describe entities in dicom files, handed those data structures to an API client, and received a list of responses, each associated with one call to the API (one entity/source_id). After this, the application needs to handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module. The call would look like this:
+
+```
+from som.api.identifiers.dicom import replace_identifiers
+
+updated_files = replace_identifiers(dicom_files=dicom_files,
+                                    response=batch_ids.response)        
+```
+
+By default, the function overwrites the current files (since they are deleted later). But if you want to change this default behavior, you can ask it to write them instead to a temporary directory:
+
+```
+updated_files = replace_identifiers(dicom_files=dicom_files,
+                                    response=batch_ids.response)        
+                                    overwrite=False)
+```
+
+How we know how to deal with the response to properly de-identify the data. A few important points. The response from the function `get_identifiers` is going to return a dictionary, indexed by patient id (or source_id). The reason for this is because the function cannot be sure if a user will provide a list that has more than one source_id represented. The response will generally look like this:
+
+```
+{
+ '12SC1': {'identifiers': {...}},
+ '12SC2': {'identifiers': {...}}
+}
+```
+
+**Note** the function above may change, I would prefer to pass around lists of identifiers, and am just figuring out what the API can handle, versus the client and these functions. For now I'll write what is implemented.
+
+In the example above, a set of dicom files was provided that had two source ids, `12SC1` and `12SC2`. This is why when we do calls to the `deidentify` function, since we want to provide a datastructure with 
+
+
+`deidentify` will return
 
 
 #### Responses
@@ -368,4 +406,12 @@ The first `*` is a catch all for the action to take for any that we didn't speci
  - original: do not touch the original identifier.
  - removed: completely remove the field and value from the data/header
 
-In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
+Valid actions names are provided in [standards.py](standards.py). If the user has not specified a default with the `*` operator, then the default taken is the most conservative, blanked. If the user specifies an invalid action, `blanked` is also used. In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
+
+
+##### Additions
+If the config has specified additions, each call to `replace_identifiers` will add the set provided to all dicom_files given to the function call. For example, if I have a set of `dicom_files` for a (patient id) indexed list from `get_identifiers` I might do the following:
+
+```
+DEBUG PatientIdentityRemoved will be added as Yes to all datasets.
+```

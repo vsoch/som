@@ -37,6 +37,33 @@ import re
 import os
 
 
+def create_lookup(response,field=None,lookup_field=None):
+    '''create_identifier_lookup will take a response, which can be a single
+    dict with some field (eg, results or identifiers) or a list,
+    and return a dictionary (lookup) based
+    on the lookup_field (default is id)
+    '''
+    if field is None:
+        field = "results"
+
+    if lookup_field is None:
+        lookup_field = "id"
+
+    if not isinstance(response,list):
+        response = [response]
+
+    lookup = dict()
+    for entry in response:
+        if field not in entry:
+            bot.error("Cannot make lookup, %s is not a key in %s" %(field))
+            sys.exit(1)
+        key = entry[field][lookup_field]
+        if key in lookup:
+            bot.warning("%s already in lookup, will use last in list." %(key))
+        lookup[key] = entry
+    return lookup
+
+
 def create_identifier(entity_id,id_source,id_timestamp=None,items=None,
                       custom_fields=None,sources=None):
     '''create_identifier will return a json (dict) of required elements for an entity,
