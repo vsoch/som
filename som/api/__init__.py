@@ -6,6 +6,7 @@ som.api: base template for making a connection to an API
 
 from som.logger import bot
 import requests
+import json
 import sys
 import re
 import os
@@ -86,7 +87,8 @@ class ApiConnection(object):
         '''call is a template that will take a post, put, or get function
         and insert the right variables.
         '''
-        response = func(url,self.headers,json=data)
+        response = func(url,headers=self.headers,
+                            data=json.dumps(data))
 
         if response.status_code == 200 and return_json:
             return response.json()
