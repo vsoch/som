@@ -368,45 +368,63 @@ In the example above, a set of dicom files was provided that had two source ids,
 
 
 #### Responses
-A Response is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`:
+A Response is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`. `Actions` are provided from identifiers associated with an entity or item, and so they are represented again at these levels. Additions are not specific to the response, and don't need this association. The overall structure might look something like this:
 
 ```
-{
-  "response": {
- 
-               "actions":{}
-               "additions":{}
-
-    }
-
-}
+   "response":{
+      "additions":[
+         {
+            "name":"PatientIdentityRemoved",
+            "value":"Yes"
+         }
+      ],
+      "entity":{
+         "actions":[
+            {
+               "name":"PatientID",
+               "action":"coded",
+               "value":"suid"
+            }
+         ]
+      },
+      "item":{
+         "actions":[
+            {
+               "name":"SOPInstanceUid",
+               "action":"coded",
+               "value":"suid"
+            }
+         ]
+      }
 ```
 
-In the [tasks.py](tasks.py) file, the function called `replace_identifiers` should know how to take a valid response from the API, the dicom image it is matched to, and a [config.json](config.json) file, and perform this task.
+
+Basically, the function in [tasks.py](tasks.py) called `replace_identifiers` knows how to take a valid response from the API, the dicom image it is matched to, and use this data structure above to perform the task of deidentification. 
 
 ##### Actions
-Actions are a list of header values, and for each, how to deal with the header in the data. Each entry in actions includes a dictionary, each is a simple key (the field name) and value (the action). Let's look at an example.
+Each group of actions is associated with an item or entity, and we do this so that we can look up the right value in the response from the api. One action should specify 1) a header value, 2) how to deal with it, and 3) if a replacement is done, what the field is called in the response to replace. Let's look at an example.
 
 ```
 
-   "actions": {
+ "actions"  [
+              {
+                 "name":"SOPInstanceUid",
+                 "action":"coded",
+                 "value":"suid"
+               },
 
-     "*":"blank",
-     "PatientID":"coded",
-     "SOPInstanceUID":"coded"
-
-   }
-
+              ....
+            ]
 ```
 
-The first `*` is a catch all for the action to take for any that we didn't specify. In this case, we blank them, which is a good conservative approach to take. The valid options for `action` (the value) are:
+This says to take `SOPInstanceUid` (and this is in the item response), and code it with the value provided with the item with key `suid`. If this value is not provided, we fall back to the default of blanking it. The valid options for `action` are:
 
  - coded: use the response from the API to code the item. If no response is provided, blank it.
  - blanked: blank the response (meaning replace with an empty string)
  - original: do not touch the original identifier.
  - removed: completely remove the field and value from the data/header
 
-Valid actions names are provided in [standards.py](standards.py). If the user has not specified a default with the `*` operator, then the default taken is the most conservative, blanked. If the user specifies an invalid action, `blanked` is also used. In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
+Valid actions names are provided in [standards.py](standards.py). If the user has not specified a global default, then the default taken is the most conservative, blanked. If the user specifies an invalid action, `blanked` is also used. In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
 
 
 ##### Additions

@@ -59,6 +59,53 @@ def get_func(function_name):
     return None
 
 
+def perform_action(dicom,response,params):
+    '''perform action takes  
+    :param dicom: a loaded dicom file (pydicom read_file)
+    and a dictionary of params.
+    :param response: the api response, with "id", "id_source" "items"
+    at the top level
+    :param params:
+        "name" (eg, PatientID) the header field to process
+        "action" (eg, coded) what to do with the field
+        "value": if needed, the field from the response to replace with
+    '''
+    if default_action is None:
+        default_action = "blanked"
+
+    header = entity_action.get('name')   # e.g: PatientID
+    action = entity_action.get('action') # "coded"
+    value = entity_action.get('value')   # "suid"
+    done = False
+
+    if header in dicom:
+
+        # Blank the value
+        if action == "blank":
+            dicom.update({header:""})
+            done = True
+ 
+        # Code the value with something in the response
+        elif entity_action == "coded":
+            if value in response:
+                dicom.update({header:response[value]})
+                done = True
+
+        # Remove the field entirely
+        elif entity_action == "remove":
+            done = True
+            del dicom[header]
+
+        # Do nothing. Keep the original
+        elif entity_action == "original":
+            done = True
+
+        if not done:            
+            dicom.update({header:""})
+
+    return dicom
+
+
 ######################################################################
 # CONFIG DEFINED FUNCS
 ######################################################################
@@ -240,7 +287,6 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
     lookup = create_lookup(response)
 
     ## Actions/Additions for each come from config
-    actions = config['response']['actions']
     additions = config['response']['additions']
 
     # Does the config want additions?
@@ -251,15 +297,9 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
             bot.debug("%s will be added as %s to all datasets." %(addition['name'],
                                                                   addition['value']))
 
-    default_action = "blank"
-    if "*" in actions:
-        if actions['*'].lower() in valid_actions:
-            default_action = actions['*'].lower()
-        else:
-            bot.warning("%s is not a valid action. Using default of blank for headers not specified in config",
-                        %(actions['*'].lower()))
-
-    bot.debug("Default action for header de-id set to %s" %(default_action))
+    # Get specified actions
+    item_actions = config['response']['item']['actions']
+    entity_actions = config['response']['entity']['actions']
     
     # Parse through dicom files, update headers, and save
     updated_files = []
@@ -273,23 +313,54 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
                                    dicom=dicom,
                                    template=config['request']['entity'])
 
+        item_id = get_identifier(tag='id',
+                                 dicom=dicom,
+                                 template=config['request']['item'])
+
 
         # Is the entity_id in the data structure given to de-identify?
         if entity_id in lookup:
-            result = lookup[entity_id]['results']
-            # STOPPED HERE - need to iterate through result, and replace for file
-            # need to add to config how to specify an old field (eg id) to have new (eg suid)
+            result = lookup[entity_id]
 
+            fields = dicom.dir()
+            
+            # Returns same dicom with action performed
+            for entity_action in entity_actions:
+
+                # We've dealt with this field
+                fields = [x for x in fields if x != entity_action['name']]
+                dicom = perform_action(dicom=dicom,
+                                       response=result
+                                       params=entity_action)
+
+            if "items" in result:
+
+                for item in result['items']:
+
+                    # Is this API response for this dicom?
+                    if item['id'] == item_id
+                        for item_action in item_actions:
+
+                           # Returns same dicom with action performed
+                           fields = [x for x in fields if x != item_action['name']]
+                           dicom = perform_action(dicom=dicom,
+                                                  response=item
+                                                  params=item_action)
+
+
+            # Blank remaining fields
+            for field in fields:
+                dicom.update({field:""})
+
+            # Save to file
+            output_dicom = dicom_file
+            if overwrite is False:
+                output_dicom = "%s/%s" %(save_base,os.path.basename(dicom_file))
+            dicom.save_as(output_dicom)
+
+            update_files.append(output_dicom)
+       
         else:
             bot.warning("%s not found in identifiers lookup. Skipping" %(entity_id))
 
-valid_actions = ['blank',    # use API response to code the item. If no response is provided, blank it.
-                 'coded',    # blank the response (meaning replace with an empty string)
-                 'original', # do not touch the original header value
-                 'removed']  # completely remove the field and value from the data/header
-
-
-    default = actions['*']
-
-    ##TODO: go through fields of data, if in actions, do action
-    # if not, go to default. Return list of fixed dicoms.
+    return updated_files

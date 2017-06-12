@@ -94,12 +94,23 @@
             "value":"Yes"
          }
       ],
-   
-      "actions": {
-
-         "*":"blank",
-         "PatientID":"coded",
-         "SOPInstanceUID":"coded"
-       }
-    }
+      "entity":{
+         "actions":[
+            {
+               "name":"PatientID",
+               "action":"coded",
+               "value":"suid"
+            }
+         ]
+      },
+      "item":{
+         "actions":[
+            {
+               "name":"SOPInstanceUid",
+               "action":"coded",
+               "value":"suid"
+            }
+         ]
+      }
+   }
 }
