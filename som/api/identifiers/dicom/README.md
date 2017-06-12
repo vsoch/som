@@ -68,7 +68,21 @@ Requests require knowing how to generate a request to the API from a dicom datas
 
 ```
 
-The `entity` is referring to the main thing that has items belonging to it, corresponding to this section of an identifier:
+Remember that the above is a **list** of identifiers, so the data structure above only is for one entity (we might have more than one): This isn't proper json, but should show you how multiple entities (each with items) would be represented:
+
+```
+{  
+   "identifiers": [  
+
+            { [ENTITY1] },
+            { [ENTITY2] }
+
+   ]
+}
+
+```
+
+Looking at just the one, the `entity` is referring to the main thing that has items belonging to it, corresponding to this section of an identifier:
 
 ```
       "id":"14953772",
@@ -220,31 +234,122 @@ DEBUG item source: SOPInstanceUID
 DEBUG item custom_fields: [{'key': 'ContentDate', 'value': '19970706'}, {'key': 'ImageComments', 'value': 'Uncompressed'}, {'key': 'InstanceCreationDate', 'value': '20040826'}, {'key': 'InstanceCreationTime', 'value': '185744'}, {'key': 'InstanceCreatorUID', 'value': '1.3.6.1.4.1.5962.3'}, {'key': 'SeriesDate', 'value': '19950705'}, {'key': 'SeriesInstanceUID', 'value': '1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457'}, {'key': 'SeriesNumber', 'value': '1'}, {'key': 'SOPClassUID', 'value': '1.2.840.10008.5.1.4.1.1.7'}, {'key': 'SOPInstanceUID', 'value': '1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457'}, {'key': 'StudyDate', 'value': '20040826'}, {'key': 'StudyID', 'value': '12SC1'}, {'key': 'StudyInstanceUID', 'value': '1.3.6.1.4.1.5962.1.2.12.20040826185059.5457'}, {'key': 'StudyTime', 'value': '185059'}]
 ```
 
-and the final data structure produced (note that this example is for one entity that one one item, or dicom image):
+While we are putting this data structure together, meaning creating a list of identifiers across (potentially) different entities, internally to the `get_identifiers` function we represent an entity and it's items with a dictionary indexed with key as the entity name:  
+
+```
+{
+   '12SC1':{
+      'custom_fields':[
+         {
+            'key':'PatientID',
+            'value':'12SC1'
+         },
+         {
+            'key':'PatientName',
+            'value':'CompressedSamples^SC1'
+         },
+         {
+            'key':'ReferringPhysicianName',
+            'value':'^^^^'
+         }
+      ],
+      'id':'12SC1',
+      'id_source':'PatientID',
+      'items':[
+         {
+            'custom_fields':[
+               {
+                  'key':'ContentDate',
+                  'value':'19970706'
+               },
+               {
+                  'key':'ImageComments',
+                  'value':'Uncompressed'
+               },
+               {
+                  'key':'InstanceCreationDate',
+                  'value':'20040826'
+               },
+               {
+                  'key':'InstanceCreationTime',
+                  'value':'185744'
+               },
+               {
+                  'key':'InstanceCreatorUID',
+                  'value':'1.3.6.1.4.1.5962.3'
+               },
+               {
+                  'key':'SeriesDate',
+                  'value':'19950705'
+               },
+               {
+                  'key':'SeriesInstanceUID',
+                  'value':'1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457'
+               },
+               {
+                  'key':'SeriesNumber',
+                  'value':'1'
+               },
+               {
+                  'key':'SOPClassUID',
+                  'value':'1.2.840.10008.5.1.4.1.1.7'
+               },
+               {
+                  'key':'SOPInstanceUID',
+                  'value':'1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457'
+               },
+               {
+                  'key':'StudyDate',
+                  'value':'20040826'
+               },
+               {
+                  'key':'StudyID',
+                  'value':'12SC1'
+               },
+               {
+                  'key':'StudyInstanceUID',
+                  'value':'1.3.6.1.4.1.5962.1.2.12.20040826185059.5457'
+               },
+               {
+                  'key':'StudyTime',
+                  'value':'185059'
+               }
+            ],
+            'id_source':'SOPInstanceUID'
+         }
+      ]
+   }
+}
+```
+
+Note that this is not the format of the data structure returned, but just used to make sure that when we are iterating through dicom images, if more than one entity is represented, the data gets associated with the right one. When we finish this process, this data structure is unwrapped:
+
+```
+# Upwrap the dictionary to return an identifiers objects with a list of all entities
+ids = {"identifiers": [entity for key,entity in ids.items()]}
+```
+
+and that produces the data structure that the API expects, a list of identifiers: 
+
 ```
 {
    "12SC1":{
-      "identifiers":{
-         "custom_fields":[
-            {
-               "key":"PatientID",
-               "value":"12SC1"
-            },
-            {
-               "key":"PatientBirthDate",
-               "value":""
-            },
-            {
-               "key":"PatientName",
-               "value":"CompressedSamples^SC1"
-            },
-            {
-               "key":"ReferringPhysicianName",
-               "value":"^^^^"
-            }
-         ],
-         "id":"12SC1"
-      },
+      "custom_fields":[
+         {
+            "key":"PatientID",
+            "value":"12SC1"
+         },
+         {
+            "key":"PatientName",
+            "value":"CompressedSamples^SC1"
+         },
+         {
+            "key":"ReferringPhysicianName",
+            "value":"^^^^"
+         }
+      ],
+      "id":"12SC1",
+      "id_source":"PatientID",
       "items":[
          {
             "custom_fields":[
@@ -312,6 +417,7 @@ and the final data structure produced (note that this example is for one entity 
 }
 ```
 
+
 #### Giving Identifiers to API
 Our next task is to take the data structure above, amd give it to some API client that can send it to DASHER to return the de-identifiers to replace in the data. First note that the return of the `get_identifiers` function is indexed by the `entity_id`, and this is done in the case that different entities were found in the list of dicom files. For each of these found entities, we want to do one call to the API (note the API or client might support a list, so this is apt to change). For the current single call expectation, here is an example of how we might import the client to make the request:
 
@@ -323,19 +429,16 @@ som_client = Client()
 
 # Here is the function we walked through above, returns a dict
 ids = get_identifiers(dicom_files)
-
-deids = []
-for entity_id,data in ids.items():
-    response = client.deidentify(ids=data)
-    deids.append(response)
+response = client.deidentify(ids=ids)
 ```
 
-In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. We save the response (one call per each entity_id to the api endpoint, and note this may change so that `deidentify` can handle the list, either within the function or in the API itself) to a list, and it is this list that we will then use to replace identifiers in the data with the function `replace_identifiers`, also provided in [tasks.py](tasks.py).
+In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. We save the response to the database with an object associated with the batch so another worker can then use it to replace identifiers (in the actual data) with the function `replace_identifiers`, also provided in [tasks.py](tasks.py).
+
 
 #### Replacing Identifiers in Data
-We now have generated data structures to describe entities in dicom files, handed those data structures to an API client, and received a list of responses, each associated with one call to the API (one entity/source_id). After this, the application needs to handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module. The call would look like this:
-
+We now have generated data structures to describe entities in dicom files, handed those data structures to an API client, and received a response. While the API has support to return a response with a list of entity, since we do a check to make sure a batch is specific to one patient, we expect to only get one response. After this, the application needs to handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module. The call would look like this:
 ```
+
 from som.api.identifiers.dicom import replace_identifiers
 
 updated_files = replace_identifiers(dicom_files=dicom_files,
@@ -350,25 +453,8 @@ updated_files = replace_identifiers(dicom_files=dicom_files,
                                     overwrite=False)
 ```
 
-How we know how to deal with the response to properly de-identify the data. A few important points. The response from the function `get_identifiers` is going to return a dictionary, indexed by patient id (or source_id). The reason for this is because the function cannot be sure if a user will provide a list that has more than one source_id represented. The response will generally look like this:
-
-```
-{
- '12SC1': {'identifiers': {...}},
- '12SC2': {'identifiers': {...}}
-}
-```
-
-**Note** the function above may change, I would prefer to pass around lists of identifiers, and am just figuring out what the API can handle, versus the client and these functions. For now I'll write what is implemented.
-
-In the example above, a set of dicom files was provided that had two source ids, `12SC1` and `12SC2`. This is why when we do calls to the `deidentify` function, since we want to provide a datastructure with 
-
-
-`deidentify` will return
-
-
 #### Responses
-A Response is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`. `Actions` are provided from identifiers associated with an entity or item, and so they are represented again at these levels. Additions are not specific to the response, and don't need this association. The overall structure might look something like this:
+A Response specification in the [config.json](config.json) is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`. `Actions` are provided from identifiers associated with an entity or item, and so they are represented again at these levels. Additions are not specific to the response, and don't need this association. The overall structure might look something like this:
 
 ```
    "response":{

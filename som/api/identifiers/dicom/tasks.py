@@ -162,9 +162,9 @@ def get_identifiers(dicom_files,force=True,config=None):
 
            # Only need to add the entity once
            if entity_id not in ids:
-               ids[entity_id] = {'identifiers': { 'id': entity_id } } 
+               ids[entity_id] = { 'id': entity_id } 
                ids[entity_id]['items'] = []
-               ids[entity_id]['identifiers']['custom_fields'] = custom_fields
+               ids[entity_id]['custom_fields'] = custom_fields
 
 
            # Item is always added
@@ -175,6 +175,9 @@ def get_identifiers(dicom_files,force=True,config=None):
 
         else:
             bot.warning("Skipping %s due to empty entity (%s) or item (%s) id" %(dicom_file,entity_id,item_id))
+    
+    # Upwrap the dictionary to return an identifiers objects with a list of all entities
+    ids = {"identifiers": [entity for key,entity in ids.items()]}
     return ids
 
 
