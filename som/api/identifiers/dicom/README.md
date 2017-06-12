@@ -333,87 +333,89 @@ and that produces the data structure that the API expects, a list of identifiers
 
 ```
 {
-   "12SC1":{
-      "custom_fields":[
-         {
-            "key":"PatientID",
-            "value":"12SC1"
-         },
-         {
-            "key":"PatientName",
-            "value":"CompressedSamples^SC1"
-         },
-         {
-            "key":"ReferringPhysicianName",
-            "value":"^^^^"
-         }
-      ],
-      "id":"12SC1",
-      "id_source":"PatientID",
-      "items":[
-         {
-            "custom_fields":[
-               {
-                  "key":"ContentDate",
-                  "value":"19970706"
-               },
-               {
-                  "key":"ImageComments",
-                  "value":"Uncompressed"
-               },
-               {
-                  "key":"InstanceCreationDate",
-                  "value":"20040826"
-               },
-               {
-                  "key":"InstanceCreationTime",
-                  "value":"185744"
-               },
-               {
-                  "key":"InstanceCreatorUID",
-                  "value":"1.3.6.1.4.1.5962.3"
-               },
-               {
-                  "key":"SeriesDate",
-                  "value":"19950705"
-               },
-               {
-                  "key":"SeriesInstanceUID",
-                  "value":"1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457"
-               },
-               {
-                  "key":"SeriesNumber",
-                  "value":"1"
-               },
-               {
-                  "key":"SOPClassUID",
-                  "value":"1.2.840.10008.5.1.4.1.1.7"
-               },
-               {
-                  "key":"SOPInstanceUID",
-                  "value":"1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457"
-               },
-               {
-                  "key":"StudyDate",
-                  "value":"20040826"
-               },
-               {
-                  "key":"StudyID",
-                  "value":"12SC1"
-               },
-               {
-                  "key":"StudyInstanceUID",
-                  "value":"1.3.6.1.4.1.5962.1.2.12.20040826185059.5457"
-               },
-               {
-                  "key":"StudyTime",
-                  "value":"185059"
-               }
-            ],
-            "id_source":"SOPInstanceUID"
-         }
-      ]
-   }
+   "identifiers":[
+      {
+         "custom_fields":[
+            {
+               "key":"PatientID",
+               "value":"12SC1"
+            },
+            {
+               "key":"PatientName",
+               "value":"CompressedSamples^SC1"
+            },
+            {
+               "key":"ReferringPhysicianName",
+               "value":"^^^^"
+            }
+         ],
+         "id":"12SC1",
+         "id_source":"PatientID",
+         "items":[
+            {
+               "custom_fields":[
+                  {
+                     "key":"ContentDate",
+                     "value":"19970706"
+                  },
+                  {
+                     "key":"ImageComments",
+                     "value":"Uncompressed"
+                  },
+                  {
+                     "key":"InstanceCreationDate",
+                     "value":"20040826"
+                  },
+                  {
+                     "key":"InstanceCreationTime",
+                     "value":"185744"
+                  },
+                  {
+                     "key":"InstanceCreatorUID",
+                     "value":"1.3.6.1.4.1.5962.3"
+                  },
+                  {
+                     "key":"SeriesDate",
+                     "value":"19950705"
+                  },
+                  {
+                     "key":"SeriesInstanceUID",
+                     "value":"1.3.6.1.4.1.5962.1.3.12.1.20040826185059.5457"
+                  },
+                  {
+                     "key":"SeriesNumber",
+                     "value":"1"
+                  },
+                  {
+                     "key":"SOPClassUID",
+                     "value":"1.2.840.10008.5.1.4.1.1.7"
+                  },
+                  {
+                     "key":"SOPInstanceUID",
+                     "value":"1.3.6.1.4.1.5962.1.1.12.1.1.20040826185059.5457"
+                  },
+                  {
+                     "key":"StudyDate",
+                     "value":"20040826"
+                  },
+                  {
+                     "key":"StudyID",
+                     "value":"12SC1"
+                  },
+                  {
+                     "key":"StudyInstanceUID",
+                     "value":"1.3.6.1.4.1.5962.1.2.12.20040826185059.5457"
+                  },
+                  {
+                     "key":"StudyTime",
+                     "value":"185059"
+                  }
+               ],
+               "id_source":"SOPInstanceUID"
+            }
+         ]
+      }
+   ]
 }
 ```
 
@@ -432,29 +434,96 @@ ids = get_identifiers(dicom_files)
 response = client.deidentify(ids=ids)
 ```
 
-In the above example, we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. We save the response to the database with an object associated with the batch so another worker can then use it to replace identifiers (in the actual data) with the function `replace_identifiers`, also provided in [tasks.py](tasks.py).
+Note that the actual response from the API returns a list of `results`:
+
+```
+{
+   "results":[
+      {
+         "id":"14953772",
+         "id_source":"Stanford MRN",
+         "items":[
+            {
+               "custom_fields":[
+                  {
+                     "key":"ordValue",
+                     "value":"33.1"
+                  }
+               ],
+               "id":"MCH",
+               "id_source":"Lab Result",
+               "jitter":-19,
+               "jittered_timestamp":"2010-01-16T11:50:00-0800",
+               "suid":"10f6"
+            }
+         ],
+         "jitter":-19,
+         "jittered_timestamp":"1961-07-08T00:00:00-0700",
+         "suid":"10f5"
+      }
+   ]
+}
+```
+
+but the client (in the `deidentify` function) checks for results, and returns just the list:
+
+```
+[
+   {
+      "id":"14953772",
+      "id_source":"Stanford MRN",
+      "items":[
+         {
+            "custom_fields":[
+               {
+                  "key":"ordValue",
+                  "value":"33.1"
+               }
+            ],
+            "id":"MCH",
+            "id_source":"Lab Result",
+            "jitter":-19,
+            "jittered_timestamp":"2010-01-16T11:50:00-0800",
+            "suid":"10f6"
+         }
+      ],
+      "jitter":-19,
+      "jittered_timestamp":"1961-07-08T00:00:00-0700",
+      "suid":"10f5"
+   }
+]
+```
+
+This is done primarily so the API client can consistently return only the results, and in the case that there is an improper response, respond appropriately. This could be changed if there is reason to return the entire datastructure to the client. Let's look again at the call:
+
+```
+response = client.deidentify(ids=ids)
+```
+
+Notice that we don't specify `save_records=True` or a study parameter, so this would be using a test endpoint and not save data. 
 
 
 #### Replacing Identifiers in Data
-We now have generated data structures to describe entities in dicom files, handed those data structures to an API client, and received a response. While the API has support to return a response with a list of entity, since we do a check to make sure a batch is specific to one patient, we expect to only get one response. After this, the application needs to handle the response to de-identify the images, which would be another call to a function provided by the `identifiers.dicom` module. The call would look like this:
+We now have generated data structures to describe entities in dicom files, handed those data structures to an API client, and received a response.  After this, it's likely that you would want to use the response from the API to actually deidentify the data files. For this you want the `replace_identifiers` function in this module, and the call would look like this:
 ```
 
 from som.api.identifiers.dicom import replace_identifiers
 
 updated_files = replace_identifiers(dicom_files=dicom_files,
-                                    response=batch_ids.response)        
+                                    response=response)        
 ```
 
+where dicom_files is the same list that were used previously, and the response is the response returned above.
 By default, the function overwrites the current files (since they are deleted later). But if you want to change this default behavior, you can ask it to write them instead to a temporary directory:
 
 ```
 updated_files = replace_identifiers(dicom_files=dicom_files,
-                                    response=batch_ids.response)        
+                                    response=response)        
                                     overwrite=False)
 ```
 
 #### Responses
-A Response specification in the [config.json](config.json) is going to need to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`. `Actions` are provided from identifiers associated with an entity or item, and so they are represented again at these levels. Additions are not specific to the response, and don't need this association. The overall structure might look something like this:
+Now we are concerned with how a Response specification in the [config.json](config.json) knows how to use the response, per the users specifications in the [config.json](config.json) to write new files. The function `replace_identifiers` basically needs to know how to receive a respones from the identifiers API, and substitute values back into the data to properly de-identify it. We might also want to add fields to indicate that it's been de-identified. It follows then, that the `response` section of the [config.json](config.json) has settings for `actions` and `additions`. `Actions` are provided from identifiers associated with an entity or item, and so they are represented again at these levels. Additions are not specific to the response, and don't need this association. The overall structure might look something like this:
 
 ```
    "response":{
@@ -484,8 +553,7 @@ A Response specification in the [config.json](config.json) is going to need to k
       }
 ```
 
-
-Basically, the function in [tasks.py](tasks.py) called `replace_identifiers` knows how to take a valid response from the API, the dicom image it is matched to, and use this data structure above to perform the task of deidentification. 
+Basically, the function in [tasks.py](tasks.py) called `replace_identifiers` knows how to take a valid response from the API, the dicom image it is matched to, and use this data structure above to perform the task of deidentification. By default the old image is re-written, but a new image can also be written to a temporary directory, in which case it is up to the user to deal with archiving / removing the original files.
 
 ##### Actions
 Each group of actions is associated with an item or entity, and we do this so that we can look up the right value in the response from the api. One action should specify 1) a header value, 2) how to deal with it, and 3) if a replacement is done, what the field is called in the response to replace. Let's look at an example.
