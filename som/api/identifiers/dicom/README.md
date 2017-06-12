@@ -17,7 +17,7 @@ for key,entry in DicomDictionary.items():
        field_names.append(entry[4])
 ```
 
-Since there are so many, it's recommended to have a conservative default for replacements (under section [Response](#Response) below, so you don't need to code every single field into the [config.json](config.json). Speaking of, let's talk about that.
+Since there are so many, it's recommended to have a conservative default for replacements (under section Response below), so you don't need to code every single field into the [config.json](config.json). Speaking of, let's talk about that.
 
 ## Config.json
 The base of the json has two classes, and they correspond with the API actions of `request` and `response`. Here they are, completely empty:
