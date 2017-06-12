@@ -38,7 +38,7 @@ studies = ['radiologydeid','test']
 
 # Valid actions to be taken for deidentification (in dicom/config.json)
 
-valid_actions = ['blank',    # use API response to code the item. If no response is provided, blank it.
+valid_actions = ['blanked',    # use API response to code the item. If no response is provided, blank it.
                  'coded',    # blank the response (meaning replace with an empty string)
                  'original', # do not touch the original header value
                  'removed']  # completely remove the field and value from the data/header

@@ -1,3 +1,4 @@
 from .tasks import (
-    get_identifiers
+    get_identifiers,
+    replace_identifiers
 )

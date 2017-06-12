@@ -23,15 +23,12 @@ SOFTWARE.
 '''
 
 
-import importlib
 from som.logger import bot
 from som.utils import (
     read_json
 )
 
-from som.api.identifiers.standards import (
-    valid_actions
-)
+from .utils import blank_tag
 
 from som.api.identifiers.utils import (
     create_lookup
@@ -43,93 +40,15 @@ from pydicom.errors import InvalidDicomError
 import dateutil.parser
 import tempfile
 
+from .utils import (
+    get_func, 
+    perform_addition,
+    perform_action,
+    get_item_timestamp,
+    get_entity_timestamp
+)
+
 here = os.path.dirname(os.path.abspath(__file__))
-
-######################################################################
-# HELPERS
-######################################################################
-
-def get_func(function_name):
-    '''get_func will return a function that is defined from a string.
-    the function is assumed to be in this file
-    '''
-    env = globals()
-    if function_name in env:
-        return env[function_name]
-    return None
-
-
-def perform_action(dicom,response,params):
-    '''perform action takes  
-    :param dicom: a loaded dicom file (pydicom read_file)
-    and a dictionary of params.
-    :param response: the api response, with "id", "id_source" "items"
-    at the top level
-    :param params:
-        "name" (eg, PatientID) the header field to process
-        "action" (eg, coded) what to do with the field
-        "value": if needed, the field from the response to replace with
-    '''
-    if default_action is None:
-        default_action = "blanked"
-
-    header = entity_action.get('name')   # e.g: PatientID
-    action = entity_action.get('action') # "coded"
-    value = entity_action.get('value')   # "suid"
-    done = False
-
-    if header in dicom:
-
-        # Blank the value
-        if action == "blank":
-            dicom.update({header:""})
-            done = True
- 
-        # Code the value with something in the response
-        elif entity_action == "coded":
-            if value in response:
-                dicom.update({header:response[value]})
-                done = True
-
-        # Remove the field entirely
-        elif entity_action == "remove":
-            done = True
-            del dicom[header]
-
-        # Do nothing. Keep the original
-        elif entity_action == "original":
-            done = True
-
-        if not done:            
-            dicom.update({header:""})
-
-    return dicom
-
-
-######################################################################
-# CONFIG DEFINED FUNCS
-######################################################################
-
-def get_item_timestamp(dicom):
-    '''get_item_timestamp will return the UTC time for an instance.
-    This is derived from the InstanceCreationDate and InstanceCreationTime
-    If the Time is not set, only the date is used.
-    # testing function https://gist.github.com/vsoch/23d6b313bd231cad855877dc544c98ed
-    '''
-    item_time = dicom.get("InstanceCreationTime","")
-    item_date = dicom.get("InstanceCreationDate")
-    timestamp = dateutil.parser.parse("%s%s" %(item_date,item_time))
-    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def get_entity_timestamp(dicom):
-    '''get_entity_timestamp will return a UTC timestamp for the entity,
-    derived from the patient's birthdate. In the config.json, this is
-    set by setting type=func, and value=get_entity_timestamp
-    '''
-    item_date = dicom.get("PatientBirthDate")
-    timestamp = dateutil.parser.parse("%s" %(item_date))
-    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 ######################################################################
@@ -285,21 +204,6 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
 
     # We should have a list of responses
     lookup = create_lookup(response)
-
-    ## Actions/Additions for each come from config
-    additions = config['response']['additions']
-
-    # Does the config want additions?
-    has_additions = False
-    if len(additions) > 0:
-        has_additions = True
-        for addition in additions:
-            bot.debug("%s will be added as %s to all datasets." %(addition['name'],
-                                                                  addition['value']))
-
-    # Get specified actions
-    item_actions = config['response']['item']['actions']
-    entity_actions = config['response']['entity']['actions']
     
     # Parse through dicom files, update headers, and save
     updated_files = []
@@ -325,7 +229,7 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
             fields = dicom.dir()
             
             # Returns same dicom with action performed
-            for entity_action in entity_actions:
+            for entity_action in config['response']['entity']['actions']:
 
                 # We've dealt with this field
                 fields = [x for x in fields if x != entity_action['name']]
@@ -339,7 +243,7 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
 
                     # Is this API response for this dicom?
                     if item['id'] == item_id
-                        for item_action in item_actions:
+                        for item_action in config['response']['item']['actions']:
 
                            # Returns same dicom with action performed
                            fields = [x for x in fields if x != item_action['name']]
@@ -350,7 +254,11 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
 
             # Blank remaining fields
             for field in fields:
-                dicom.update({field:""})
+                dicom = blank_tag(dicom,name=field)
+
+
+            # Additions
+            dicom = perform_addition(config,dicom)
 
             # Save to file
             output_dicom = dicom_file
@@ -358,9 +266,10 @@ def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=Tr
                 output_dicom = "%s/%s" %(save_base,os.path.basename(dicom_file))
             dicom.save_as(output_dicom)
 
-            update_files.append(output_dicom)
+            updated_files.append(output_dicom)
        
         else:
             bot.warning("%s not found in identifiers lookup. Skipping" %(entity_id))
+
 
     return updated_files

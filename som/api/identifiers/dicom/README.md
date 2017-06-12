@@ -428,8 +428,4 @@ Valid actions names are provided in [standards.py](standards.py). If the user ha
 
 
 ##### Additions
-If the config has specified additions, each call to `replace_identifiers` will add the set provided to all dicom_files given to the function call. For example, if I have a set of `dicom_files` for a (patient id) indexed list from `get_identifiers` I might do the following:
-
-```
-DEBUG PatientIdentityRemoved will be added as Yes to all datasets.
-```
+If the config has specified additions, each call to `replace_identifiers` will add the set provided to all dicom_files given to the function call. 
