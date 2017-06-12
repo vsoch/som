@@ -38,10 +38,10 @@ import os
 
 
 def create_lookup(response,lookup_field=None):
-    '''create_identifier_lookup will take a response, which can be a single
-    dict with some field (eg, results or identifiers) or a list,
-    and return a dictionary (lookup) based
-    on the lookup_field (default is id)
+    '''create_identifier_lookup will take a response, which should be a list
+    of results (the API returns a "results" object, and the client 
+    returns the list under "results". A lookup dictionary is returned,
+    indexed by "id"
     '''
     if lookup_field is None:
         lookup_field = "id"
