@@ -578,7 +578,7 @@ This says to take `SOPInstanceUid` (and this is in the item response), and code 
  - original: do not touch the original identifier.
  - removed: completely remove the field and value from the data/header
 
-Valid actions names are provided in [standards.py](standards.py). If the user has not specified a global default, then the default taken is the most conservative, blanked. If the user specifies an invalid action, `blanked` is also used. In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
+Valid actions names are provided in [standards.py](../standards.py). If the user has not specified a global default, then the default taken is the most conservative, blanked. If the user specifies an invalid action, `blanked` is also used. In most cases, fields that are provided to the API as `custom_fields` are likely PHI and should be blanked, and only `source_id` and `id` should be coded. It is generally best to not remove fields, but to blank them instead, and care should be kept that original values are only kept if they are absolutely not PHI.
 
 
 ##### Additions
