@@ -8,9 +8,9 @@ Content in the following files includes:
 - [auth.py](auth.py): contains functions to authenticate a person with the API. We are taking a simplified Oauth approach, where a client is given a refresh token, and uses it when needed to obtain an access token. How often is this? They expire after 24 hours, at which point a 401 response is issued, and the client can issue the previous token as the refresh token to get a new one. We will likely make this more robust and use [oauth2client](https://oauth2client.readthedocs.io) but this simple approach works for now. Ideally, the client would authenticate with a stanford email address through some web portal, and be given a `json` file to download to a secure place:
  
      {
-      'AccessToken': 'ttttttuuuuuurrrrrrttttttlllllleeeee',
+      'accessToken': 'ttttttuuuuuurrrrrrttttttlllllleeeee',
       'client_id': 'client.email@stanford.edu',
-      'RefreshToken': 'ttttttttttttttttttttttttuuuuuuuuuuuuuuuurrrrrrttttttllllllle',
+      'refreshToken': 'ttttttttttttttttttttttttuuuuuuuuuuuuuuuurrrrrrttttttllllllle',
       'token_uri': 'https://api.rit.stanford.edu/token/api/v1/refresh'
      }
 

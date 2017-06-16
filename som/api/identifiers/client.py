@@ -73,10 +73,10 @@ class Client(SomApiConnection):
         # Saving records (uid) or not (mrn) changes the endpoint
         if not save_records:
             action = "uid"
-            bot.debug("[uid]: save_records is %s, no new data will be saved.")
+            bot.debug("[uid]: save_records is False, no new data will be saved.")
         else:
             action = "mrn"
-            bot.debug("[mrn]: save_records is %s, data will be saved.")
+            bot.debug("[mrn]: save_records is True, data will be saved.")
 
         # Testing overrides all other specifications
         if study is None:

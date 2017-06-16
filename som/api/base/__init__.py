@@ -11,6 +11,10 @@ from som.api.base.auth import (
 )
 
 from som.api import ApiConnection
+from simplejson import JSONDecodeError
+from json import SimpleJSONDecodeError
+import json
+import sys
 
 class SomApiConnection(ApiConnection):
 
@@ -31,6 +35,9 @@ class SomApiConnection(ApiConnection):
         :param data: additional data to add to the request
         :param return_json: return json if successful
         '''
+        if not isinstance(data,dict):
+            data = json.dumps(data)
+
         response = func(url=url,
                         headers=self.headers,
                         data=data)
@@ -39,9 +46,23 @@ class SomApiConnection(ApiConnection):
         if response.status_code == 401:
             bot.warning("Expired token, refreshing...")
             self.token = refresh_access_token()
-            response = func(url,self.headers,data=data)
+            self.update_headers()
+            response = func(url,
+                            headers=self.headers,
+                            data=data)
 
-        if response.status_code == 200 and return_json:
-            return response.json()
+        if response.status_code == 200:
+
+            if return_json:
+                try:
+                    response =  response.json()
+
+                except SimpleJSONDecodeError:
+                    bot.error("The server returned a malformed response. Are you on VPN?")
+                    sys.exit(1)
+
+                except JSONDecodeError:
+                    bot.error("The server returned a malformed response. Are you on VPN?")
+                    sys.exit(1)
 
         return response

@@ -58,7 +58,7 @@ def authenticate():
     token = None
     secrets = read_client_secrets()
     if secrets is not None:
-        token = secrets['AccessToken']
+        token = secrets['accessToken']
     return token
 
 
@@ -73,14 +73,16 @@ def refresh_access_token():
     # Query to update the token - must be on Stanford network
     if secrets is not None:
         response = requests.post(secrets['token_uri'],
-                                 data={'RefreshToken':secrets['RefreshToken']},
+                                 data=json.dumps({'refreshToken':secrets['refreshToken']},
                                  headers={'Content-Type':"application/json"})
 
-        if isinstance(response,dict):
-            secrets["AccessToken"] = response['AccessToken']
-            secrets["RefreshToken"] = response['RefreshToken']
+        if response.status_code == 200:
+
+            response = response.json()
+            secrets["accessToken"] = response['accessToken']
+            secrets["refreshToken"] = response['refreshToken']
             print("Successfully refreshed access token.")
             token_file = write_json(secrets,token_file)
-            token = secrets['AccessToken']
+            token = secrets['accessToken']
 
     return token

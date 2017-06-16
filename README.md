@@ -24,6 +24,8 @@ This module is currently under development, and anything/everything can change. 
 
   - [DocFish](https://doc.fish)
   - [WordFish](https://word.fish)
+  - [SendIt](https://www.github.com/pydicom/sendit)
+
 
 ## Issues
 If you have an issue, or want to request a feature, please do so on our [issues board](https://www.github.com/vsoch/som/issues)
