@@ -1,0 +1,10 @@
+FORMAT dicom
+
+%header
+
+REPLACE PatientID var:entity_id
+REPLACE SOPInstanceUID var:item_id
+ADD PatientIdentityRemoved "Yes"
+REPLACE PatientBirthDate var:entity_timestamp
+REPLACE InstanceCreationDate var:item_timestamp
+REPLACE InstanceCreationTime var:item_timestamp

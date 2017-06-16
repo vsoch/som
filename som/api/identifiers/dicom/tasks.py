@@ -28,24 +28,22 @@ from som.utils import (
     read_json
 )
 
-from .utils import blank_tag
-
-from som.api.identifiers.utils import (
-    create_lookup
-)
-
-
-from pydicom import read_file
-from pydicom.errors import InvalidDicomError
 import dateutil.parser
 import tempfile
 
-from .utils import (
-    get_func, 
-    perform_addition,
-    perform_action,
-    get_item_timestamp,
-    get_entity_timestamp
+from deid.identifiers import (
+    get_timestamp
+)
+
+from deid.dicom import (
+    get_files,
+    get_identifiers as get,
+    replace_identifiers as put,
+)
+
+from .settings import (
+   entity as entity_options
+   item as item_options
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -95,184 +93,150 @@ def get_identifier(tag,dicom,template):
     return result
 
 
-def get_identifiers(dicom_files,force=True,config=None):
-    '''extract and validate identifiers from a dicom image that conform
-    to the expected request to the identifiers api. This function cannot be
-    sure if more than one source_id is present in the data, so it returns
-    a lookup dictionary by patient id.
+def get_identifiers(dicom_files,force=True):
+    '''extract and validate identifiers from a dicom image This function 
+    uses the deid standard get_identifiers, and formats the data into 
+    what is expected for the SOM API request. 
     :param dicom_files: the dicom file(s) to extract from
     :param force: force reading the file (default True)
-    :param config: if None, uses default in provided module folder
     '''
+    # Enforce application default
+    entity_id = entity_options['id_source']
+    item_id = item_options['id_source']
 
-    if config is None:
-        config = "%s/config.json" %(here)
-
-    if not os.path.exists(config):
-        bot.error("Cannot find config %s, exiting" %(config))
-
-    # get_identifiers needs to know about request
-    config = read_json(config)['request'] 
-
-    if not isinstance(dicom_files,list):
-        dicom_files = [dicom_files]
-
-    ids = dict() # identifiers
-
-    for dicom_file in dicom_files:
-
-        dicom = read_file(dicom_file,force=True)
-
-        # Read in / calculate preferred values
-        entity_id = get_identifier(tag='id',
-                                   dicom=dicom,
-                                   template=config['entity'])
-        bot.debug('entity id: %s' %(entity_id))
-
-        source_id = get_identifier(tag='id_source',
-                                   dicom=dicom,
-                                   template=config['entity'])
-        bot.debug('entity source_id: %s' %(source_id))
-
-        item_id = get_identifier('id',
-                                 dicom=dicom,
-                                 template=config['item'])
-        bot.debug('item id: %s' %(item_id))
+    # get_identifiers: returns ids[entity][item] = {"field":"value"}
+    ids = get(dicom_files=dicom_files,
+              force=force,
+              entity_id=entity_id,
+              item_id=item_id)
 
 
-        entity_fields = get_identifier('custom_fields',
-                                      dicom=dicom,
-                                      template=config['entity'])
-        bot.debug('entity custom_fields: %s' %(entity_fields))
+    bot.verbose("Starting preparation of %s entity for SOM API" %(len(ids)))
+    entity_cf = entity_options['custom_fields']
+    item_cf = item_options["custom_fields"]
+    entity_date = entity_options["PatientBirthDate"]
+    entity_times = entity_options['id_timestamp']
+    item_times = item_options['id_timestamp']
+    
 
+    # Now we build a request from the ids
+    request = dict()
+    for eid,items in ids.items():
+        request[eid] = {"id_source":entity_id,
+                        "id":eid,
+                        "items":[],
+                        "custom_fields":{}}
 
-        item_source = get_identifier('id_source',
-                                     dicom=dicom,
-                                     template=config['item'])
-        bot.debug('item source: %s' %(item_source))
+        bot.debug('entity id: %s' %(eid))
+        for iid,item in items.items():
+            bot.debug('item id: %s' %(iid))
 
+            # Here we generate a timestamp for the entity
+            if "id_timestamp" not in request[eid]:
+                entity_ts = get_timestamp(item_date=entity_times['date'])
+                request[eid]['id_timestamp'] = entity_ts
 
-        item_fields = get_identifer('custom_fields',
-                                     dicom=dicom,
-                                     template=config['item'])
-        bot.debug('item custom_fields: %s' %(item_fields))
+            # Generate the timestamp for the item
+            item_ts = get_timestamp(item_date=item_times['date'],
+                                    item_time=item_times['time'])
 
-        # Skip images without patient id or item id
-        if entity_id is not None and item_id is not None:
+            new_item = {"id_source": item_id,
+                        "id": iid,
+                        "custom_fields":{}}
 
-           # Only need to add the entity once
-           if entity_id not in ids:
-               ids[entity_id] = { 'id': entity_id } 
-               ids[entity_id]['items'] = []
-               ids[entity_id]['custom_fields'] = custom_fields
+            for header,value in item.items():
+            
+                # Is it wanted for the entity?
+                if header in entity_cf:
+                    request[eid]['custom_fields'][header] = value
 
+                # Is it wanted for the item?
+                elif header in item_cf:
+                    new_item["custom_fields"][header] = value
 
-           # Item is always added
-           item = dict()
-           item['custom_fields'] = item_fields
-           item['id_source'] = item_source
-           ids[entity_id]['items'].append(item) 
-
-        else:
-            bot.warning("Skipping %s due to empty entity (%s) or item (%s) id" %(dicom_file,entity_id,item_id))
+            request[eid]["items"].append(new_item)
+       
     
     # Upwrap the dictionary to return an identifiers objects with a list of all entities
-    ids = {"identifiers": [entity for key,entity in ids.items()]}
+    ids = {"identifiers": [entity for key,entity in request.items()]}
     return ids
 
 
 
-def replace_identifiers(response,dicom_files,force=True,config=None,overwrite=True):
+
+def replace_identifiers(response,dicom_files,force=True,deid=None,
+                        output_folder=None,overwrite=True):
     '''replace identifiers will replace dicom_files with a response
     from the identifiers API. 
     :param response: the response from the API, or a list of identifiers
     :param dicom_files: the dicom file(s) to extract from
     :param force: force reading the file (default True)
-    :param config: if None, uses default in provided module folder
+    :param deid: The deid (recipe for replacement) defaults to SOM deid
+    :param output_folder: if not defined, uses temp. directory
     :param overwrite: if False, save updated files to temporary directory
+
+    :: note a response looks like this
+
+    [{'id': '14953772',
+      'id_source': 'Stanford MRN',
+      'items': [{'custom_fields': [{'key': 'ordValue', 'value': '33.1'}],
+        'id': 'MCH',
+        'id_source': 'Lab Result',
+        'jitter': -19,
+        'jittered_timestamp': '2010-01-16T11:50:00-0800',
+        'suid': '10f6'}],
+      'jitter': -19,
+      'jittered_timestamp': '1961-07-08T00:00:00-0700',
+      'suid': '10f5'}]
     '''
-    if overwrite is False:
-        save_base = tempfile.mkdtemp()
 
-    if config is None:
-        config = "%s/config.json" %(here)
+    # Generate ids dictionary for data put (replace_identifiers) function
+    ids = dict()
 
-    if not os.path.exists(config):
-        bot.error("Cannot find config %s, exiting" %(config))
+    # Enforce application default
+    entity_id = entity_options['id_source']
+    item_id = item_options['id_source']
 
-    config = read_json(config)
+    if deid is None:
+        deid = "%s/deid.som" %(here)
 
-    if not isinstance(dicom_files,list):
-        dicom_files = [dicom_files]
-
-    # We should have a list of responses
-    lookup = create_lookup(response)
-    
-    # Parse through dicom files, update headers, and save
-    updated_files = []
-
-    for dicom_file in dicom_files:
-
-        dicom = read_file(dicom_file,force=True)
-
-        # Read in / calculate preferred values
-        entity_id = get_identifier(tag='id',
-                                   dicom=dicom,
-                                   template=config['request']['entity'])
-
-        item_id = get_identifier(tag='id',
-                                 dicom=dicom,
-                                 template=config['request']['item'])
+    if not os.path.exists(deid):
+        bot.warning("Cannot find deid %s, using defaults." %(deid))
 
 
-        # Is the entity_id in the data structure given to de-identify?
-        if entity_id in lookup:
-            result = lookup[entity_id]
+    # Format data correctly for deid
+    ids = dict()
 
-            fields = dicom.dir()
-            
-            # Returns same dicom with action performed
-            for entity_action in config['response']['entity']['actions']:
+    for entity in response:
 
-                # We've dealt with this field
-                fields = [x for x in fields if x != entity_action['name']]
-                dicom = perform_action(dicom=dicom,
-                                       response=result
-                                       params=entity_action)
+        eid = entity['id']
+        bot.debug('entity id: %s' %(eid))
+        ids[eid] = dict()
 
-            if "items" in result:
+        for item in result['items']:
+            iid = item['id']
+            bot.debug('item id: %s' %(iid))
 
-                for item in result['items']:
-
-                    # Is this API response for this dicom?
-                    if item['id'] == item_id
-                        for item_action in config['response']['item']['actions']:
-
-                           # Returns same dicom with action performed
-                           fields = [x for x in fields if x != item_action['name']]
-                           dicom = perform_action(dicom=dicom,
-                                                  response=item
-                                                  params=item_action)
+            # Custom variables
+            ids[eid][iid] = {'item_timestamp': item['jittered_timestamp'],
+                             'entity_timestamp': entity['jittered_timestamp'],
+                             'entity_id': entity['suid'],
+                             'item_id': item['suid'] }
 
 
-            # Blank remaining fields
-            for field in fields:
-                dicom = blank_tag(dicom,name=field)
+            # All custom fields (likely not used)
+            for field in item['custom_fields']:
+                ids[eid][iid][field['key']] = field['value'] 
 
-
-            # Additions
-            dicom = perform_addition(config,dicom)
-
-            # Save to file
-            output_dicom = dicom_file
-            if overwrite is False:
-                output_dicom = "%s/%s" %(save_base,os.path.basename(dicom_file))
-            dicom.save_as(output_dicom)
-
-            updated_files.append(output_dicom)
-       
-        else:
-            bot.warning("%s not found in identifiers lookup. Skipping" %(entity_id))
-
-
+           
+    # Do the request to update the files, get them
+    updated_files = put(dicom_files,
+                        ids=ids,
+                        deid=deid,
+                        overwrite=overwrite,
+                        output_folder=output_folder,
+                        entity_id=entity_id,
+                        item_id=item_id,
+                        force=force)
+                        
     return updated_files
