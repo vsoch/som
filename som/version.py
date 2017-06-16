@@ -32,6 +32,7 @@ LICENSE = "LICENSE"
 INSTALL_REQUIRES = (
 
     ('flask', {'min_version': '0.12'}),
+    ('deid', {'min_version': '0.0.3'}),
     ('flask-restful', {'min_version': None}),
     ('pandas', {'min_version': '0.19.2'}),
     ('requests', {'min_version': '2.12.4'}),
