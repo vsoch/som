@@ -53,46 +53,6 @@ here = os.path.dirname(os.path.abspath(__file__))
 # MAIN GET FUNCTIONS
 ######################################################################
 
-def get_identifier(tag,dicom,template):
-    '''get_id will use a template and an image to return the user's
-    preference for some identifier
-    :param tag: the name of the identifier (eg, id, id_source)
-    :param dicom: the dicom image, already read in
-    :param template: the config['item']/config['entity'] template
-    '''
-    result = None
-    if tag in template:
-        action = template[tag]['type']
-        value = template[tag]['value']
-
-        # Extracted from data
-        if action == "data":
-            if isinstance(value,list):
-                result = [{"key":x,"value":dicom.get(x)} for x in value if dicom.get(x) not in [None,""]]
-            else:
-                result = dicom.get(value)
-
-        # Custom function in this file that takes dicom image
-        elif action == "func":
-            func = get_func(value)
-            result = func(dicom)
-
-        elif action == "default":
-            result = value
-
-        # Retrieve from environment
-        elif action == "env":
-            if isinstance(value,list):
-                result = [os.environ.get(x) for x in value if 
-                          os.environ.get(x) is not None]
-            else:
-                result = os.environ.get(value)
-
-    if result == "":
-        result = None
-    return result
-
-
 def get_identifiers(dicom_files,force=True):
     '''extract and validate identifiers from a dicom image This function 
     uses the deid standard get_identifiers, and formats the data into 
