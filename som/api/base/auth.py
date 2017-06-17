@@ -73,7 +73,7 @@ def refresh_access_token():
     # Query to update the token - must be on Stanford network
     if secrets is not None:
         response = requests.post(secrets['token_uri'],
-                                 data=json.dumps({'refreshToken':secrets['refreshToken']},
+                                 data=json.dumps({'refreshToken':secrets['refreshToken']}),
                                  headers={'Content-Type':"application/json"})
 
         if response.status_code == 200:
