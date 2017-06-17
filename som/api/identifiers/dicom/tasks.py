@@ -46,6 +46,8 @@ from .settings import (
    item as item_options
 )
 
+import os
+import sys
 here = os.path.dirname(os.path.abspath(__file__))
 
 
