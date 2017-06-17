@@ -42,7 +42,7 @@ from deid.dicom import (
 )
 
 from .settings import (
-   entity as entity_options
+   entity as entity_options,
    item as item_options
 )
 
