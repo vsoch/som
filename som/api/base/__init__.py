@@ -57,11 +57,7 @@ class SomApiConnection(ApiConnection):
                 try:
                     response =  response.json()
 
-                except SimpleJSONDecodeError:
-                    bot.error("The server returned a malformed response. Are you on VPN?")
-                    sys.exit(1)
-
-                except JSONDecodeError:
+                except (SimpleJSONDecodeError, JSONDecodeError):
                     bot.error("The server returned a malformed response. Are you on VPN?")
                     sys.exit(1)
 
