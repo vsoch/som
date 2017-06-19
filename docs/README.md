@@ -4,7 +4,7 @@ The Stanford Open modules for Python implement several modules for moving and st
 
 ## Data Structure
 
- -  - [wordfish-standard](wordfish-standard): The core of many of these modules is the wordfish standard, which is a simple file organization hierarchy for general groups of things called Collections, each of which has an Entity, and some number of Images and Text. For details on the organization, for now go to the [example datasets](https://github.com/vsoch/wordfish-standard). The nice thing about this simple approach is that these general categories map nicely onto many different domains. For example, this would work on a file system, or in Google Storage, or modeled in a relational database:
+  - [wordfish-standard](): The core of many of these modules is the wordfish standard, which is a simple file organization hierarchy for general groups of things called Collections, each of which has an Entity, and some number of Images and Text. For details on the organization, for now go to the [example datasets](https://github.com/vsoch/wordfish-standard). The nice thing about this simple approach is that these general categories map nicely onto many different domains. For example, this would work on a file system, or in Google Storage, or modeled in a relational database:
 
 ```
 Collection / [ collection name ]/ Entity / [ entity name ] / Images / [ image name ]

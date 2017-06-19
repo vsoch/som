@@ -4,7 +4,6 @@ The identifiers API is a component of DASHER, and is limited in use to the Stanf
 ```      
 api_base = "https://api.rit.stanford.edu/identifiers/api"
 api_version = "v1"
-
 ```
 
 If you need specific details about the endpoints or implementations, please see our [Swagger Specification](https://app.swaggerhub.com/api/susanweber/UID/1.0.0).
@@ -25,12 +24,15 @@ DEBUG Headers found: Content-Type,Authorization
 
 Where do the tokens come from? We don't have an automated way of doing this, so likely you will receive this file interally. The client would receive a `json` file to put in a secure place where he or she intends to use the API. It looks like this:
  
+```
      {
       'accessToken': 'ttttttuuuuuurrrrrrttttttlllllleeeee',
       'client_id': 'client.email@stanford.edu',
       'refreshToken': 'ttttttttttttttttttttttttuuuuuuuuuuuuuuuurrrrrrttttttllllllle',
       'token_uri': 'https://api.rit.stanford.edu/token/api/v1/refresh'
      }
+
+```
 
 The user would be instructed to add a line to his or her `.bashrc` or `.profile` to export the location of this file into an environmental variable, to be available to the application to discover the secrets:
 
@@ -80,7 +82,7 @@ We will add additional datasets that are needed to test endpoints as they are ne
 ```
 {
    "identifiers":[
-      {
+       {
          "id_timestamp":"1961-07-27T00:00:00Z",
          "id_source":"Stanford MRN",
          "id":"14953772",
@@ -110,7 +112,7 @@ We will add additional datasets that are needed to test endpoints as they are ne
             }
          ],
 
-      }
+       }
    ]
 }
 ```
