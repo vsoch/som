@@ -56,28 +56,13 @@ class Client(SomApiConnection):
         return "Client: <study:%s>" %(self.study)
 
 
-    def deidentifiy_update(self,identifiers,test=False):
-        '''deidentify update calls deidentify, but setting save_records
-        to True to ensure that data is updated/written.
-        '''
-        return self.deidentify(identifiers,test=test,save_records=True)
-
-
-    def deidentify(self,ids,save_records=False,study=None):
-        '''deidentify will take a list of identifiers, and return the deidentified.
-        :param save_records: if True, will use mrn endpoint and and save data.
-                             if False, will use uid endpoint and not save data.
+    def deidentify(self,ids,study=None):
+        '''deidentify: uid endpoint: 
+         https://api.rit.stanford.edu/identifiers/api/v1/uid/{study} 
+         will take a list of identifiers, and return the deidentified.        
         :param ids: a list of identifiers
+        :param study: if None, defaults to test.
         '''    
-
-        # Saving records (uid) or not (mrn) changes the endpoint
-        if not save_records:
-            action = "uid"
-            bot.debug("[uid]: save_records is False, no new data will be saved.")
-        else:
-            action = "mrn"
-            bot.debug("[mrn]: save_records is True, data will be saved.")
-
         # Testing overrides all other specifications
         if study is None:
             study = self.study
@@ -90,9 +75,9 @@ class Client(SomApiConnection):
 
         bot.debug("study: %s" %study)
 
-        url = "%s/%s/%s/%s" %(self.base,
+        url = "%s/%s/uid/%s" %(self.base,
                               self.version,
-                              action,study)
+                              study)
 
         response = self.post(url=url,data=ids)
 
