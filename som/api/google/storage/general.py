@@ -33,7 +33,7 @@ from som.utils import read_json
 import six
 
 ######################################################################################
-# Specs and base data structures for each radiology model
+# Specs and base data structures for a general model
 ######################################################################################
 
 
@@ -129,7 +129,7 @@ class Object(ModelBase):
 
 
 ######################################################################################
-# Radiology Client to interact with Models
+# Client to interact with Models
 ######################################################################################
 
 

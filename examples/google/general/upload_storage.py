@@ -137,7 +137,7 @@ from glob import glob
 pmc = get_pubmed()
 
 # Start google storage client for pmc-stanford
-from som.api.google.storage.general import Client
+from som.api.google.storage import Client
 general_client = Client(bucket_name='pmc-stanford')
 
 timeouts = []

@@ -3,7 +3,7 @@
 Stanford Open Modules for Python
 
 These are basic Python based tools for working with data (likely images and text) on Google Cloud. 
-The [base](som/api/base) API module implements a basic token/refresh token authentication, and the 
+The [base](som/api/base) API module implements a basic token/refresh authentication, and the 
 [identifiers](som/api/identifiers) module is an extension of that for the Stanford School of Medicine
 
 
