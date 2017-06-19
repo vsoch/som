@@ -94,10 +94,9 @@ class Collection(ModelBase):
         self.model = collection(uid=uid)
         super(Collection, self).__init__(client)
         if create:
-            self.update_or_create(client,fields=fields)
+            self.update_or_create(fields=fields)
         else:
-            self.update_or_create(client,
-                                  fields=fields,
+            self.update_or_create(fields=fields,
                                   save=False)
 
 

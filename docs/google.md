@@ -58,10 +58,79 @@ Collection / [ collection name ]/ Entity / [ entity name ] / Images / [ image na
 Collection / Study / Entity / SUID123 / Images / suid123-1.dcm
 ```
 
-For our purposes, if we are interested in a clinical study, it might make sense to name it based on the IRB number.
+### Create a Collection
+A collection is a logical grouping of entities, usually associated with something like a study, or for publishing, a journal. For our purposes, if we are interested in a clinical study, it might make sense to name it based on the IRB number.
 
 ```
 collection = client.create_collection(uid='IRB41449')
 ```
 
-** still being written, tested, etc. **
+
+### De-identify
+This is largely up to you, but for the example let's load some dummy data from [deid](https://pydicom.github.io/deid):
+
+```
+from deid.data import get_dataset
+from deid.dicom import get_files
+dicom_files = get_files(get_dataset('dicom-cookies'))
+```
+
+And let's properly de-identify them!
+
+```
+from deid.dicom import get_identifiers, replace_identifiers
+
+ids=get_identifiers(dicom_files)
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5323.1495927169.335276
+DEBUG Found 27 defined fields for image4.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5354.1495927170.440268
+DEBUG Found 27 defined fields for image2.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5335.1495927169.763866
+DEBUG Found 27 defined fields for image7.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5348.1495927170.228989
+DEBUG Found 27 defined fields for image6.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5360.1495927170.640947
+DEBUG Found 27 defined fields for image3.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5342.1495927169.3131
+DEBUG Found 27 defined fields for image1.dcm
+DEBUG entity id: cookie-47
+DEBUG item id: 1.2.276.0.7230010.3.1.4.8323329.5329.1495927169.580351
+DEBUG Found 27 defined fields for image5.dcm
+
+updated_files = replace_identifiers(dicom_files=dicom_files,
+                                    ids=ids)
+```
+
+### Create an Entity
+An entity within a collection corresponds to one patient. In this exanple above, we have 7 dicom images, but only for one patient. For example, here is his id in the `ids` data structure:
+
+```
+ids.keys()
+dict_keys(['cookie-47'])
+```
+
+Let's make an entity for this cookie! First, we would have some loop or process to make a dictionary of metadata for the entity. This would correspond to things like a jittered date, or any custom fields you want stored with the entity. We recommend taking an approach that tries to answer the question "How would someone search for, and then find it?" We want to have meaningful fields and values that can answer that question. Some of the fields might come from the (de-identified) data that would be useful to search for, like study alias, image modality, etc. Here is an example:
+
+
+```
+metadata = { "source_id" : "cookieTumorDatabase",
+             "id":"cookie-47",
+             "Modality": "cookie"}
+```
+
+Then making the call coincides with creating a dataset. One Entity with images and metadata within a collection is considered a dataset.
+
+```
+client.upload_dataset(images=updated_files,
+                      collection=collection,
+                      uid=metadata['id'],
+                      metadata=metadata)
+```
+
+** still under development, more to come **
