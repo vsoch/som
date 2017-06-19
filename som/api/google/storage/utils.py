@@ -269,6 +269,6 @@ def sniff_extension(file_path,verbose=True):
         mime_type = mime_types['txt']
 
     if verbose==True:
-        bot.info("%s --> %s" %(file_path mime_type))
+        bot.info("%s --> %s" %(file_path,mime_type))
 
     return mime_type
