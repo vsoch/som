@@ -79,8 +79,4 @@ class Client(SomApiConnection):
                               self.version,
                               study)
 
-        response = self.post(url=url,data=ids)
-
-        if "results" in response:
-            return response['results']
-        return response
+        return self.post(url=url,data=ids)

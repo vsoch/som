@@ -2,10 +2,6 @@
 
 # This is an example of sending a list of identifiers to the API
 
-
-import os
-import sys
-
 from som.api.identifiers import (
     Client,
     validators

@@ -35,7 +35,7 @@ class SomApiConnection(ApiConnection):
         :param data: additional data to add to the request
         :param return_json: return json if successful
         '''
-        if not isinstance(data,dict):
+        if isinstance(data,dict):
             data = json.dumps(data)
 
         response = func(url=url,
