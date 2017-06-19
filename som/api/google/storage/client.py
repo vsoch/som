@@ -40,7 +40,7 @@ from som.api.google.storage.utils import (
 
 from som.api.google.storage.models import BatchManager
 from som.api import ApiConnection
-from som.logman import bot
+from som.logger import bot
 
 
 class ClientBase(ApiConnection):

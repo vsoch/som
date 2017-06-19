@@ -33,7 +33,7 @@ from som.api.google.storage.datastore import (
     parse_keys
 )
 
-from som.logman import bot
+from som.logger import bot
 import datetime
 import collections
 import sys
@@ -155,7 +155,7 @@ class BatchManager:
 
         if query == None:
             if kind is None:
-                bot.logger.error("You must define 'kind' to run a query.")
+                bot.error("You must define 'kind' to run a query.")
                 sys.exit(1)
             query = self.client.query(kind=kind.capitalize(),ancestor=ancestor) # uppercase first letter
 
@@ -194,7 +194,7 @@ class BatchManager:
 
         except (google.cloud.exceptions.BadRequest,
                 google.cloud.exceptions.GrpcRendezvous):
-            bot.logger.error("Error with query.")         
+            bot.error("Error with query.")         
             pass
 
         return result
@@ -207,7 +207,7 @@ class BatchManager:
             operator = '>'
 
         if operator not in get_key_filters():
-            bot.logger.error("%s is not a valid operator.", operator)
+            bot.error("%s is not a valid operator." %operator)
             sys.exit(1)
 
         keys = parse_keys(keys)
@@ -230,8 +230,8 @@ class BatchManager:
         if endyear is not None and endmonth is not None and endday is not None:
             end_date = datetime.datetime(endyear, endmonth, endday)
         if start_date == None and end_date == None:
-            bot.logger.warning('''Both start date and end date are null, did you provide
-                                  year, month, day for one or both?''')
+            bot.warning('''Both start date and end date are null, did you provide
+                           year, month, day for one or both?''')
      
         query = self.client.query(kind=kind)
         if start_date is not None:
@@ -327,11 +327,11 @@ class ModelBase:
         '''
         for key,value in new_fields.items():
             if key not in self._Entity.keys():
-                bot.logger.debug("adding %s to Entity" %(key))
+                bot.debug("adding %s to Entity" %(key))
                 self._Entity[key] = value
             else:
                 if add_new == True:
-                    bot.logger.debug("%s found existing in Entity, overwriting" %(key))
+                    bot.debug("%s found existing in Entity, overwriting" %(key))
                     self._Entity[key] = value
 
 
@@ -385,7 +385,7 @@ class ModelBase:
         if self._Entity is not None:
             key = self._Entity.key
             self.client.delete(key)
-            bot.logger.debug("Deleting %s" %(key))
+            bot.debug("Deleting %s" %(key))
         return key
 
 

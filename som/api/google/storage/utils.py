@@ -33,7 +33,7 @@ from googleapiclient import (
 from oauth2client.client import GoogleCredentials
 from oauth2client.service_account import ServiceAccountCredentials
 
-from som.logman import bot
+from som.logger import bot
 
 from som.utils import (
     get_installdir,
@@ -216,8 +216,8 @@ def get_metadata(key):
     if response.status_code == 200:
         return response.text
     else:
-        bot.logger.error("Error retrieving metadata %s, returned response %s", key,
-                                                                               response.status_code)
+        bot.error("Error retrieving metadata %s, returned response %s" %(key,
+                                                                         response.status_code))
     return None
 
 
@@ -269,6 +269,6 @@ def sniff_extension(file_path,verbose=True):
         mime_type = mime_types['txt']
 
     if verbose==True:
-        bot.logger.info("%s --> %s", file_path, mime_type)
+        bot.info("%s --> %s" %(file_path mime_type))
 
     return mime_type

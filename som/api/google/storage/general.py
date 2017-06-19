@@ -28,7 +28,7 @@ SOFTWARE.
 from som.api.google.storage.client import ClientBase
 from som.api.google.storage.models import *
 from som.api.google.storage.utils import *
-from som.logman import bot
+from som.logger import bot
 from som.utils import read_json
 import six
 
@@ -242,7 +242,7 @@ class Client(ClientBase):
         '''upload_object will add a general object to the batch manager'''
 
         if object_type is None:
-            bot.logger.warning("You must specify object_type. Image or Text.")
+            bot.warning("You must specify object_type. Image or Text.")
             return None
 
         uid = self.get_storage_path(file_path,entity)
@@ -273,7 +273,7 @@ class Client(ClientBase):
                                         entity=entity,
                                         object_type="Text",
                                         batch=batch)
-        bot.logger.debug('TEXT: %s',new_object)
+        bot.debug('TEXT: %s' %new_object)
         return new_object
 
 
@@ -284,7 +284,7 @@ class Client(ClientBase):
                                         entity=entity,
                                         object_type="Image",
                                         batch=batch)
-        bot.logger.debug('IMAGE: %s',new_object)
+        bot.debug('IMAGE: %s' %new_object)
         return new_object
 
 

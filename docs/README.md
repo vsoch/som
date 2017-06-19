@@ -22,6 +22,6 @@ Collection / Study / Entity / SUID123 / Text / radiology-notes.txt
 
 ## Application Program Interaces
 
- - [google](): A client is provided to move Collections defined in the Wordfish Standard onto Google Storage, and metadata into DataStore. The two are linked, so that you can query DataStore to find what you are looking for in Storage.
+ - [google](google.md): A client is provided to move Collections defined in the Wordfish Standard onto Google Storage, and metadata into DataStore. The two are linked, so that you can query DataStore to find what you are looking for in Storage.
  - [identifiers](identifiers.md): A client is provided to communicate with the identifiers API (DASHER) at the Stanford school of medicine to get identifiers for images.
  - [developers](identifiers-developers.md): A brief review of how identifiers works, to be better parsed out into different documentation bases if/when the application expands.

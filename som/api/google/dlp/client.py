@@ -26,7 +26,7 @@ SOFTWARE.
 api_base = "https://dlp.googleapis.com"
 api_version = "v2beta1"
 
-from som.logman import bot
+from som.logger import bot
 from som.api import ApiConnection
 from som.api.google.dlp.utils import *
 
@@ -75,7 +75,7 @@ class DLPApiConnection(ApiConnection):
         
         results = []
         for idx in range(len(groups)):
-            bot.logger.debug("inspecting for %s of %s",idx+1,len(groups))
+            bot.debug("inspecting for %s of %s" %(idx+1,len(groups)))
             items = groups[idx]
             body = {'inspectConfig': config,
                     'items': items }

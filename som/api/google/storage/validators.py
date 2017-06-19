@@ -23,6 +23,8 @@ SOFTWARE.
 
 '''
 
+from som.logger import bot
+
 def validate_model(fields):
     '''remove_nones will remove any None fields from a passed dictionary
     '''
@@ -32,6 +34,6 @@ def validate_model(fields):
             keepers[entry['key']] = entry['value']
         else:
             if entry['required'] == True:
-                bot.logger.error("Field %s is required for this entity.",entry['key'])
+                bot.error("Field %s is required for this entity." %entry['key'])
     return keepers
 

@@ -26,7 +26,7 @@ SOFTWARE.
 '''
 
 
-from som.logman import bot
+from som.logger import bot
 
 import os
 import sys

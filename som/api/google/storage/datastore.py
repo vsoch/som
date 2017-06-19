@@ -25,7 +25,7 @@ SOFTWARE.
 
 from google.cloud import datastore as ds
 from google.cloud.datastore.key import Key
-from som.logman import bot
+from som.logger import bot
 import sys
 import os
 
