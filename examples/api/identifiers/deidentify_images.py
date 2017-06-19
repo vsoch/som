@@ -28,5 +28,5 @@ validators.validate_identifiers(identifiers)
 # Out[2]: True
 
 # Note that you must be on Stanford VPN
-# deidentify(identifiers,test=False,save_records=False)
-response = client.deidentify(ids=identifiers) # Default uses mrn endpoint, doesn't save
+# https://api.rit.stanford.edu/identifiers/api/uid
+response = client.deidentify(ids=identifiers)
