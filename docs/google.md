@@ -279,5 +279,7 @@ Key(Collection, 'IRB41449', Entity, 'cookie-47', Image, 'Collection/IRB41449/Ent
 
 Along with a "URL-safe key" that has been byte64 encoded. Please note this key is **not** encrypted, if that matters for where you use it.
 
-``` ahJzfnNvbS1sYW5nbG90ei1sYWJyZwsSCkNvbGxlY3Rpb24iCElSQjQxNDQ5DAsSBkVudGl0eSIJY29va2llLTQ3DAsSBUltYWdlIi9Db2xsZWN0aW9uL0lSQjQxNDQ5L0VudGl0eS9jb29raWUtNDcvaW1hZ2U0LmRjbQw
 ```
+ahJzfnNvbS1sYW5nbG90ei1sYWJyZwsSCk.... 
+```
+
