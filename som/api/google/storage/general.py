@@ -237,8 +237,15 @@ class Client(ClientBase):
     ## Upload #########################################################
     ###################################################################
 
-    def upload_object(self,file_path,entity,object_type=None,batch=True):
-        '''upload_object will add a general object to the batch manager'''
+    def upload_object(self,file_path,entity,
+                      object_type=None,
+                      batch=True,
+                      fields=None):
+
+        '''upload_object will add a general object to the batch manager
+        The object is uploaded to Google Storage, returning storage fields.
+        If the user has provided additional fields, these are added to the
+        call to create a new object (datastore)'''
 
         if object_type is None:
             bot.warning("You must specify object_type. Image or Text.")
@@ -250,7 +257,12 @@ class Client(ClientBase):
         storage_obj = self.put_object(file_path=file_path,
                                       bucket_folder=bucket_folder)
 
-        fields = get_storage_fields(storage_obj)
+        # Obtain storage fields, update with provided fields
+        storage_fields = get_storage_fields(storage_obj)
+        if fields is not None:
+            storage_fields.update(fields)
+        fields = storage_fields
+
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
                                                        storage_obj['name'])
 
@@ -266,52 +278,85 @@ class Client(ClientBase):
         return new_object
 
 
-    def upload_text(self,text,entity,batch=True):
+    def upload_text(self,text,entity,batch=True,fields=None):
         '''upload_text will add a text object to the batch manager'''
         new_object = self.upload_object(file_path=text,
                                         entity=entity,
+                                        fields=fields,
                                         object_type="Text",
                                         batch=batch)
         bot.debug('TEXT: %s' %new_object)
         return new_object
 
 
-    def upload_image(self,image,entity,batch=True):
+    def upload_image(self,image,entity,batch=True,fields=None):
         '''upload_images will add an image object to the batch manager
         '''
         new_object = self.upload_object(file_path=image,
                                         entity=entity,
+                                        fields=fields,
                                         object_type="Image",
                                         batch=batch)
         bot.debug('IMAGE: %s' %new_object)
         return new_object
 
 
-    def upload_dataset(self,uid,collection,images=None,texts=None,metadata=None,batch=True):
-        '''upload takes a list of images, texts, and optional metadata 
+    def upload_dataset(self,uid,collection,
+                       images=None,
+                       texts=None,
+                       entity_metadata=None,
+                       images_metadata=None,
+                       texts_metadata=None,
+                       batch=True):
+
+        '''upload takes a list of images, texts, and optional metadata
         and uploads to datastore (metadata) and storage (images)
         :param uid: should be the unique id for the entity, with one or more images/texts
+        :param entity_metadata: a single dictionary of keys/values for the entity
+        :param texts_metadata: a dictionary with keys corresponding to text paths
+        of key value pairs for the text in question
+        :param images_metadata: the same, but for images
         :param collection: should be the collection to add the entity to
         :param batch: add entities in batches (recommended, default True)
         '''
-                
+
+        if images_metadata is None: images_metadata = {}
+        if texts_metadata is None: texts_metadata = {}
+
         # Add entity
         entity = self.create_entity(collection=collection,
                                     uid=uid)
 
-        if metadata is not None:
-            entity.update(fields=metadata)
+        if entity_metadata is not None:
+            entity.update(fields=entity_metadata)
        
         if texts is not None:
+
             for text in texts:
+                fields = None
+
+                # metadata provided for the text?
+                if text in texts_metadata:
+                    fields = texts_metadata[text]
+
                 self.upload_text(text=text,
                                  entity=entity,
+                                 fields=fields,
                                  batch=batch)
+
+
 
         if images is not None:
             for img in images:
+                fields = None
+
+                # metadata provided for the image?
+                if img in images_metadata:
+                    fields = images_metadata[img]
+
                 self.upload_image(image=img,
                                   entity=entity,
+                                  fields=fields,
                                   batch=batch)
 
         # Run a transaction for put (insert) images and text, and clears queue
