@@ -124,34 +124,12 @@ def get_identifiers(dicom_files,force=True):
     return ids
 
 
-
-
-def replace_identifiers(response,dicom_files,force=True,deid=None,
-                        output_folder=None,overwrite=True):
-    '''replace identifiers will replace dicom_files with a response
-    from the identifiers API. 
-    :param response: the response from the API, or a list of identifiers
-    :param dicom_files: the dicom file(s) to extract from
-    :param force: force reading the file (default True)
-    :param deid: The deid (recipe for replacement) defaults to SOM deid
-    :param output_folder: if not defined, uses temp. directory
-    :param overwrite: if False, save updated files to temporary directory
-
-    :: note a response looks like this
-
-    [{'id': '14953772',
-      'id_source': 'Stanford MRN',
-      'items': [{'custom_fields': [{'key': 'ordValue', 'value': '33.1'}],
-        'id': 'MCH',
-        'id_source': 'Lab Result',
-        'jitter': -19,
-        'jittered_timestamp': '2010-01-16T11:50:00-0800',
-        'suid': '10f6'}],
-      'jitter': -19,
-      'jittered_timestamp': '1961-07-08T00:00:00-0700',
-      'suid': '10f5'}]
+def prepare_identifiers(response,dicom_files,force=True,deid=None):
+    '''prepare identifiers is the step before replacing identifiers,
+    taking in a respones from the DASHER API and a list of files, and
+    returning an ids data structure for deid. This is useful in the case
+    that you need to use or inspect the data structure before using deid.
     '''
-
     # Generate ids dictionary for data put (replace_identifiers) function
     ids = dict()
 
@@ -190,7 +168,45 @@ def replace_identifiers(response,dicom_files,force=True,deid=None,
             for field in item['custom_fields']:
                 ids[eid][iid][field['key']] = field['value'] 
 
-           
+    return ids
+
+
+def replace_identifiers(response,dicom_files,force=True,deid=None,
+                        output_folder=None,overwrite=True):
+    '''replace identifiers will replace dicom_files with a response
+    from the identifiers API. 
+    :param response: the response from the API, or a list of identifiers
+    :param dicom_files: the dicom file(s) to extract from
+    :param force: force reading the file (default True)
+    :param deid: The deid (recipe for replacement) defaults to SOM deid
+    :param output_folder: if not defined, uses temp. directory
+    :param overwrite: if False, save updated files to temporary directory
+
+    :: note a response looks like this
+
+    [{'id': '14953772',
+      'id_source': 'Stanford MRN',
+      'items': [{'custom_fields': [{'key': 'ordValue', 'value': '33.1'}],
+        'id': 'MCH',
+        'id_source': 'Lab Result',
+        'jitter': -19,
+        'jittered_timestamp': '2010-01-16T11:50:00-0800',
+        'suid': '10f6'}],
+      'jitter': -19,
+      'jittered_timestamp': '1961-07-08T00:00:00-0700',
+      'suid': '10f5'}]
+    '''
+    if ids is None:
+        ids = prepare_identifiers(response=response,
+                                  dicom_files=dicom_files,
+                                  force=force,
+                                  deid=deid)
+
+    # Enforce application default
+    entity_id = entity_options['id_source']
+    item_id = item_options['id_source']
+
+
     # Do the request to update the files, get them
     updated_files = put(dicom_files,
                         ids=ids,
