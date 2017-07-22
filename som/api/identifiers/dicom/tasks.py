@@ -41,7 +41,7 @@ from deid.dicom import (
     replace_identifiers as put,
 )
 
-from .settings import (
+from som.api.identifiers.dicom.settings import (
    entity as entity_options,
    item as item_options
 )
@@ -78,10 +78,11 @@ def get_identifiers(dicom_files,force=True):
     item_cf = item_options["custom_fields"]
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
-    
+
 
     # Now we build a request from the ids
     request = dict()
+
     for eid,items in ids.items():
         request[eid] = {"id_source":entity_id,
                         "id":eid,
@@ -114,7 +115,19 @@ def get_identifiers(dicom_files,force=True):
                         "id": iid,
                         "custom_fields":{}}
 
+            # Add custom fields, making json serializable
             for header,value in item.items(): 
+                if isinstance(value,list):
+                    str_values = []
+                    for value_item in value:
+                        if isinstance(value_item,bytes):
+                            value_item = value_item.decode('utf-8')
+                        str_values.append(value_item)
+                    value = str_values
+                else:
+                    if isinstance(value,bytes):
+                        value = value.decode('utf-8')
+
                 # Is it wanted for the entity?
                 if header in entity_cf:
                     request[eid]['custom_fields'][header] = str(value)
@@ -122,7 +135,6 @@ def get_identifiers(dicom_files,force=True):
                 # Is it wanted for the item?
                 elif header in item_cf:
                     new_item["custom_fields"][header] = str(value)
-
             request[eid]["items"].append(new_item)
        
     
