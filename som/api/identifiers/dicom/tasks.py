@@ -76,7 +76,6 @@ def get_identifiers(dicom_files,force=True):
     bot.verbose("Starting preparation of %s entity for SOM API" %(len(ids)))
     entity_cf = entity_options['custom_fields']
     item_cf = item_options["custom_fields"]
-    entity_date = entity_options["PatientBirthDate"]
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
     
