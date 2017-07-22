@@ -94,27 +94,26 @@ def get_identifiers(dicom_files,force=True):
 
             # Here we generate a timestamp for the entity
             if "id_timestamp" not in request[eid]:
-                entity_ts = get_timestamp(item_date=entity_times['date'])
-                request[eid]['id_timestamp'] = entity_ts
+                if entity_times['date'] in item:
+                    entity_ts = item[entity_times['date']]
+                    entity_ts = get_timestamp(item_date=entity_ts)
+                    request[eid]['id_timestamp'] = entity_ts
 
             # Generate the timestamp for the item
-            item_ts = get_timestamp(item_date=item_times['date'],
-                                    item_time=item_times['time'])
+            item_creation_date = item[item_times['date']]
+            item_ts = get_timestamp(item_date=item_creation_date)
 
             new_item = {"id_source": item_id,
                         "id": iid,
                         "custom_fields":{}}
 
-            for header,value in item.items():
-            
+            for header,value in item.items(): 
                 # Is it wanted for the entity?
                 if header in entity_cf:
                     request[eid]['custom_fields'][header] = value
-
                 # Is it wanted for the item?
                 elif header in item_cf:
                     new_item["custom_fields"][header] = value
-
             request[eid]["items"].append(new_item)
        
     

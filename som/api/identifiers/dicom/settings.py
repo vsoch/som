@@ -42,8 +42,7 @@ entity = {'id_source': 'PatientID',
 
 
 item = {'id_source': 'SOPInstanceUID',
-        'id_timestamp': {"date":"InstanceCreationDate",
-                         "time":"InstanceCreationTime"},
+        'id_timestamp': {"date":"AcquisitionDate"},
         'custom_fields': ["AcquisitionDate",
                           "ContentDate",
                           "CurrentRequestedProcedureEvidenceSequence",
