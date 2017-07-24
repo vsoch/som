@@ -24,8 +24,7 @@ SOFTWARE.
 
 from som.api.base import SomApiConnection
 from .standards import (
-    spec,
-    studies
+    spec
 )
 
 from som.logger import bot
@@ -67,12 +66,6 @@ class Client(SomApiConnection):
         if study is None:
             study = self.study
         study = study.lower()
-
-        # Did the user provide a valid study id?
-        if study not in studies:
-            bot.error("%s is not a valid study. Valid ids include %s" %(study,",".join(studies)))
-            sys.exit(1)
-
         bot.debug("study: %s" %study)
 
         url = "%s/%s/uid/%s" %(self.base,

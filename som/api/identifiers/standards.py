@@ -32,10 +32,6 @@ timestamp = '\d{4}-\d{2}-[A-Za-z0-9]{5}:\d{2}:\d{2}Z$'
 # Swagger api
 spec = "https://app.swaggerhub.com/apiproxy/schema/file/susanweber/UID/1.0.0/swagger.json"
 
-# Valid study ids
-studies = ['radiologydeid','test']
-
-
 # Valid actions to be taken for deidentification (in dicom/config.json)
 
 valid_actions = ['blanked',    # use API response to code the item. If no response is provided, blank it.
