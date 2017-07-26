@@ -87,7 +87,7 @@ def get_identifiers(dicom_files,force=True):
         request[eid] = {"id_source":entity_id,
                         "id":eid,
                         "items":[],
-                        "custom_fields":{}}
+                        "custom_fields":[]}
 
         bot.debug('entity id: %s' %(eid))
         for iid,item in items.items():
@@ -113,7 +113,7 @@ def get_identifiers(dicom_files,force=True):
             new_item = {"id_source": item_id,
                         "id_timestamp": item_ts,
                         "id": iid,
-                        "custom_fields":{}}
+                        "custom_fields":[]}
 
             # Add custom fields, making json serializable
             for header,value in item.items(): 
@@ -128,18 +128,23 @@ def get_identifiers(dicom_files,force=True):
                     if isinstance(value,bytes):
                         value = value.decode('utf-8')
 
+                cf_entry = {"key": header,
+                            "value": str(value)}
+
                 # Is it wanted for the entity?
                 if header in entity_cf:
-                    request[eid]['custom_fields'][header] = str(value)
+                    request[eid]['custom_fields'].append(cf_entry)
 
                 # Is it wanted for the item?
                 elif header in item_cf:
-                    new_item["custom_fields"][header] = str(value)
+                    new_item["custom_fields"].append(cf_entry)
+
             request[eid]["items"].append(new_item)
        
     
     # Upwrap the dictionary to return an identifiers objects with a list of all entities
     ids = {"identifiers": [entity for key,entity in request.items()]}
+    
     return ids
 
 
