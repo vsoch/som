@@ -163,30 +163,23 @@ def prepare_identifiers(response,dicom_files,force=True,deid=None):
 
     if deid is None:
         deid = "%s/deid.som" %(here)
-
     if not os.path.exists(deid):
         bot.warning("Cannot find deid %s, using defaults." %(deid))
 
-
     # Format data correctly for deid
     ids = dict()
-
     for entity in response:
-
         eid = entity['id']
         bot.debug('entity id: %s' %(eid))
         ids[eid] = dict()
-
-        for item in result['items']:
+        for item in entity['items']:
             iid = item['id']
-            bot.debug('item id: %s' %(iid))
 
             # Custom variables
             ids[eid][iid] = {'item_timestamp': item['jittered_timestamp'],
                              'entity_timestamp': entity['jittered_timestamp'],
                              'entity_id': entity['suid'],
                              'item_id': item['suid'] }
-
 
             # All custom fields (likely not used)
             for field in item['custom_fields']:
