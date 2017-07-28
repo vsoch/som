@@ -55,6 +55,16 @@ here = os.path.dirname(os.path.abspath(__file__))
 # MAIN GET FUNCTIONS
 ######################################################################
 
+def get_deid(tag=None):
+    if tag is None:
+        tag = "som"
+    deid = "%s/deid.%s" %(here,tag)
+    if not os.path.exists(deid):
+        bot.warning("Cannot find %s, will use default." %(deid))
+        tag = "som"
+    return "%s/deid.%s" %(here,tag)
+
+
 def get_identifiers(dicom_files,force=True):
     '''extract and validate identifiers from a dicom image This function 
     uses the deid standard get_identifiers, and formats the data into 
@@ -188,8 +198,13 @@ def prepare_identifiers(response,dicom_files,force=True,deid=None):
     return ids
 
 
-def replace_identifiers(response,dicom_files,force=True,deid=None,
-                        output_folder=None,overwrite=True):
+def replace_identifiers(response,dicom_files,
+                        ids=None,
+                        force=True,
+                        deid=None,
+                        output_folder=None,
+                        overwrite=True):
+
     '''replace identifiers will replace dicom_files with a response
     from the identifiers API. 
     :param response: the response from the API, or a list of identifiers
@@ -222,7 +237,6 @@ def replace_identifiers(response,dicom_files,force=True,deid=None,
     # Enforce application default
     entity_id = entity_options['id_source']
     item_id = item_options['id_source']
-
 
     # Do the request to update the files, get them
     updated_files = put(dicom_files,
