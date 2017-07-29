@@ -145,8 +145,8 @@ def get_identifiers(dicom_files,force=True):
                 if header in entity_cf:
                     request[eid]['custom_fields'].append(cf_entry)
 
-                # Is it wanted for the item?
-                elif header in item_cf:
+                # Put everything else in items
+                else:
                     new_item["custom_fields"].append(cf_entry)
 
             request[eid]["items"].append(new_item)
@@ -189,7 +189,8 @@ def prepare_identifiers(response,dicom_files,force=True,deid=None):
             ids[eid][iid] = {'item_timestamp': item['jittered_timestamp'],
                              'entity_timestamp': entity['jittered_timestamp'],
                              'entity_id': entity['suid'],
-                             'item_id': item['suid'] }
+                             'item_id': item['suid'],
+                             'jitter': item['jitter'] }
 
             # All custom fields (likely not used)
             for field in item['custom_fields']:
