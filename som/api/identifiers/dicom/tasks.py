@@ -38,8 +38,11 @@ from deid.identifiers import (
 from deid.dicom import (
     get_files,
     get_identifiers as get,
+    extract_sequence,
     replace_identifiers as put,
 )
+
+from pydicom.sequence import Sequence
 
 from som.api.identifiers.dicom.settings import (
    entity as entity_options,
@@ -85,7 +88,6 @@ def get_identifiers(dicom_files,force=True):
 
     bot.verbose("Starting preparation of %s entity for SOM API" %(len(ids)))
     entity_cf = entity_options['custom_fields']
-    item_cf = item_options["custom_fields"]
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
 
@@ -98,7 +100,6 @@ def get_identifiers(dicom_files,force=True):
                         "id":eid,
                         "items":[],
                         "custom_fields":[]}
-
         bot.debug('entity id: %s' %(eid))
         for iid,item in items.items():
             bot.debug('item id: %s' %(iid))
@@ -119,7 +120,6 @@ def get_identifiers(dicom_files,force=True):
             # We fall back to providing a blank timestamp
             if item_ts is not None:
                 item_ts = get_timestamp(item_date=item_ts)
-
             new_item = {"id_source": item_id,
                         "id_timestamp": item_ts,
                         "id": iid,
@@ -127,31 +127,24 @@ def get_identifiers(dicom_files,force=True):
 
             # Add custom fields, making json serializable
             for header,value in item.items(): 
-                if isinstance(value,list):
-                    str_values = []
-                    for value_item in value:
-                        if isinstance(value_item,bytes):
-                            value_item = value_item.decode('utf-8')
-                        str_values.append(value_item)
-                    value = str_values
+                if isinstance(value,Sequence):
+                    seq_entries = extract_sequence(value,prefix=header)
+                    new_item["custom_fields"]+=seq_entries
                 else:
                     if isinstance(value,bytes):
                         value = value.decode('utf-8')
+                    cf_entry = {"key": header,
+                                "value": str(value)}
 
-                cf_entry = {"key": header,
-                            "value": str(value)}
+                    # Is it wanted for the entity?
+                    if header in entity_cf:
+                        request[eid]['custom_fields'].append(cf_entry)
 
-                # Is it wanted for the entity?
-                if header in entity_cf:
-                    request[eid]['custom_fields'].append(cf_entry)
-
-                # Put everything else in items
-                else:
-                    new_item["custom_fields"].append(cf_entry)
-
+                    # Put everything else in items
+                    else:
+                        new_item["custom_fields"].append(cf_entry)
             request[eid]["items"].append(new_item)
        
-    
     # Upwrap the dictionary to return an identifiers objects with a list of all entities
     ids = {"identifiers": [entity for key,entity in request.items()]}
     
