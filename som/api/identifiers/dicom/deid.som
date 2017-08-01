@@ -4,7 +4,7 @@ FORMAT dicom
 
 REPLACE endswith:PatientID var:entity_id
 REPLACE endswith:SOPInstanceUID var:item_id
-ADD PatientIdentityRemoved Yes"
+ADD PatientIdentityRemoved Yes
 REPLACE endswith:PatientBirthDate var:entity_timestamp
 REPLACE endswith:InstanceCreationDate var:item_timestamp
 JITTER endswith:Time var:jitter

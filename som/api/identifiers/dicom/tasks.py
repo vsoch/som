@@ -68,41 +68,34 @@ def get_deid(tag=None):
     return "%s/deid.%s" %(here,tag)
 
 
-def get_identifiers(dicom_files,force=True):
-    '''extract and validate identifiers from a dicom image This function 
-    uses the deid standard get_identifiers, and formats the data into 
-    what is expected for the SOM API request. 
-    :param dicom_files: the dicom file(s) to extract from
-    :param force: force reading the file (default True)
+
+def prepare_identifiers_request(ids,
+                                force=True,
+                                entity_custom_fields=True,
+                                item_custom_fields=False):
+    '''prepare identifiers request takes in the output from deid 
+    get_identifiers, and returns the minimal request to send to DASHER.
+    If entity/item_custom_fields is False (recommended for items) 
+    no extra data is sent. This is suggested to optimize sending more data faster
     '''
+
     # Enforce application default
     entity_id = entity_options['id_source']
-    item_id = item_options['id_source']
-
-    # get_identifiers: returns ids[entity][item] = {"field":"value"}
-    ids = get(dicom_files=dicom_files,
-              force=force,
-              entity_id=entity_id,
-              item_id=item_id)
-
-
-    bot.verbose("Starting preparation of %s entity for SOM API" %(len(ids)))
+    item_id = item_options['id_source']            
     entity_cf = entity_options['custom_fields']
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
 
-
     # Now we build a request from the ids
     request = dict()
-
     for eid,items in ids.items():
+        added = []
         request[eid] = {"id_source":entity_id,
                         "id":eid,
                         "items":[],
                         "custom_fields":[]}
-        bot.debug('entity id: %s' %(eid))
+        bot.debug('entity id: %s >> %s items' %(eid,len(items)))
         for iid,item in items.items():
-            bot.debug('item id: %s' %(iid))
 
             # Here we generate a timestamp for the entity
             if "id_timestamp" not in request[eid]:
@@ -127,35 +120,48 @@ def get_identifiers(dicom_files,force=True):
 
             # Add custom fields, making json serializable
             for header,value in item.items(): 
-                if isinstance(value,Sequence):
-                    seq_entries = extract_sequence(value,prefix=header)
-                    new_item["custom_fields"]+=seq_entries
-                else:
-                    if isinstance(value,bytes):
-                        value = value.decode('utf-8')
-                    cf_entry = {"key": header,
-                                "value": str(value)}
+                parse_customfield = False
+                if header in entity_cf and entity_custom_fields is True and header not in added:
+                    parse_customfield = True
+                    added.append(header) # otherwise would add to entity more than once
+                elif item_custom_fields is True:
+                    parse_customfield = True
+                if parse_customfield is True:
 
-                    # Is it wanted for the entity?
-                    if header in entity_cf:
-                        request[eid]['custom_fields'].append(cf_entry)
+                    # Skip sequence data for now
+                    if not isinstance(value,Sequence):
+                        if isinstance(value,bytes):
+                            value = value.decode('utf-8')
+                        print("adding %s to %s:%s" %(header,eid,iid))
+                        cf_entry = {"key": header,
+                                    "value": str(value)}
 
-                    # Put everything else in items
-                    else:
-                        new_item["custom_fields"].append(cf_entry)
+                        # Is it wanted for the entity?
+                        if header in entity_cf:
+                            request[eid]['custom_fields'].append(cf_entry)
+
+                        # Put everything else in items
+                        else:
+                            new_item["custom_fields"].append(cf_entry)
             request[eid]["items"].append(new_item)
-       
+
     # Upwrap the dictionary to return an identifiers objects with a list of all entities
-    ids = {"identifiers": [entity for key,entity in request.items()]}
-    
+    ids = {"identifiers": [entity for key,entity in request.items()]}    
     return ids
 
 
-def prepare_identifiers(response,dicom_files,force=True,deid=None):
+
+#TODO: call prepare_replacement?
+def prepare_identifiers(response,
+                        dicom_files,
+                        force=True,
+                        deid=None,
+                        custom_fields=False):
     '''prepare identifiers is the step before replacing identifiers,
     taking in a respones from the DASHER API and a list of files, and
     returning an ids data structure for deid. This is useful in the case
     that you need to use or inspect the data structure before using deid.
+    By default, we skip custom fields to send a minimal respo
     '''
     # Generate ids dictionary for data put (replace_identifiers) function
     ids = dict()
