@@ -151,7 +151,7 @@ def prepare_identifiers_request(ids,
 
 
 
-#TODO: call prepare_replacement?
+
 def prepare_identifiers(response,
                         dicom_files,
                         force=True,

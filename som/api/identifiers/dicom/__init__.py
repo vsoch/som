@@ -1,6 +1,6 @@
 from .tasks import (
     get_deid,
-    get_identifiers,
+    prepare_identifiers_request,
     replace_identifiers,
     prepare_identifiers
 )
