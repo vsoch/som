@@ -53,11 +53,14 @@ import sys
 def prepare_identifiers_request(ids,
                                 force=True,
                                 entity_custom_fields=True,
+                                custom_entity_id_source=None,
                                 item_custom_fields=False):
     '''prepare identifiers request takes in the output from deid 
     get_identifiers, and returns the minimal request to send to DASHER.
     If entity/item_custom_fields is False (recommended for items) 
     no extra data is sent. This is suggested to optimize sending more data faster
+    if the entity ID source string needs to be customized from the index value,
+    set this in custom_entity_id_source
     '''
 
     # Enforce application default
@@ -66,12 +69,15 @@ def prepare_identifiers_request(ids,
     entity_cf = entity_options['custom_fields']
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
+    custom_eid_source = entity_id
+    if custom_entity_id_source is not None:
+        custom_eid_source = custom_entity_id_source
 
     # Now we build a request from the ids
     request = dict()
     for eid,items in ids.items():
         added = []
-        request[eid] = {"id_source":entity_id,
+        request[eid] = {"id_source":custom_eid_source,
                         "id":eid,
                         "items":[],
                         "custom_fields":[]}

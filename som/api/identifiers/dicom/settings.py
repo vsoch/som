@@ -23,7 +23,7 @@ SOFTWARE.
 '''
 
 
-entity = {'id_source': 'PatientID',
+entity = {'id_source': 'AccessionNumber',
           'id_timestamp': {"date":"PatientBirthDate"},
           'custom_fields':[ "AccessionNumber",
                             "OtherPatientIDs",
