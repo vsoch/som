@@ -41,7 +41,9 @@ entity = {'id_source': 'PatientID',
                             "PatientAge",
                             "PatientTelephoneNumbers",
                             "ReferringPhysicianName",
-                            "ReasonForStudy"
+                            "ReasonForStudy",
+                            "SeriesDescription",
+                            "StudyDescription"
                           ]
          }
 
