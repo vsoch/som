@@ -26,6 +26,9 @@ SOFTWARE.
 entity = {'id_source': 'PatientID',
           'id_timestamp': {"date":"PatientBirthDate"},
           'custom_fields':[ "AccessionNumber",
+                            "AdditionalPatientHistory"
+                            "InstitutionName",
+                            "NameOfPhysiciansReadingStudy",
                             "OtherPatientIDs",
                             "OtherPatientNames",
                             "OtherPatientIDsSequence",
@@ -35,6 +38,7 @@ entity = {'id_source': 'PatientID',
                             "PatientID",
                             "PatientMotherBirthName",
                             "PatientName",
+                            "PatientAge"
                             "PatientTelephoneNumbers",
                             "ReferringPhysicianName"
                           ]
