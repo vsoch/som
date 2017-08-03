@@ -1,4 +1,4 @@
-'''
+"""
 settings.py: fields to send to the som API, distinct from the de-identification
 
 Copyright (c) 2017 Vanessa Sochat
@@ -20,31 +20,93 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 
-entity = {'id_source': 'AccessionNumber',
-          'id_timestamp': {"date":"PatientBirthDate"},
-          'custom_fields':[ "AccessionNumber",
+entity = {"id_source":  "AccessionNumber",
+          "id_timestamp": {"date":"PatientBirthDate"},
+          "custom_fields":[ "AccessionNumber",
+                            "AffectedSOPClassUID",
+                            "AffectedSOPInstanceUID",
+                            "AssertionUID",
+                            "CodingSchemeUID",
+                            "ConcatenationUID",
+                            "ContextGroupExtensionCreatorUID",
+                            "ContextUID",
+                            "CreatorVersionUID",
+                            "DeviceUID",
+                            "DigitalSignatureUID",
+                            "DimensionOrganizationUID",
+                            "DoseReferenceUID",
+                            "EncryptedContentTransferSyntaxUID",
+                            "FiducialUID",
+                            "FrameOfReferenceUID",
+                            "ImplementationClassUID",
+                            "InstanceCreatorUID",
+                            "IrradiationEventUID",
+                            "LargePaletteColorLookupTableUID",
+                            "MACCalculationTransferSyntaxUID",
+                            "MappingResourceUID",
+                            "MediaStorageSOPClassUID",
+                            "MediaStorageSOPInstanceUID",
+                            "MultiFrameSourceSOPInstanceUID",
+                            "ObservationUID",
+                            "OriginalSpecializedSOPClassUID",
                             "OtherPatientIDs",
-                            "OtherPatientNames",
                             "OtherPatientIDsSequence",
+                            "OtherPatientNames",
+                            "PaletteColorLookupTableUID",
                             "PatientAddress",
                             "PatientBirthDate",
                             "PatientBirthName",
                             "PatientID",
                             "PatientMotherBirthName",
                             "PatientName",
-                            "PatientTelephoneNumbers"
-                          ]
+                            "PatientTelephoneNumbers",
+                            "PresentationDisplayCollectionUID",
+                            "PresentationSequenceCollectionUID",
+                            "PrivateInformationCreatorUID",
+                            "PrivateRecordUID",
+                            "RadiopharmaceuticalAdministrationEventUID",
+                            "ReasonForStudyReferencedGeneralPurposeScheduledProcedureStepTransactionUID",
+                            "ReferencedAssertionUID",
+                            "ReferencedColorPaletteInstanceUID",
+                            "ReferencedDoseReferenceUID",
+                            "ReferencedFrameOfReferenceUID",
+                            "ReferencedSOPClassUID",
+                            "ReferencedSOPInstanceUID",
+                            "RelatedFrameOfReferenceUID",
+                            "RelatedGeneralSOPClassUID",
+                            "RequestedSOPClassUID",
+                            "RequestedSOPInstanceUID",
+                            "RetrieveLocationUID",
+                            "SOPClassUID",
+                            "SOPInstanceUID",
+                            "SeriesInstanceUID",
+                            "SourceFrameOfReferenceUID",
+                            "SpecimenUID",
+                            "StorageMediaFileSetUID",
+                            "StudyInstanceUID",
+                            "SynchronizationFrameOfReferenceUID",
+                            "TableFrameOfReferenceUID",
+                            "TargetFrameOfReferenceUID",
+                            "TargetUID",
+                            "TemplateExtensionCreatorUID",
+                            "TemplateExtensionOrganizationUID",
+                            "TrackingUID",
+                            "TransactionUID",
+                            "TransferSyntaxUID",
+                            "UID",
+                            "VolumeFrameOfReferenceUID",
+                            "VolumetricPresentationInputSetUID"]
          }
 
 
-item = {'id_source': 'SOPInstanceUID',
-        'id_timestamp': {"date": ["AcquisitionDate",
-                                  'ContentDate',
-                                  'SeriesDate',
-                                  'StudyDate']
+item = {"id_source": "SOPInstanceUID",
+        "id_timestamp": {"date": ["AcquisitionDate",
+                                  "ContentDate",
+                                  "SeriesDate",
+                                  "StudyDate"]
                          }
 
        }
