@@ -24,7 +24,10 @@ SOFTWARE.
 
 
 entity = {"id_source":  "AccessionNumber",
-          "id_timestamp": {"date":"PatientBirthDate"},
+          "id_timestamp": {"date": ["StudyDate",
+                                    "SeriesDate",
+                                    "ContentDate",
+                                    "AcquisitionDate"]
           "custom_fields":[ "AccessionNumber",
                             "AffectedSOPClassUID",
                             "AffectedSOPInstanceUID",

@@ -55,7 +55,6 @@ def update_identifiers(ids,updates):
         # Now update with updates items
         if entity in updates:
             for item, fields in updates[entity].items(): 
-                if item in ids[entity]:
-                    for key,val in fields.items():   
-                        updated[entity][item][key] = val    
+                for key,val in fields.items():   
+                    updated[entity][item][key] = val  
     return updated
