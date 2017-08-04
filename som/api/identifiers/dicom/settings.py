@@ -23,7 +23,7 @@ SOFTWARE.
 """
 
 
-entity = {"id_source":  "AccessionNumber",
+entity = {"id_source":  "PatientID",
           "id_timestamp": {"date": ["StudyDate",
                                     "SeriesDate",
                                     "ContentDate",
@@ -107,7 +107,7 @@ entity = {"id_source":  "AccessionNumber",
          }
 
 
-item = {"id_source": "SOPInstanceUID",
+item = {"id_source": "AccessionNumber",
         "id_timestamp": {"date": ["AcquisitionDate",
                                   "ContentDate",
                                   "SeriesDate",
