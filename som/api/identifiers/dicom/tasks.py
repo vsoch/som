@@ -122,19 +122,17 @@ def prepare_identifiers(response,force=True):
     '''
     # Generate ids dictionary for data put (replace_identifiers) function
     ids = dict()
-
     # Enforce application default
     entity_id = entity_options['id_source']
     item_id = item_options['id_source']
-
     # Format data correctly for deid
     ids = dict()
     for entity in response:
         eid = entity['id']
         bot.debug('entity id: %s' %(eid))
         ids[eid] = dict()
-        for item in entity['items']:
-            iid = item['id']
+            for item in entity['items']:
+                iid = item['id']
             # Custom variables
             ids[eid][iid] = {'item_timestamp': item['jittered_timestamp'],
                              'entity_timestamp': entity['jittered_timestamp'],
@@ -142,6 +140,7 @@ def prepare_identifiers(response,force=True):
                              'item_id': item['suid'],
                              'jitter': item['jitter'] }
             # All custom fields (likely not used)
-            for field in item['custom_fields']:
-                ids[eid][iid][field['key']] = field['value']
+            if "custom_fields" in item:
+                for field in item['custom_fields']:
+                    ids[eid][iid][field['key']] = field['value']
     return ids
