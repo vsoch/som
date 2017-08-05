@@ -25,6 +25,7 @@ SOFTWARE.
 
 from som.logger import bot
 from som.utils import (
+    get_listfirst,
     read_json
 )
 
@@ -50,83 +51,61 @@ import sys
 # MAIN GET FUNCTIONS
 ######################################################################
 
-def prepare_identifiers_request(ids,
-                                force=True,
-                                entity_custom_fields=True,
-                                item_custom_fields=False):
+def prepare_identifiers_request(ids, force=True):
     '''prepare identifiers request takes in the output from deid 
     get_identifiers, and returns the minimal request to send to DASHER.
     If entity/item_custom_fields is False (recommended for items) 
     no extra data is sent. This is suggested to optimize sending more data faster
     if the entity ID source string needs to be customized from the index value,
     set this in custom_entity_id_source
-
     '''
-
     # Enforce application default
-    entity_id = entity_options['id_source']
-    item_id = item_options['id_source']            
-    entity_cf = entity_options['custom_fields']
+    entity_source = entity_options['id_source']['name']
+    entity_field = entity_options['id_source']['field']
+    item_source = item_options['id_source']['name']            
+    item_field = item_options['id_source']['field']  
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
 
-    # Now we build a request from the ids
     request = dict()
+
     for eid,items in ids.items():
-        added = []
-        request[eid] = {"id_source":entity_id,
-                        "id":eid,
-                        "items":[],
-                        "custom_fields":[]}
+
+        # Entity --> Patient
+        request[eid] = {"id_source":entity_source,
+                        "items":[]}
+
+        # Item --> Study (to represent all images)
+        new_item = {"id_source": item_source}
         bot.debug('entity id: %s >> %s items' %(eid,len(items)))
+
+        # Build request item until we have all fields        
         for iid,item in items.items():
 
-            # Here we generate a timestamp for the entity
+            # Entity ID
+            if "id" not in request[eid]:
+                request[eid]["id"] = item[entity_field]
+
+            # Entity timestamp
             if "id_timestamp" not in request[eid]:
-                if entity_times['date'] in item:
-                    entity_ts = item[entity_times['date']]
-                    entity_ts = get_timestamp(item_date=entity_ts)
-                    request[eid]['id_timestamp'] = entity_ts
+                entity_ts = get_listfirst(item=item,group=entity_times['date'])
+                if entity_ts is not None:
+                    timestamp = get_timestamp(item_date=entity_ts)
+                    request[eid]['id_timestamp'] = timestamp
 
-            # Generate the timestamp for the item
-            item_ts = None
-            for item_date_field in item_times['date']: 
-                if item_date_field in item and not item_ts:
-                    item_ts = item[item_date_field]
+            # Study Timestamp
+            if "id_timestamp" not in new_item:
+                item_ts = get_listfirst(item=item,group=item_times['date']) 
+                if item_ts is not None:
+                    timestamp = get_timestamp(item_date=item_ts)
+                    new_item["id_timestamp"] = timestamp
 
-            # We fall back to providing a blank timestamp
-            if item_ts is not None:
-                item_ts = get_timestamp(item_date=item_ts)
-            new_item = {"id_source": item_id,
-                        "id_timestamp": item_ts,
-                        "id": iid,
-                        "custom_fields":[]}
+            # Study ID (accession#)
+            if "id" not in new_item:
+                new_item["id"] = item[item_field]                                        
 
-            # Add custom fields, making json serializable
-            for header,value in item.items(): 
-                parse_customfield = False
-                if header in entity_cf and entity_custom_fields is True and header not in added:
-                    parse_customfield = True
-                    added.append(header) # otherwise would add to entity more than once
-                elif item_custom_fields is True:
-                    parse_customfield = True
-                if parse_customfield is True:
-
-                    # Skip sequence data for now
-                    if not isinstance(value,Sequence):
-                        if isinstance(value,bytes):
-                            value = value.decode('utf-8')
-                        cf_entry = {"key": header,
-                                    "value": str(value)}
-
-                        # Is it wanted for the entity?
-                        if header in entity_cf:
-                            request[eid]['custom_fields'].append(cf_entry)
-
-                        # Put everything else in items
-                        else:
-                            new_item["custom_fields"].append(cf_entry)
-            request[eid]["items"].append(new_item)
+        # We are only including one study item to represent all images
+        request[eid]["items"].append(new_item)
 
     # Upwrap the dictionary to return an identifiers objects with a list of all entities
     ids = {"identifiers": [entity for key,entity in request.items()]}    

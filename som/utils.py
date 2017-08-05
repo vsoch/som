@@ -108,6 +108,18 @@ def run_command(cmd,error_message=None,sudopw=None,suppress=False):
     return output
 
 
+def get_listfirst(item,group):
+    '''return the first found in a list (group) from a 
+    dictionary item.
+    '''
+    if not isinstance(group,list):
+        group = [group]
+    for contender in group:
+        if contender in item:
+            return item[contender]
+    return None
+
+
 ############################################################################
 ## FILE OPERATIONS #########################################################
 ############################################################################
