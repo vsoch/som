@@ -54,11 +54,9 @@ import sys
 def prepare_identifiers_request(ids, force=True):
     '''prepare identifiers request takes in the output from deid 
     get_identifiers, and returns the minimal request to send to DASHER.
-    If entity/item_custom_fields is False (recommended for items) 
-    no extra data is sent. This is suggested to optimize sending more data faster
-    if the entity ID source string needs to be customized from the index value,
-    set this in custom_entity_id_source
+    The assumption is that one batch of ids ==> one entity / Accession Number
     '''
+    
     # Enforce application default
     entity_source = entity_options['id_source']['name']
     entity_field = entity_options['id_source']['field']
@@ -67,85 +65,72 @@ def prepare_identifiers_request(ids, force=True):
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
 
-    request = dict()
+    # Entity --> Patient
+    entity = {"id_source":entity_source,
+              "items":[]}
 
-    for eid,items in ids.items():
+    # Item --> Study (to represent all images)
+    new_item = {"id_source": item_source}
+    for item_id,item in ids.items():
+        bot.debug('entity >> %s items' %(len(ids)))
 
-        # Entity --> Patient
-        request[eid] = {"id_source":entity_source,
-                        "items":[]}
+        # Entity ID
+        if "id" not in entity:
+            entity_id = item[entity_field].replace('-','')
+            entity["id"] = entity_id
 
-        # Item --> Study (to represent all images)
-        new_item = {"id_source": item_source}
-        bot.debug('entity id: %s >> %s items' %(eid,len(items)))
+        # Entity timestamp
+        if "id_timestamp" not in entity:
+            entity_ts = get_listfirst(item=item,group=entity_times['date']) # 20021202
+            if entity_ts is not None: 
+                timestamp = get_timestamp(item_date=entity_ts)              # 2002-12-02T00:00:00Z
+                entity['id_timestamp'] = timestamp
 
-        # Build request item until we have all fields        
-        for iid,item in items.items():
+        # Study Timestamp
+        if "id_timestamp" not in new_item:
+            item_ts = get_listfirst(item=item,group=item_times['date']) 
+            if item_ts is not None:
+                timestamp = get_timestamp(item_date=item_ts)
+                new_item["id_timestamp"] = timestamp
 
-            # Entity ID
-            if "id" not in request[eid]:
-                request[eid]["id"] = item[entity_field]
+        # Study ID (accession#)
+        if "id" not in new_item:
+            new_item["id"] = item[item_field]                                        
 
-            # Entity timestamp
-            if "id_timestamp" not in request[eid]:
-                entity_ts = get_listfirst(item=item,group=entity_times['date'])
-                if entity_ts is not None:
-                    timestamp = get_timestamp(item_date=entity_ts)
-                    request[eid]['id_timestamp'] = timestamp
+    # We are only including one study item to represent all images
+    entity["items"].append(new_item)
 
-            # Study Timestamp
-            if "id_timestamp" not in new_item:
-                item_ts = get_listfirst(item=item,group=item_times['date']) 
-                if item_ts is not None:
-                    timestamp = get_timestamp(item_date=item_ts)
-                    new_item["id_timestamp"] = timestamp
-
-            # Study ID (accession#)
-            if "id" not in new_item:
-                new_item["id"] = item[item_field]                                        
-
-        # We are only including one study item to represent all images
-        request[eid]["items"].append(new_item)
-
-    # Upwrap the dictionary to return an identifiers objects with a list of all entities
-    ids = {"identifiers": [entity for key,entity in request.items()]}    
+    # Expected format of dasher
+    ids = {"identifiers": [entity]}    
     return ids
 
 
 
 
-def prepare_identifiers(response,force=True):
+def prepare_identifiers(response,ids,force=True):
     '''prepare identifiers is the step before replacing identifiers,
-    taking in a respones from the DASHER API and a list of files, and
-    returning an ids data structure for deid. This is useful in the case
-    that you need to use or inspect the data structure before using deid.
+    it expects a response from the DASHER API, and will use it to prepare
+    custom variables to each item provided in ids. It is assumed that the
+    response given is relevant for all items in ids
+    : param extracted: a dictionary with key (item id) and value a dictionary
+    of extracted fields 
     '''
-    # Generate ids dictionary for data put (replace_identifiers) function
-    ids = dict()
-
-    # Enforce application default
-    entity_id = entity_options['id_source']
-    item_id = item_options['id_source']
 
     # Format data correctly for deid
-    ids = dict()
-    for entity in response:
-        eid = entity['id']
-        bot.debug('entity id: %s' %(eid))
-        ids[eid] = dict()
-        if "items" in entity:
-            for item in entity['items']:
-                iid = item['id']
+    for entity in response:      
+        item = entity['items'][0]  
+        updates = {'item_timestamp': item['jittered_timestamp'],
+                   'entity_timestamp': entity['jittered_timestamp'],
+                   'entity_id': entity['suid'],
+                   'entity_id_source': entity['id_source'],
+                   'item_id': item['suid'],
+                   'item_id_source': item['id_source'],
+                   'jitter': item['jitter'] }
 
-            # Custom variables
-            ids[eid][iid] = {'item_timestamp': item['jittered_timestamp'],
-                             'entity_timestamp': entity['jittered_timestamp'],
-                             'entity_id': entity['suid'],
-                             'item_id': item['suid'],
-                             'jitter': item['jitter'] }
-
-            # All custom fields (likely not used)
-            if "custom_fields" in item:
-                for field in item['custom_fields']:
-                    ids[eid][iid][field['key']] = field['value']
-    return ids
+    updated = dict()
+    for item_id in ids:
+        updated[item_id] = dict()
+        updated[item_id].update(ids[item_id])
+        for key,value in updates.items():
+            updated[item_id][key] = value
+    return updated
