@@ -260,6 +260,8 @@ def sniff_extension(file_path,verbose=True):
                       "cab": 'application/cab',
                       "html": 'text/html',
                       "htm": 'text/html',
+                      "dcm": 'application/dicom',
+                      "dicom": 'application/dicom',
                       "default": 'application/octet-stream',
                       "folder": 'application/vnd.google-apps.folder',
                       "img" : "application/octet-stream" }
