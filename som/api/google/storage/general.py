@@ -134,8 +134,9 @@ class Object(ModelBase):
 
 class Client(ClientBase):
 
-    def __init__(self,bucket_name,**kwargs):
+    def __init__(self,bucket_name, project_name, **kwargs):
         self.bucket_name = bucket_name
+        self.project_name = project_name
         super(Client, self).__init__(**kwargs)
     
     def __str__(self):
@@ -240,6 +241,7 @@ class Client(ClientBase):
     def upload_object(self,file_path,entity,
                       object_type=None,
                       batch=True,
+                      permission=None,
                       fields=None):
 
         '''upload_object will add a general object to the batch manager
@@ -252,10 +254,13 @@ class Client(ClientBase):
             return None
 
         uid = self.get_storage_path(file_path,entity)
-        bucket_folder = self.get_storage_path(file_path,entity,return_folder=True)
+        bucket_folder = self.get_storage_path(file_path,
+                                              entity,
+                                              return_folder=True)
 
         storage_obj = self.put_object(file_path=file_path,
-                                      bucket_folder=bucket_folder)
+                                      bucket_folder=bucket_folder,
+                                      permission=permission)
 
         # Obtain storage fields, update with provided fields
         storage_fields = get_storage_fields(storage_obj)
@@ -278,23 +283,26 @@ class Client(ClientBase):
         return new_object
 
 
-    def upload_text(self,text,entity,batch=True,fields=None):
+    def upload_text(self,text,entity,batch=True,fields=None,permission=None):
         '''upload_text will add a text object to the batch manager'''
         new_object = self.upload_object(file_path=text,
                                         entity=entity,
                                         fields=fields,
+                                        permission=permission,
                                         object_type="Text",
                                         batch=batch)
         bot.debug('TEXT: %s' %new_object)
         return new_object
 
 
-    def upload_image(self,image,entity,batch=True,fields=None):
+
+    def upload_image(self,image,entity,batch=True,fields=None,permission=None):
         '''upload_images will add an image object to the batch manager
         '''
         new_object = self.upload_object(file_path=image,
                                         entity=entity,
                                         fields=fields,
+                                        permission=permission,
                                         object_type="Image",
                                         batch=batch)
         bot.debug('IMAGE: %s' %new_object)
@@ -304,6 +312,7 @@ class Client(ClientBase):
     def upload_dataset(self,uid,collection,
                        images=None,
                        texts=None,
+                       permission=None,
                        entity_metadata=None,
                        images_metadata=None,
                        texts_metadata=None,
@@ -319,13 +328,14 @@ class Client(ClientBase):
         :param collection: should be the collection to add the entity to
         :param batch: add entities in batches (recommended, default True)
         '''
-
+        if permission is None:
+            permission = "projectPrivate"
+    
         if images_metadata is None: images_metadata = {}
         if texts_metadata is None: texts_metadata = {}
 
         # Add entity
-        entity = self.create_entity(collection=collection,
-                                    uid=uid)
+        entity = self.create_entity(collection=collection,uid=uid)
 
         if entity_metadata is not None:
             entity.update(fields=entity_metadata)
@@ -342,14 +352,12 @@ class Client(ClientBase):
                 self.upload_text(text=text,
                                  entity=entity,
                                  fields=fields,
-                                 batch=batch)
-
-
+                                 batch=batch,
+                                 permission=permission)
 
         if images is not None:
             for img in images:
                 fields = None
-
                 # metadata provided for the image?
                 if img in images_metadata:
                     fields = images_metadata[img]
@@ -357,7 +365,8 @@ class Client(ClientBase):
                 self.upload_image(image=img,
                                   entity=entity,
                                   fields=fields,
-                                  batch=batch)
+                                  batch=batch,
+                                  permission=permission)
 
         # Run a transaction for put (insert) images and text, and clears queue
         if batch:

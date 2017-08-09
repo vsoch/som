@@ -47,7 +47,7 @@ class ClientBase(ApiConnection):
 
     def __init__(self,**kwargs):
         super(ApiConnection, self).__init__(**kwargs)
-        self.datastore = datastore.Client()
+        self.datastore = datastore.Client(self.project_name)
         self.batch = BatchManager(client=self.datastore)
         self.storage = get_google_service('storage', 'v1')
         if self.bucket_name is not None:
@@ -63,11 +63,12 @@ class ClientBase(ApiConnection):
         return self.datastore.key(*key)
 
 
-    def put_object(self,bucket_folder,file_path,verbose=True):
+    def put_object(self,bucket_folder,file_path,verbose=True,permission=None):
         '''upload_object will upload a file to path bucket_path in storage
         '''
         return upload_file(storage_service=self.storage,
                            bucket=self.bucket,
                            bucket_path=bucket_folder,
                            file_path=file_path,
+                           permission=permission,
                            verbose=verbose)

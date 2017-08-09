@@ -72,7 +72,6 @@ def prepare_identifiers_request(ids, force=True):
     # Item --> Study (to represent all images)
     new_item = {"id_source": item_source}
     for item_id,item in ids.items():
-        bot.debug('entity >> %s items' %(len(ids)))
 
         # Entity ID
         if "id" not in entity:

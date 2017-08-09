@@ -27,6 +27,9 @@ from som.api.google.storage.validators import (
     validate_model
 )
 
+from som.api.google.storage.utils import (
+    get_google_service, 
+)
 import google.cloud.datastore as datastore
 from som.api.google.storage.datastore import (
     get_key_filters,
