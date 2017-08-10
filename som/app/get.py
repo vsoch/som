@@ -187,7 +187,7 @@ def retry_get_collection(client,collection_name):
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
 def retry_get_images(client,filters):
-    images = client.batch.query(kind="Image",
+    return client.batch.query(kind="Image",
                                 filters=filters)
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
