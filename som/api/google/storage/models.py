@@ -31,6 +31,7 @@ from som.api.google.storage.utils import (
     get_google_service, 
 )
 import google.cloud.datastore as datastore
+from retrying import retry
 from som.api.google.storage.datastore import (
     get_key_filters,
     parse_keys
@@ -104,7 +105,7 @@ class BatchManager:
                                                   # (currently on airplane)
 
 
-
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def runInsert(self,clear_queue=True):
        '''runInsert will run a transaction for a set of tasks
        '''
@@ -117,7 +118,7 @@ class BatchManager:
                self.tasks = []
        return tasks
        
-
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def runQueries(self,clear_queue=True):
        results = None
        if len(self.queries) > 0:
@@ -337,7 +338,7 @@ class ModelBase:
                     bot.debug("%s found existing in Entity, overwriting" %(key))
                     self._Entity[key] = value
 
-
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def get_or_create(self):
         '''get_or_create will get or create an object using a transaction.
         If an entity object already exists with the object, it is overridden
@@ -361,6 +362,7 @@ class ModelBase:
             self.update_fields(fields)
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def save(self):
         '''save just calls put for the current _Entity'''
         self.client.put(self._Entity)
@@ -381,7 +383,7 @@ class ModelBase:
             self.save()
         return self._Entity
 
-
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def delete(self):
         '''delete an entity'''
         key = None
@@ -422,6 +424,7 @@ class ModelBase:
         return self._Entity
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def get(self):
         '''get an entity, and override the currently set _Entity in the model
         if it is not retrieved yet. If already retrieved, does not update.
