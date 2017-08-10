@@ -26,6 +26,7 @@ from som.api.google.storage import Client
 from som.utils import write_json
 from som.logger import bot
 
+from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import storage
 from retrying import retry
 
@@ -77,7 +78,12 @@ def progress_download(collection_name,
         filters = [ ("entity_id","=", study) ]
 
     # Retrieve bucket, datastore client, images
-    storage_client = storage.Client()
+    try:
+        storage_client = storage.Client()
+    except DefaultCredentialsError:
+        bot.error("We didn't detect your GOOGLE_APPLICATION_CREDENTIALS in the environment! Did you export the path?")
+        sys.exit(1)
+
     bucket = storage_client.get_bucket(bucket_name)
     client = retry_get_client(bucket_name,project)
     collection = retry_get_collection(collection_name)
