@@ -84,6 +84,9 @@ def progress_download(collection_name,
         bot.error("We didn't detect your GOOGLE_APPLICATION_CREDENTIALS in the environment! Did you export the path?")
         sys.exit(1)
 
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
     bucket = storage_client.get_bucket(bucket_name)
     client = retry_get_client(bucket_name,project)
     collection = retry_get_collection(client,collection_name)
