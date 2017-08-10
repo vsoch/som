@@ -128,7 +128,7 @@ def delete_object(storage_service,bucket_name,object_name):
     return operation
 
 
-def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True,permission=None):
+def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True,mimetype=None,permission=None):
     '''get_folder will return the folder with folder_name, and if create=True,
     will create it if not found. If folder is found or created, the metadata is
     returned, otherwise None is returned
@@ -145,8 +145,8 @@ def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True,permis
     if permission == None:
         permission = "publicRead"
 
-    # Create media object with correct mimetype
-    mimetype = sniff_extension(file_path,verbose=verbose)
+    if mimetype == None:
+        mimetype = sniff_extension(file_path,verbose=verbose)
     media = http.MediaFileUpload(file_path,
                                  mimetype=mimetype,
                                  resumable=True)

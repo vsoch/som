@@ -63,11 +63,12 @@ class ClientBase(ApiConnection):
         return self.datastore.key(*key)
 
 
-    def put_object(self,bucket_folder,file_path,verbose=True,permission=None):
+    def put_object(self,bucket_folder,file_path,verbose=True,permission=None, mimetype=None):
         '''upload_object will upload a file to path bucket_path in storage
         '''
         return upload_file(storage_service=self.storage,
                            bucket=self.bucket,
+                           mimetype=mimetype,
                            bucket_path=bucket_folder,
                            file_path=file_path,
                            permission=permission,

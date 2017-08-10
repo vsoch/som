@@ -242,6 +242,7 @@ class Client(ClientBase):
                       object_type=None,
                       batch=True,
                       permission=None,
+                      mimetype=None,
                       fields=None):
 
         '''upload_object will add a general object to the batch manager
@@ -260,7 +261,8 @@ class Client(ClientBase):
 
         storage_obj = self.put_object(file_path=file_path,
                                       bucket_folder=bucket_folder,
-                                      permission=permission)
+                                      permission=permission,
+                                      mimetype=mimetype)
 
         # Obtain storage fields, update with provided fields
         storage_fields = get_storage_fields(storage_obj)
@@ -283,11 +285,12 @@ class Client(ClientBase):
         return new_object
 
 
-    def upload_text(self,text,entity,batch=True,fields=None,permission=None):
+    def upload_text(self,text,entity,batch=True,fields=None,permission=None,mimetype=None):
         '''upload_text will add a text object to the batch manager'''
         new_object = self.upload_object(file_path=text,
                                         entity=entity,
                                         fields=fields,
+                                        mimetype=mimetype,
                                         permission=permission,
                                         object_type="Text",
                                         batch=batch)
@@ -296,12 +299,13 @@ class Client(ClientBase):
 
 
 
-    def upload_image(self,image,entity,batch=True,fields=None,permission=None):
+    def upload_image(self,image,entity,batch=True,fields=None,permission=None,mimetype=None):
         '''upload_images will add an image object to the batch manager
         '''
         new_object = self.upload_object(file_path=image,
                                         entity=entity,
                                         fields=fields,
+                                        mimetype=mimetype,
                                         permission=permission,
                                         object_type="Image",
                                         batch=batch)
@@ -313,6 +317,8 @@ class Client(ClientBase):
                        images=None,
                        texts=None,
                        permission=None,
+                       texts_mimetype=None,
+                       images_mimetype=None,
                        entity_metadata=None,
                        images_metadata=None,
                        texts_metadata=None,
@@ -351,6 +357,7 @@ class Client(ClientBase):
 
                 self.upload_text(text=text,
                                  entity=entity,
+                                 mimetype=texts_mimetype,
                                  fields=fields,
                                  batch=batch,
                                  permission=permission)
@@ -365,6 +372,7 @@ class Client(ClientBase):
                 self.upload_image(image=img,
                                   entity=entity,
                                   fields=fields,
+                                  mimetype=images_mimetype,
                                   batch=batch,
                                   permission=permission)
 
