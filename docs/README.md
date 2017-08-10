@@ -1,6 +1,11 @@
 # Stanford Open Modules
 The Stanford Open modules for Python implement several modules for moving and structuring data, and communicating with different API endpoints. This documentation base will go over some basic examples for usage.
 
+## Clients
+If you want to use the client, the software provides a command line utility, `som`, to do so.
+
+ - [Download Images](client-download.md): Here is a walkthrough to download images and associated metadata from Google Storage and Datastore.
+
 
 ## Data Structure
 

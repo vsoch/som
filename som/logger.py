@@ -251,10 +251,10 @@ class SomMessage:
 def get_logging_level():
     '''get_logging_level will configure a logging to standard out based on the user's
     selected level, which should be in an environment variable called
-    SOM_MESSAGELEVEL. if SOM_MESSAGELEVEL is not set, the maximum level
+    MESSAGELEVEL. if MESSAGELEVEL is not set, the maximum level
     (5) is assumed (all messages).     
     '''
-    return int(os.environ.get("SOM_MESSAGELEVEL",5))
+    return int(os.environ.get("MESSAGELEVEL",5))
     
 
 def get_user_color_preference():

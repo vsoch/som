@@ -27,7 +27,6 @@ SOFTWARE.
 import argparse
 import sys
 import os
-import som
 
 def get_parser():
     parser = argparse.ArgumentParser(description="Stanford Open Modules for Python [SOM]")
@@ -88,7 +87,7 @@ def get_subparsers(parser):
     for action in actions:
         # get all subparsers and print help
         for choice, subparser in action.choices.items():
-            subs[choice] = subparser
+            subparsers[choice] = subparser
 
     return subparsers
 
@@ -109,7 +108,8 @@ def main():
         os.environ['MESSAGELEVEL'] = "CRITICAL"
 
     if args.version is True:
-        print(som.__version__)
+        from som.version import __version__
+        print(__version__)
         sys.exit(0)
 
 
@@ -120,6 +120,9 @@ def main():
                                             project=args.project,
                                             study=args.study,
                                             bucket=args.bucket)
+        sys.exit(0)
+
+    parser.print_help()
 
 
 if __name__ == '__main__':
