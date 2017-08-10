@@ -105,7 +105,7 @@ def main():
 
     # if environment logging variable not set, make silent
     if args.debug is False:
-        os.environ['MESSAGELEVEL'] = "CRITICAL"
+        os.environ['MESSAGELEVEL'] = 0
 
     if args.version is True:
         from som.version import __version__
@@ -123,7 +123,6 @@ def main():
         sys.exit(0)
 
     parser.print_help()
-
 
 if __name__ == '__main__':
     main()
