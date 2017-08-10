@@ -86,7 +86,7 @@ def progress_download(collection_name,
 
     bucket = storage_client.get_bucket(bucket_name)
     client = retry_get_client(bucket_name,project)
-    collection = retry_get_collection(collection_name)
+    collection = retry_get_collection(client,collection_name)
     images = retry_get_images(client,filters)
     
     bot.info("Found %s images for study %s in collection %s" %(len(images),
@@ -182,7 +182,7 @@ def download_collection(collection,
 
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def retry_get_collection(collection_name):
+def retry_get_collection(client,collection_name):
     return client.create_collection(collection_name)
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
