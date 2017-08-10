@@ -105,7 +105,7 @@ def main():
 
     # if environment logging variable not set, make silent
     if args.debug is False:
-        os.environ['MESSAGELEVEL'] = "0"
+        os.environ['MESSAGELEVEL'] = "5"
 
     if args.version is True:
         from som.version import __version__
