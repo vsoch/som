@@ -159,12 +159,12 @@ def download_collection(collection,
         sys.exit(1)
 
     output_folder = "%s/%s" %(output_folder,collection)
-    return retry_download_collection(output_folder=output_folder,
-                                     study=study,
-                                     collection_name=collection,
-                                     project=project,
-                                     bucket_name=bucket,
-                                     filters=filters)
+    return progress_download(output_folder=output_folder,
+                             study=study,
+                             collection_name=collection,
+                             project=project,
+                             bucket_name=bucket,
+                             filters=filters)
 
 
 
