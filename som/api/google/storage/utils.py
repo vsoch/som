@@ -59,6 +59,7 @@ import json
 import pickle
 import re
 import requests
+from googleapiclient.errors import HttpError
 from retrying import retry
 import shutil
 import simplejson
@@ -150,11 +151,17 @@ def upload_file(storage_service,bucket,bucket_path,file_path,verbose=True,mimety
     media = http.MediaFileUpload(file_path,
                                  mimetype=mimetype,
                                  resumable=True)
-    request = storage_service.objects().insert(bucket=bucket['id'], 
-                                               body=body,
-                                               predefinedAcl=permission,
-                                               media_body=media)
-    return request.execute()
+    try:
+        request = storage_service.objects().insert(bucket=bucket['id'], 
+                                                   body=body,
+                                                   predefinedAcl=permission,
+                                                   media_body=media)
+        result = request.execute()
+    except HttpError:
+        result = None
+        pass
+
+    return result
 
 
 

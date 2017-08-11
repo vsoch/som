@@ -26,6 +26,7 @@ from som.api.google.storage import Client
 from som.utils import write_json
 from som.logger import bot
 
+from google.cloud.exceptions import Forbidden
 from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import storage
 from retrying import retry
@@ -77,11 +78,17 @@ def progress_download(collection_name,
     if filters is None:
         filters = [ ("entity_id","=", study) ]
 
+    bot.info("Collecting available images...")
+
     # Retrieve bucket, datastore client, images
     try:
         storage_client = storage.Client()
+
     except DefaultCredentialsError:
         bot.error("We didn't detect your GOOGLE_APPLICATION_CREDENTIALS in the environment! Did you export the path?")
+        sys.exit(1)
+    except Forbidden:
+        bot.error("The service account specified by GOOGLE_APPLICATION_CREDENTIALS does not have permission to use this resource.")
         sys.exit(1)
 
     if not os.path.exists(output_folder):
@@ -105,7 +112,9 @@ def progress_download(collection_name,
         for image in images:
 
             # Download image
-            file_name = "%s/%s" %(output_folder,image.key.name.replace('/','-'))
+            file_name = prepare_folders(output_folder=output_folder,
+                                        image_name = image.key.name)
+            
             blob = bucket.blob(image['storage_name'])
 
             bot.show_progress(progress, total, length=35)
@@ -143,6 +152,21 @@ def save_metadata(image,file_name):
     del metadata['updated'] 
     metadata_file = file_name.replace('.dcm','.json')
     return write_json(metadata,metadata_file)
+
+
+
+def prepare_folders(output_folder,image_name):
+    '''prepare download path for image, and return path.
+    '''
+
+    folders = image_name.split('/')[:-1] # last is the image
+    image_name = image_name.split('/')[-1]
+    for folder in folders:
+        output_folder = "%s/%s" %(output_folder,folder)
+        if not os.path.exists(output_folder):
+            os.mkdir(output_folder)
+ 
+    return "%s/%s" %(output_folder,image_name)
 
 
 
@@ -191,7 +215,7 @@ def retry_get_collection(client,collection_name):
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
 def retry_get_images(client,filters):
     return client.batch.query(kind="Image",
-                                filters=filters)
+                              filters=filters)
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
 def retry_get_client(bucket_name,project):

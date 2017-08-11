@@ -259,16 +259,23 @@ class Client(ClientBase):
                                               entity,
                                               return_folder=True)
 
+        # Returns none on httperror, if object already exists
         storage_obj = self.put_object(file_path=file_path,
                                       bucket_folder=bucket_folder,
                                       permission=permission,
                                       mimetype=mimetype)
 
-        # Obtain storage fields, update with provided fields
+        # We created it
+        if storage_obj is None:
+            return storage_obj
+
         storage_fields = get_storage_fields(storage_obj)
         if fields is not None:
             storage_fields.update(fields)
         fields = storage_fields
+
+        # TODO: here we need to try to GET object to make url, to upload metadata
+        # right now we just pass over it
 
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
                                                        storage_obj['name'])
