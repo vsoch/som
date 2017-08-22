@@ -47,9 +47,10 @@ except ImportError:
 
 def progress_download(collection_name,
                       output_folder,
-                      study,
+                      suid,
                       project,
                       bucket_name,
+                      query_entity=True,
                       filters=None):
 
     '''
@@ -61,7 +62,11 @@ def progress_download(collection_name,
     collection_name: the name of the collection, typically an IRB number
     output_folder: the base directory to create a study folder in
     project: Google Cloud project name
-    study: the name of the study, usually an Entity SUID (coded accession#)
+    suid: an suid of interest to query (eg, if querying an Entity, you would
+          use the suid of the patient, an Image would be an suid of the
+          study SUID --> (coded accession#)
+    query_entity: by default, we query the entity first, and then get images.
+                  to query the images (studies) set this to False.
     bucket_name: the name for the Google Storage Bucket (usually provided)
     filters: a list of tuples to apply to filter the query. Default is:
 
@@ -76,7 +81,10 @@ def progress_download(collection_name,
     '''
 
     if filters is None:
-        filters = [ ("entity_id","=", study) ]
+        if query_entity is True:
+            filters = [ ("uid","=", suid) ]
+        else:
+            filters = [ ("AccessionNumber","=", suid) ]
 
     bot.info("Collecting available images...")
 
@@ -97,11 +105,19 @@ def progress_download(collection_name,
     bucket = storage_client.get_bucket(bucket_name)
     client = retry_get_client(bucket_name,project)
     collection = retry_get_collection(client,collection_name)
-    images = retry_get_images(client,filters)
+
+    if query_entity is True:
+        entity_set = retry_get_entity(client,filters)
+        images = []
+        for entity in entity_set:
+            entity_images = client.get_images(entity=entity)
+            images = [x for x in entity_images if x not in images]
+    else:
+        images = retry_get_images(client,filters)
     
-    bot.info("Found %s images for study %s in collection %s" %(len(images),
-                                                               study,
-                                                               collection_name))
+    bot.info("Found %s images for suid %s in collection %s" %(len(images),
+                                                             suid,
+                                                             collection_name))
     
     progress = 0
     total = len(images)
@@ -172,8 +188,9 @@ def prepare_folders(output_folder,image_name):
 
 def download_collection(collection,
                         project,
-                        study,
+                        suid,
                         bucket,
+                        query_entity=True,
                         output_folder=None,
                         filters=None):
 
@@ -193,9 +210,10 @@ def download_collection(collection,
 
     output_folder = "%s/%s" %(output_folder,collection)
     return progress_download(output_folder=output_folder,
-                             study=study,
+                             suid=suid,
                              collection_name=collection,
                              project=project,
+                             query_entity=query_entity,
                              bucket_name=bucket,
                              filters=filters)
 
@@ -211,6 +229,13 @@ def download_collection(collection,
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
 def retry_get_collection(client,collection_name):
     return client.create_collection(collection_name)
+
+
+@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
+def retry_get_entity(client,filters):
+    return client.batch.query(kind="Entity",
+                              filters=filters)
+
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
 def retry_get_images(client,filters):

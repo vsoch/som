@@ -61,9 +61,15 @@ def get_parser():
                      help="name of Google Cloud project (eg, irlhs-learning)",
                      type=str, required=True)
 
-    get.add_argument('--study', dest="study",
-                     help="Identifier for the study. Typically begins with IRXXXX",
+    get.add_argument('--suid', dest="suid",
+                     help='''An suid associated with an entity to find images (default) 
+                             or query single images (set flag --query-images for the study. 
+                             Typically begins with IRXXXX''',
                      type=str, required=True)
+
+    get.add_argument('--query-images', dest="query_images", 
+                        help="use verbose logging to debug.", 
+                        default=False, action='store_true')
 
     get.add_argument('--bucket', dest="bucket",
                      help="Name of the storage bucket. Eg (irlhs-dicom)",
@@ -118,7 +124,8 @@ def main():
         output_folder = download_collection(output_folder=args.outfolder,
                                             collection=args.collection,
                                             project=args.project,
-                                            study=args.study,
+                                            suid=args.suid,
+                                            query_entity=not args.query_images,
                                             bucket=args.bucket)
         sys.exit(0)
 
