@@ -81,6 +81,10 @@ An example API Call might look like the following:
 
 ```
 som get --outfolder /tmp --project som-irlearning --suid IR661f32 --bucket irlhs-dicom --collection IRB33192
+Collecting available images...
+Found 2 images for suid IR661f32 in collection IRB33192
+DEBUG Saving images and metadata...
+Progress |===================================| 100.0% 
 ```
 
 Yeah it's a lot of parameters. We try to make this really hard on your memory centers :)
