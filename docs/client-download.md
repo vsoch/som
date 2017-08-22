@@ -55,7 +55,7 @@ optional arguments:
 Before this will work for you, you need to be given a credentials file, and you need to export the path to this credentials file in your environment. For example, let's say I saved my top secret credentials in the file `/home/vanessa/.secrets/hufflepuff.json`. This could be in my `$HOME/.bashrc` or `$HOME/.profile`:
 
 ```
-GOOGLE_APPLICATIO_CREDENTIALS="/home/vanessa/.secrets/hufflepuff.json"
+GOOGLE_APPLICATION_CREDENTIALS="/home/vanessa/.secrets/hufflepuff.json"
 export GOOGLE_APPLICATION_CREDENTIALS 
 ```
 
