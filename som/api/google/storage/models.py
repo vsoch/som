@@ -338,6 +338,7 @@ class ModelBase:
                     bot.debug("%s found existing in Entity, overwriting" %(key))
                     self._Entity[key] = value
 
+
     @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def get_or_create(self):
         '''get_or_create will get or create an object using a transaction.
@@ -350,6 +351,7 @@ class ModelBase:
         return self._Entity
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def setup(self,fields=None):
         '''setup will generate a new Entity without saving it (for batches)
         '''
@@ -368,6 +370,7 @@ class ModelBase:
         self.client.put(self._Entity)
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def create(self,fields=None,save=True):
         '''create a new entity
         :param fields: additional fields to add
@@ -394,6 +397,7 @@ class ModelBase:
         return key
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def update_or_create(self,fields=None,save=True):
         '''update or create will update or create an entity.
         '''
@@ -407,6 +411,7 @@ class ModelBase:
         return self._Entity
 
 
+    @retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=5)
     def update(self,fields=None,save=True):
         '''update an entity, meaning updating the local and then pushing
         (saving) to the datastore. This overrides the datastore version
