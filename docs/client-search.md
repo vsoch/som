@@ -5,6 +5,14 @@
 
 <asciinema-player src="assets/asciicast/client-search.json" poster="data:text/plain,Intro to SOM Search" title="How to search the SOM DataStore" author="vsochat@stanford.edu" cols="124" rows="24" speed="2.0" theme="asciinema"></asciinema-player>
 
+<style>
+.main-content {
+    max-width: 64rem;
+    padding: 2rem !important;
+    margin: 0 auto;
+    font-size: 1.1rem;
+}
+</style>
 
 After installing the som tools:
 
