@@ -30,6 +30,7 @@ from som.api.google.storage.validators import (
 from som.api.google.storage.utils import (
     get_google_service, 
 )
+
 import google.cloud.datastore as datastore
 from retrying import retry
 from som.api.google.storage.datastore import (
@@ -37,6 +38,10 @@ from som.api.google.storage.datastore import (
     parse_keys
 )
 
+from google.cloud.exceptions import (
+    BadRequest,
+    GrpcRendezvous
+)
 from som.logger import bot
 import datetime
 import collections
@@ -196,8 +201,7 @@ class BatchManager:
         try:
             result = [x for x in query.fetch(limit=limit)]
 
-        except (google.cloud.exceptions.BadRequest,
-                google.cloud.exceptions.GrpcRendezvous):
+        except (BadRequest, GrpcRendezvous):
             bot.error("Error with query.")         
             pass
 

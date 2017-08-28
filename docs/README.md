@@ -5,6 +5,7 @@ The Stanford Open modules for Python implement several modules for moving and st
 If you want to use the client, the software provides a command line utility, `som`, to do so.
 
  - [Download Images](client-download.md): Here is a walkthrough to download images and associated metadata from Google Storage and Datastore.
+ - [Search](client-search.md): Search collections, entity, and images.
 
 
 ## Data Structure

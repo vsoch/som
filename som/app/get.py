@@ -22,14 +22,13 @@ SOFTWARE.
 
 '''
 
-from som.api.google.storage import Client
 from som.utils import write_json
 from som.logger import bot
 
 from google.cloud.exceptions import Forbidden
 from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import storage
-from retrying import retry
+from .requester import RetryRequester
 
 import tempfile
 import os
@@ -88,7 +87,6 @@ def progress_download(collection_name,
 
     bot.info("Collecting available images...")
 
-    # Retrieve bucket, datastore client, images
     try:
         storage_client = storage.Client()
 
@@ -103,17 +101,21 @@ def progress_download(collection_name,
         os.mkdir(output_folder)
 
     bucket = storage_client.get_bucket(bucket_name)
-    client = retry_get_client(bucket_name,project)
-    collection = retry_get_collection(client,collection_name)
+
+    # Retrieve bucket, datastore client, images
+    requester = RetryRequester(bucket_name=bucket_name,
+                               project=project)
+
+    collection = requester.create_collection(collection_name)
 
     if query_entity is True:
-        entity_set = retry_get_entity(client,filters)
+        entity_set = requester.get_entity(filters)
         images = []
         for entity in entity_set:
-            entity_images = client.get_images(entity=entity)
+            entity_images = requester.client.get_images(entity=entity)
             images = [x for x in entity_images if x not in images]
     else:
-        images = retry_get_images(client,filters)
+        images = requester.get_images(filters)
     
     bot.info("Found %s images for suid %s in collection %s" %(len(images),
                                                              suid,
@@ -129,12 +131,12 @@ def progress_download(collection_name,
 
             # Download image
             file_name = prepare_folders(output_folder=output_folder,
-                                        image_name = image.key.name)
+                                        image_name=image.key.name)
             
             blob = bucket.blob(image['storage_name'])
 
             bot.show_progress(progress, total, length=35)
-            download_retry(blob,file_name)
+            requester.download(blob,file_name)
             files.append(file_name)
             files.append(save_metadata(image,file_name))
             progress+=1
@@ -216,37 +218,3 @@ def download_collection(collection,
                              query_entity=query_entity,
                              bucket_name=bucket,
                              filters=filters)
-
-
-
-########################################################################
-# RETRY FUNCTIONS
-#----------------------------------------------------------------------
-# exponential backoff for Google Cloud APIs that can have hiccups from
-########################################################################
-
-
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def retry_get_collection(client,collection_name):
-    return client.create_collection(collection_name)
-
-
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def retry_get_entity(client,filters):
-    return client.batch.query(kind="Entity",
-                              filters=filters)
-
-
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def retry_get_images(client,filters):
-    return client.batch.query(kind="Image",
-                              filters=filters)
-
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def retry_get_client(bucket_name,project):
-    return Client(bucket_name=bucket_name,
-                  project_name=project)
-
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-def download_retry(blob,file_name):
-    blob.download_to_filename(file_name)
