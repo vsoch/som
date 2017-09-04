@@ -34,85 +34,7 @@ entity = {
       "date": [
          "PatientBirthDate"
       ]
-   },
-   "custom_fields":[
-      "AccessionNumber",
-      "AffectedSOPClassUID",
-      "AffectedSOPInstanceUID",
-      "AssertionUID",
-      "CodingSchemeUID",
-      "ConcatenationUID",
-      "ContextGroupExtensionCreatorUID",
-      "ContextUID",
-      "CreatorVersionUID",
-      "DeviceUID",
-      "DigitalSignatureUID",
-      "DimensionOrganizationUID",
-      "DoseReferenceUID",
-      "EncryptedContentTransferSyntaxUID",
-      "FiducialUID",
-      "FillerOrderNumberImagingServiceRequest",
-      "FrameOfReferenceUID",
-      "ImplementationClassUID",
-      "InstanceCreatorUID",
-      "IrradiationEventUID",
-      "LargePaletteColorLookupTableUID",
-      "MACCalculationTransferSyntaxUID",
-      "MappingResourceUID",
-      "MediaStorageSOPClassUID",
-      "MediaStorageSOPInstanceUID",
-      "MultiFrameSourceSOPInstanceUID",
-      "ObservationUID",
-      "OriginalSpecializedSOPClassUID",
-      "OtherPatientIDs",
-      "OtherPatientIDsSequence",
-      "OtherPatientNames",
-      "PaletteColorLookupTableUID",
-      "PatientAddress",
-      "PatientBirthDate",
-      "PatientBirthName",
-      "PatientID",
-      "PatientMotherBirthName",
-      "PatientName",
-      "PatientTelephoneNumbers",
-      "PresentationDisplayCollectionUID",
-      "PresentationSequenceCollectionUID",
-      "PrivateInformationCreatorUID",
-      "PrivateRecordUID",
-      "RadiopharmaceuticalAdministrationEventUID",
-      "ReasonForStudyReferencedGeneralPurposeScheduledProcedureStepTransactionUID",
-      "ReferencedAssertionUID",
-      "ReferencedColorPaletteInstanceUID",
-      "ReferencedDoseReferenceUID",
-      "ReferencedFrameOfReferenceUID",
-      "ReferencedSOPClassUID",
-      "ReferencedSOPInstanceUID",
-      "RelatedFrameOfReferenceUID",
-      "RelatedGeneralSOPClassUID",
-      "RequestedSOPClassUID",
-      "RequestedSOPInstanceUID",
-      "RetrieveLocationUID",
-      "SOPClassUID",
-      "SOPInstanceUID",
-      "SeriesInstanceUID",
-      "SourceFrameOfReferenceUID",
-      "SpecimenUID",
-      "StorageMediaFileSetUID",
-      "StudyInstanceUID",
-      "StudyID",
-      "SynchronizationFrameOfReferenceUID",
-      "TableFrameOfReferenceUID",
-      "TargetFrameOfReferenceUID",
-      "TargetUID",
-      "TemplateExtensionCreatorUID",
-      "TemplateExtensionOrganizationUID",
-      "TrackingUID",
-      "TransactionUID",
-      "TransferSyntaxUID",
-      "UID",
-      "VolumeFrameOfReferenceUID",
-      "VolumetricPresentationInputSetUID"
-   ]
+   }
 }
 
 # This is associated with an entire study
@@ -130,5 +52,8 @@ item = {
          "ContentDate",
          "AcquisitionDate"
       ]
-   }
+   },
+   "custom_fields":[
+      "SeriesInstanceUID"
+   ]
 }

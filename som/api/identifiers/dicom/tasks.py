@@ -64,6 +64,7 @@ def prepare_identifiers_request(ids, force=True):
     item_field = item_options['id_source']['field']  
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
+    item_cfs = item_options['custom_fields']
 
     # Entity --> Patient
     entity = {"id_source":entity_source,
@@ -94,7 +95,31 @@ def prepare_identifiers_request(ids, force=True):
 
         # Study ID (accession#)
         if "id" not in new_item:
-            new_item["id"] = item[item_field]                                        
+            new_item["id"] = item[item_field]    
+
+        # Item custom fields
+        for cf in item_cfs:
+            if cf in item:
+                if item[cf] not in ['',None]:    
+
+                    # If we haven't added, add single string
+                    if cf not in new_item:
+                        new_item[cf] = item[cf]
+
+                    # If we've already added, only change if different
+                    else:
+                        # If it's a string, check if equal
+                        if not isinstance(new_item[cf],list):
+
+                            # Only add (and change to list) given different
+                            if item[cf] != new_item[cf]:
+                                new_item[cf] = [new_item[cf],item[cf]]
+
+                        else:
+                            # Only add if not in list
+                            if item[cf] not in new_item[cf]:
+                                new_item[cf].append(item[cf])
+
 
     # We are only including one study item to represent all images
     entity["items"].append(new_item)
