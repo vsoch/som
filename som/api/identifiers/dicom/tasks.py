@@ -64,14 +64,10 @@ def prepare_identifiers_request(ids, force=True):
     item_field = item_options['id_source']['field']  
     entity_times = entity_options['id_timestamp']
     item_times = item_options['id_timestamp']
-    item_cfs = item_options['custom_fields']
 
     # Entity --> Patient
     entity = {"id_source":entity_source,
               "items":[]}
-
-    # Keep a record of custom fields, values seen
-    seen = dict()
 
     # Item --> Study (to represent all images)
     new_item = {"id_source": item_source}
@@ -99,31 +95,6 @@ def prepare_identifiers_request(ids, force=True):
         # Study ID (accession#)
         if "id" not in new_item:
             new_item["id"] = item[item_field]    
-
-        # Item custom fields
-        for cf in item_cfs:
-            if "custom_fields" not in new_item:
-                new_item['custom_fields'] = []
-
-            # Is the item defined in the data?
-            if cf in item:
-
-                # Only continue if it's defined
-                if item[cf] not in ['',None]:    
-
-                    # Add to list of custom fields if haven't seen VALUE yet
-                    do_add = True
-                    if cf in seen: 
-                        if item[cf] in seen[cf]:
-                            do_add = False
-                    else:
-                        seen[cf] = []                    
-
-                    if do_add is True:               
-                        new_item['custom_fields'].append({'key': cf, 
-                                                          'value': item[cf] })
-                        seen[cf].append(item[cf])
- 
 
     # We are only including one study item to represent all images
     entity["items"].append(new_item)
