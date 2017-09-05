@@ -70,6 +70,9 @@ def prepare_identifiers_request(ids, force=True):
     entity = {"id_source":entity_source,
               "items":[]}
 
+    # Keep a record of custom fields, values seen
+    seen = dict()
+
     # Item --> Study (to represent all images)
     new_item = {"id_source": item_source}
     for item_id,item in ids.items():
@@ -99,27 +102,28 @@ def prepare_identifiers_request(ids, force=True):
 
         # Item custom fields
         for cf in item_cfs:
+            if "custom_fields" not in new_item:
+                new_item['custom_fields'] = []
+
+            # Is the item defined in the data?
             if cf in item:
+
+                # Only continue if it's defined
                 if item[cf] not in ['',None]:    
 
-                    # If we haven't added, add single string
-                    if cf not in new_item:
-                        new_item[cf] = item[cf]
-
-                    # If we've already added, only change if different
+                    # Add to list of custom fields if haven't seen VALUE yet
+                    do_add = True
+                    if cf in seen: 
+                        if item[cf] in seen[cf]:
+                            do_add = False
                     else:
-                        # If it's a string, check if equal
-                        if not isinstance(new_item[cf],list):
+                        seen[cf] = []                    
 
-                            # Only add (and change to list) given different
-                            if item[cf] != new_item[cf]:
-                                new_item[cf] = [new_item[cf],item[cf]]
-
-                        else:
-                            # Only add if not in list
-                            if item[cf] not in new_item[cf]:
-                                new_item[cf].append(item[cf])
-
+                    if do_add is True:               
+                        new_item['custom_fields'].append({'key': cf, 
+                                                          'value': item[cf] })
+                        seen[cf].append(item[cf])
+ 
 
     # We are only including one study item to represent all images
     entity["items"].append(new_item)
