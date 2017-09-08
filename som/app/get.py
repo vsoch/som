@@ -204,7 +204,7 @@ def download_collection(collection,
     '''
 
     if output_folder is None:
-        output_folder = os.path.getcwd()
+        output_folder = os.getcwd()
 
     if not os.path.exists(output_folder):
         bot.error("Output folder %s not found. Exiting." %output_folder)
