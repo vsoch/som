@@ -28,7 +28,7 @@ from som.logger import bot
 from google.cloud.exceptions import Forbidden
 from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import storage
-from .requester import RetryRequester
+from som.cli.requester import RetryRequester
 
 import tempfile
 import os
@@ -134,7 +134,6 @@ def progress_download(collection_name,
                                         image_name=image.key.name)
             
             blob = bucket.blob(image['storage_name'])
-
             bot.show_progress(progress, total, length=35)
             requester.download(blob,file_name)
             files.append(file_name)
@@ -158,7 +157,8 @@ def save_metadata(image,file_name):
     Parameters
     ==========
     image: a Google DataStore Entity that converts to dictionary
-    file_name: the file name of the dicom the metadata is for
+    file_name: the file name of the dicom the metadata is for. 
+               Currently, the only extension options are .tar.gz and .dcm
 
     Returns
     =======
@@ -167,8 +167,10 @@ def save_metadata(image,file_name):
     '''
     metadata = dict(image)
     del metadata['created']
-    del metadata['updated'] 
-    metadata_file = file_name.replace('.dcm','.json')
+    del metadata['updated']
+    dirname = os.path.dirname(file_name)
+    basename = os.path.basename(file_name).split('.')[0]
+    metadata_file = "%s/%s.json" %(dirname,basename)
     return write_json(metadata,metadata_file)
 
 
