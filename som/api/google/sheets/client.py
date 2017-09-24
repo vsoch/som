@@ -51,3 +51,25 @@ class Client(ApiConnection):
         if not values:
             print('No data found.')
         return values
+
+
+    def write_spreadsheet(self, sheet_id, values, 
+                                range_name="A:Z", 
+                                valueInputOption="USER_ENTERED"):
+        '''write spreadsheet will write a new row to a spreadsheet
+
+        Parameters
+        ==========
+        sheet_id: should correspond with the sheet_id to write to
+        values: a list of values for the sheet, including the header.
+                None: will skip a cell
+                '': will clear a cell
+        range_name: the range of the sheet to use
+        valueInputOption: one of USER_ENTERED (default) or RAW. 
+                          USER_ENTERED means formatted by sheet
+        '''
+        body = {'values': values}
+
+        return self.cli.spreadsheets().values().update(
+                        spreadsheetId=sheet_id, range=range_name,
+                        valueInputOption=valueInputOption, body=body).execute()
