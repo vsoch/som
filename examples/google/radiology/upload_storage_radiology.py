@@ -7,8 +7,10 @@
 import os
 
 # Start google storage client for pmc-stanford
-from som.api.google import Client
-client = Client(use_bigquery=False, bucket_name='radiology')
+from som.api.google.datastore import DataStoreClient as Client
+client = Client(bucket_name='radiology')
+
+# big_query not developed yet
 collection = client.create_collection(uid='IRB41449')
 
 # Let's load some dummy data from deid
