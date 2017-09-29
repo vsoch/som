@@ -1,5 +1,5 @@
 '''
-google/storage/utils.py: general storage utility functions
+google/utils.py: general storage utility functions
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -25,16 +25,89 @@ SOFTWARE.
 
 
 from googleapiclient.errors import HttpError
-from googleapiclient import http
+from googleapiclient import (
+    http,
+    discovery
+)
+
+from oauth2client.client import GoogleCredentials
+from oauth2client.service_account import ServiceAccountCredentials
+
 from som.logger import bot
+
+from som.utils import (
+    get_installdir,
+    read_file,
+    run_command
+)
+
+from subprocess import (
+    Popen,
+    PIPE,
+    STDOUT
+)
+
+import tempfile
+import zipfile
 
 from glob import glob
 import httplib2
+import inspect
+import imp
 import os
+import json
+import pickle
 import re
+import requests
+from googleapiclient.errors import HttpError
+from retrying import retry
+import shutil
+import simplejson
 import sys
 import tempfile
+import time
+import zipfile
 
+
+#######################################################################
+# TESTING/RETRY FUNCTIONS #############################################
+#######################################################################
+
+def stop_if_result_none(result):
+    '''stop if result none will return True if we should not retry 
+    when result is none, False otherwise using retrying python package
+    '''
+    do_retry = result is not None
+    return do_retry
+
+
+# Simple default retrying for calls to api
+doretry = retry(wait_exponential_multiplier=1000,wait_exponential_max=10000,stop_max_attempt_number=10)
+
+
+
+#######################################################################
+# GOOGLE GENERAL API ##################################################
+#######################################################################
+
+def get_google_service(service_type=None,version=None):
+    '''
+    get_url will use the requests library to get a url
+    :param service_type: the service to get (default is storage)
+    :param version: version to use (default is v1)
+    '''
+    if service_type == None:
+        service_type = "storage"
+    if version == None:
+        version = "v1"
+
+    credentials = GoogleCredentials.get_application_default()
+    return discovery.build(service_type, version, credentials=credentials) 
+
+
+#######################################################################
+# GOOGLE STORAGE API ##################################################
+#######################################################################
     
 def get_bucket(storage_service,bucket_name):
     req = storage_service.buckets().get(bucket=bucket_name)
