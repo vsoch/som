@@ -32,12 +32,9 @@ from .models import (
 )
 
 from .models import DataStoreManager
-from som.api.google.storage.utils import get_bucket
-from som.api.google.utils import get_google_service
+from som.api.google.storage.client import StorageClientBase
 from google.cloud import datastore
-from som.api import ApiConnection
 from som.logger import bot
-from som.utils import read_json
 import six
 
 ######################################################################################
@@ -97,49 +94,16 @@ def storageObject(uid,entity,url,storage_type):
 ######################################################################################
 
 
-class DataStoreClient(ApiConnection):
+class DataStoreClient(StorageClientBase):
     ''' a DataStore Client is a wrapper for DataStore and google Storage, with
         a general stratgy to upload to storage, and save metadata in Datastore
     '''
 
     def __init__(self, project, bucket_name, **kwargs):
-        super(ApiConnection, self).__init__(**kwargs)
-        self.project = project
+        super(DataStoreClient, self).__init__(project, bucket_name, **kwargs)
         self.datastore = datastore.Client(self.project)
-        self.storage = get_google_service('storage', 'v1')
-        self.bucket_name = bucket_name
+        self.name = "datastore"
         self.batch = DataStoreManager(client=self.datastore)
-
-        if self.bucket_name is not None:
-            self.get_bucket()
-
-    def get_bucket(self):
-        self.bucket = get_bucket(self.storage, self.bucket_name)
-
-
-    def name(self):
-        name = ""
-        if self.bucket_name is not None:
-            name = ".%s" %self.bucket_name
-        return "google[storage][datastore]%s" %name
-
-    def __str__(self):
-        return self.name()
-
-    def __repr__(self):
-        return self.name()
-
-    def put_object(self,bucket_folder,file_path, verbose=True,permission=None, mimetype=None):
-        '''upload_object will upload a file to path bucket_path in storage
-        '''
-        return upload_file(storage_service=self.storage,
-                           bucket=self.bucket,
-                           mimetype=mimetype,
-                           bucket_path=bucket_folder,
-                           file_path=file_path,
-                           permission=permission,
-                           verbose=verbose)
-
 
     ###################################################################
     ## Create #########################################################

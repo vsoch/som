@@ -104,18 +104,6 @@ def list_bucket(bucket,storage_service):
     return objects
 
 
-def get_image_path(repo_url,commit):
-    '''get_image_path will determine an image path based on a repo url, removing
-    any token, and taking into account urls that end with .git.
-    :param repo_url: the repo url to parse:
-    :param commit: the commit to use
-    '''
-    repo_url = repo_url.split('@')[-1].strip()
-    if repo_url.endswith('.git'):
-        repo_url =  repo_url[:-4]
-    return "%s/%s" %(re.sub('^http.+//www[.]','',repo_url),commit)
-
-
 
 
 #######################################################################

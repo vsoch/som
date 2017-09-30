@@ -22,148 +22,118 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 '''
-
-from som.api.google.storage.validators import (
-    validate_model
-)
-
-from som.api.google.utils import get_google_service
-from .utils import (
-    get_bucket,
-    upload_file
-)
-
-import google.cloud.datastore as datastore
-import google.cloud.bigquery as bq
-
+ 
+from google.cloud import bigquery
+from som.api.google.models import BatchManager, ModelBase
 from retrying import retry
-from som.api.google.storage.datastore import (
-    get_key_filters,
-    parse_keys
-)
-
 from google.cloud.exceptions import (
     BadRequest,
     GrpcRendezvous
 )
 from som.logger import bot
 import datetime
-import collections
 import sys
 import os
 
 
-################################################################################
-# Bases
-################################################################################
+class BigQueryManager(BatchManager):
+    '''a batch manager that sends metadata to Google BigQuery, is a child
+       class of som.google.api.models BatchManager that has skeleton functions
+       to fill in for insert, run, etc.
 
-class BatchManager:
-    '''a batch manager is bucket to hold multiple objects to filter, query, etc.
-    It a way to compile a set, and then run through a transaction. It is intended
-    to be a Base class for the DataStoreBatch and BigQueryBatch
-    '''
-    def __init__(self,client=None):
         self.client = client
         self.tasks = []
         self.queries = []
 
-    def get(self):
-        raise NotImplementedError
+       Parameters
+       ==========
+       rows: a list of rows to add to some table, to be specified when the 
+       manager is initialized.
 
-    def add(self):
-        raise NotImplementedError
-
-    def delete(self):
-        raise NotImplementedError
-
-    def runInsert(self):
-        raise NotImplementedError
-       
-    def runQueries(self):
-        raise NotImplementedError
-
-    def query(self):
-        raise NotImplementedError
-
-
-
-class ModelBase:
-
-    def __init__(self,client=None):
-        self.client = client
-
-    def update_fields(self):
-        return NotImplementedError
-
-    def get_or_create(self):
-        return NotImplementedError
-
-    def setup(self):
-        return NotImplementedError
-
-    def save(self):
-        return NotImplementedError
-
-    def create(self):
-        return NotImplementedError
-
-    def delete(self):
-        return NotImplementedError
-
-    def update_or_create(self):
-        return NotImplementedError
-
-    def update(self):
-        return NotImplementedError
-
-    def get(self):
-        return NotImplementedError
-
-
-################################################################################
-# BigQuery Batch Manager
-################################################################################
-
-        
-class BigQueryManager(BatchManager):
-    '''a batch manager that sends metadata to Google BigQuery
     '''
     def __init__(self, **kwargs):
         super(BigQueryManager, self).__init__(**kwargs)
         if self.client is None:
             self.client = bigquery.Client()
+        self.rows = []
+        self.table = None
+
+    def set_table(self,table, clear_rows=True):
+        self.table = table
+        if clear_rows is True:
+            bot.debug("Clearing previously added rows. Set clear_rows to False to prevent this.")
+            self.rows = []
+        return self.rows 
 
 
-class BigQueryBase:
+    def runInsert(self, table=None):
+        if len(self.rows) > 0:
+            table = table.insert_data(self.rows)
+            self.rows = []
+        return table
+       
 
-    def __init__(self,client=None):
-        self.client = client
-
-    def update_fields(self):
-        return NotImplementedError
-
-    def get_or_create(self):
-        return NotImplementedError
-
-    def setup(self):
-        return NotImplementedError
-
-    def save(self):
-        return NotImplementedError
-
-    def create(self):
-        return NotImplementedError
-
-    def delete(self):
-        return NotImplementedError
-
-    def update_or_create(self):
-        return NotImplementedError
-
-    def update(self):
-        return NotImplementedError
-
-    def get(self):
-        return NotImplementedError
+    def add_rows(self, rows, table=None):
+         ''' Add one or more rows to a table. Rows should be a list of
+             dict, each item corresponding to a key/value
+         '''
+         table = self._validate_table(table)
+         if table is not None:
+             rows = self._dict_to_table(rows,table.schema)
+             self.rows = self.rows + []
 
 
+    def _validate_table(self, table, schema_required=True):
+        ''' ensure that the user has provided a table, with the following
+            order of preference:
+
+            1. First preference goes to table provided at runtime
+            2. Second preference goes to BatchManager table
+            3. If not found, fail
+
+         Parameters
+         ==========
+         table (required) to validate
+         schema_required: Does the table, if found, require a schema?
+
+         Returns
+         =======
+         If valid, the valid table. If not, returns None
+
+        '''
+
+        # First preference to table provided at runtime
+        active_table = table
+        if active_table is None:
+            active_table = self.table
+
+        # Second (above) to BatchManagers, then error)
+        if active_table is None:
+            bot.error("Please provide a table to the Manager or function.") 
+            return False
+
+        # The table must have a schema
+        if schema_required is True:
+            if table.schema in ["",[]]: 
+                bot.error("Table must be defined with a schema before batch insert.") 
+                active_table = None
+
+        return active_table
+
+
+    def _dict_to_rows(self, rows, schema):
+        ''' check a list of rows, each a dict of field names
+            (keys) and values, against a schema. Only fields present in the
+            schema are returned, and missing fields are returned empty.
+        '''
+        schema_fields = [x.name for x in schema]
+
+        valid_rows = []
+        if not isinstance(rows, list):
+            rows = [rows]       
+        for rowdict in rows:
+            if isinstance(rowdict,dict):
+                new_row = [ val if key in schema_fields else None for key,val in rowdict.items()]
+                if len(new_row) > 0:
+                    valid_rows.append(new_row)
+        return valid_rows

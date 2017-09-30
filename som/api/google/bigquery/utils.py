@@ -32,7 +32,7 @@ import os
 
 # Read in test dataset
 
-def get_client(project=None, client=None)
+def get_client(project=None, client=None):
     ''' return a new client if not provided, with project specified,
         or None to use the active project
     '''
@@ -50,30 +50,15 @@ def list_datasets(project=None, client=None):
         print(dataset.name)
 
 
-def get_dataset(name, project, client):
+def get_dataset(name, project=None, client=None):
     ''' get a dataset. If doesn't exist, returns None
     '''
+    client = get_client(project, client)
     dataset = client.dataset(name)
     if not dataset.exists():
         dataset = None
     return dataset
 
-
-def create_dataset(name, project=None, client=None):
-    '''create a new dataset with "name" (required) 
-    '''
-
-    # Name for dataset corresponds with IRB (our current "Collection" names)
-    dataset = client.dataset(name)
-
-    # Creates the new dataset
-    message = 'Dataset {} already exists.'
-    if not dataset.exists()
-        dataset.create()
-        message = 'Dataset {} created.'
-
-    bot.info(message.format(dataset.name))
-    return dataset
 
 def create_schema(schema):
     ''' create a schema from a dictinoary, where keys are field values,
@@ -88,18 +73,15 @@ def create_schema(schema):
     return tuple(bqschema)
 
 
-def create_table(dataset_name, table_name, project=None, schema=None):
+def create_table(dataset, table_name, project=None, schema=None, client=None, quiet=False):
     '''create a table for a specified dataset and project
     '''
     client = get_client(project, client)
-    dataset = get_dataset(dataset_name, project, client):
-
-    if dataset is None:
-        bot.error("%s does not exist." % dataset_name)
     table = dataset.table(table_name)
     
     if not table.exists():
         if schema is None:
+            bot.debug("Creating table with default dicom schema")
             from .schema import dicom_schema
             schema = dicom_schema
 
@@ -107,9 +89,43 @@ def create_table(dataset_name, table_name, project=None, schema=None):
         elif isinstance(schema, dict):
             schema = create_schema(schema)
 
-        table.schema = dicom_schema
+        table.schema = schema
         table.create()
-        bot.info('Created table {} in dataset {}.'.format(table_name, dataset_name))
+        message = 'Created table {} in dataset {}.'.format(table_name, dataset.name)
     else:
-        bot.info('Table {} in dataset {} already exists.'.format(table_name, dataset_name))
+        message = 'Table {} in dataset {} already exists.'.format(table_name, dataset.name)
+
+    if not quiet:
+        bot.info(message)
+
     return table
+
+
+
+def get_table(dataset, table_name, project=None, client=None):
+    '''create a table for a specified dataset and project
+    '''
+    client = get_client(project, client)
+    table = dataset.table(table_name)    
+    if not table.exists():
+        table = None
+    return table
+
+
+def create_dataset(name, project=None, client=None, quiet=False):
+    '''create a new dataset with "name" (required) 
+    '''
+    client = get_client(project, client)
+
+    # Name for dataset corresponds with IRB (our current "Collection" names)
+    dataset = client.dataset(name)
+
+    # Creates the new dataset
+    message = ('Dataset {} already exists.').format(name)
+    if not dataset.exists():
+        dataset.create()
+        message = ('Dataset {} created.').format(name)
+    
+    if not quiet:
+        bot.info(message.format(dataset.name))
+    return dataset

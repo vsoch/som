@@ -29,6 +29,9 @@ from google.cloud import bigquery
 dicom_schema = (
     bigquery.SchemaField('entity_id', 'STRING'),
     bigquery.SchemaField('item_id', 'STRING'),
+    bigquery.SchemaField('storage_download', 'STRING'),
+    bigquery.SchemaField('storage_metadataLink', 'STRING'),
+
     bigquery.SchemaField('AccessionNumber', 'STRING'),
     bigquery.SchemaField('PatientID', 'STRING'),
     bigquery.SchemaField('PatientSex', 'STRING'),
@@ -42,4 +45,3 @@ dicom_schema = (
     bigquery.SchemaField('StudyDescription', 'STRING'),
     bigquery.SchemaField('BodyPartExamined', 'STRING')
 )
-
