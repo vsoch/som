@@ -1,5 +1,5 @@
 '''
-google/bigquery.py: bigquery general functions for client
+google/bigquery/utils.py: bigquery general functions for client
 
 Copyright (c) 2017 Vanessa Sochat
 

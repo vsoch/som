@@ -27,21 +27,26 @@ from google.cloud import bigquery
 
 
 dicom_schema = (
+
+    # Storage Variables
     bigquery.SchemaField('entity_id', 'STRING'),
     bigquery.SchemaField('item_id', 'STRING'),
     bigquery.SchemaField('storage_download', 'STRING'),
     bigquery.SchemaField('storage_metadataLink', 'STRING'),
 
+    # Demographics
     bigquery.SchemaField('AccessionNumber', 'STRING'),
     bigquery.SchemaField('PatientID', 'STRING'),
     bigquery.SchemaField('PatientSex', 'STRING'),
     bigquery.SchemaField('PatientAge', 'STRING'),
 
+    # Images
     bigquery.SchemaField('width', 'INTEGER'),
     bigquery.SchemaField('height', 'INTEGER'),
     bigquery.SchemaField('ImageType', 'STRING'),
     bigquery.SchemaField('Modality', 'STRING'),
 
+    # Domain / Context
     bigquery.SchemaField('StudyDescription', 'STRING'),
     bigquery.SchemaField('BodyPartExamined', 'STRING')
 )

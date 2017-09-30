@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 '''
-client.py: simple clients for google storage. This first go uses
-datastore for metadata, and Google Storage for images (objects) so
-a client means a connection to both, with functions to interact with 
-both. Both will look for the environment variable GOOGLE_APPLICATION_CREDENTIALS
+client.py: simple client for google storage (images) and bigquery (metadata)
+           Requires the environment variable GOOGLE_APPLICATION_CREDENTIALS
 
 Copyright (c) 2017 Vanessa Sochat
 
