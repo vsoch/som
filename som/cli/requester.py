@@ -22,7 +22,7 @@ SOFTWARE.
 
 '''
 
-from som.api.google.storage import Client
+from som.api.google.datastore import DataStoreClient as Client
 from retrying import retry
 
 ########################################################################
