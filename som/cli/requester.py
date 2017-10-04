@@ -36,7 +36,8 @@ class RetryRequester:
     def __init__(self, bucket_name=None, project=None, client=None):
         self.client = client
         if project is not None:
-            self.get_client(bucket_name,project)
+            self.get_client(bucket_name=bucket_name,
+                            project=project)
 
     def __str__(self):
         if self.client is not None:
@@ -74,9 +75,9 @@ class RetryRequester:
                                        filters=filters)
 
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000,stop_max_attempt_number=5)
-    def get_client(self, bucket_name,project):
+    def get_client(self, bucket_name, project):
         self.client = Client(bucket_name=bucket_name,
-                             project_name=project)
+                             project=project)
         return self.client
 
     # Download ----------------------------------------------------------------------------------------
