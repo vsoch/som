@@ -38,7 +38,7 @@ import six
 
 
 class BigQueryClient(StorageClientBase):
-    ''' a BigQuery Client is a wrapper for DataStore and google Storage, with
+    ''' a BigQuery Client is a wrapper for Big Query and google Storage, with
         a general stratgy to upload to storage, and save metadata in BigQuery
         This client doesn't itself do batch uploads, but holds a class (batch)
         that handles calls from the user.
@@ -176,8 +176,8 @@ class BigQueryClient(StorageClientBase):
                        mimetype,
                        entity_key="entity_id",
                        item_key="item_id",
-                       permission=None,
-                       metadata=None,
+                       permission="projectPrivate",
+                       metadata={},
                        batch=True):
 
         '''upload datasets will upload a number of items (a list of images) to 
@@ -195,11 +195,6 @@ class BigQueryClient(StorageClientBase):
 
         :param batch: add entities in batches (recommended, default True)
         '''
-
-        if permission is None:
-            permission = "projectPrivate"
-    
-        if metadata is None: metadata = {}
        
         for item in items:
 
