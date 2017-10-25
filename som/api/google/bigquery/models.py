@@ -79,7 +79,7 @@ class BigQueryManager(BatchManager):
          '''
          table = self._validate_table(table)
          if table is not None:
-             rows = self._dict_to_table(rows,table.schema)
+             rows = self._dict_to_rows(rows,table.schema)
              self.rows = self.rows + []
 
 
