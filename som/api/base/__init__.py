@@ -11,8 +11,6 @@ from som.api.base.auth import (
 )
 
 from som.api import ApiConnection
-from simplejson import JSONDecodeError as SimpleJSONDecodeError
-from json import JSONDecodeError
 import json
 import sys
 
@@ -57,7 +55,7 @@ class SomApiConnection(ApiConnection):
                 try:
                     response =  response.json()
 
-                except (SimpleJSONDecodeError, JSONDecodeError):
+                except:
                     bot.error("The server returned a malformed response. Are you on VPN?")
                     sys.exit(1)
 
