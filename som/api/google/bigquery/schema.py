@@ -41,8 +41,12 @@ dicom_schema = (
     bigquery.SchemaField('PatientAge', 'STRING'),
 
     # Images
-    bigquery.SchemaField('width', 'INTEGER'),
-    bigquery.SchemaField('height', 'INTEGER'),
+    #bigquery.SchemaField('width', 'INTEGER'),
+    #bigquery.SchemaField('height', 'INTEGER'),
+    
+    # TO support a list of multiple width/height, for compressed we use string
+    bigquery.SchemaField('width', 'STRING'),
+    bigquery.SchemaField('height', 'STRING'),
     bigquery.SchemaField('ImageType', 'STRING'),
     bigquery.SchemaField('Modality', 'STRING'),
 

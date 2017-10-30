@@ -79,8 +79,8 @@ class BigQueryManager(BatchManager):
          '''
          table = self._validate_table(table)
          if table is not None:
-             rows = self._dict_to_rows(rows,table.schema)
-             self.rows = self.rows + []
+             rows = self._dict_to_rows(rows, table.schema)
+             self.rows = self.rows + rows
 
 
     def _validate_table(self, table, schema_required=True):
@@ -132,8 +132,13 @@ class BigQueryManager(BatchManager):
         if not isinstance(rows, list):
             rows = [rows]       
         for rowdict in rows:
-            if isinstance(rowdict,dict):
-                new_row = [ val if key in schema_fields else None for key,val in rowdict.items()]
+            if isinstance(rowdict, dict):
+                new_row = [ rowdict[key] if key in rowdict else None for key in schema_fields]
                 if len(new_row) > 0:
-                    valid_rows.append(new_row)
+                    unlisted = []
+                    for item in new_row:
+                        if isinstance(item,list):
+                            item=','.join([str(x) for x in item])
+                        unlisted.append(item)
+                    valid_rows.append(unlisted)
         return valid_rows

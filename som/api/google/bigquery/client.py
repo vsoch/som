@@ -95,7 +95,7 @@ class BigQueryClient(StorageClientBase):
             schema = self.schema
         return create_table(project=self.project,
                             client=self.bigquery,
-                            schema=self.schema,
+                            schema=schema,
                             quiet=quiet,
                             dataset=dataset,
                             table_name=table_name)
@@ -197,14 +197,15 @@ class BigQueryClient(StorageClientBase):
         '''
        
         for item in items:
-
             if item in metadata:
                 rowdict = metadata.get(item,{})
-          
                 # Entity and item keys must be provided for Storage path
                 if entity_key in rowdict and item_key in rowdict:
                     entity_id = rowdict[entity_key]
                     item_id = rowdict[item_key]
+
+                    # Update the row with item and entity id
+                    rowdict.update({'item_id': item_id, 'entity_id': entity_id})
 
                     # Get back storage fields
                     fields = self.upload_item(file_path=item,

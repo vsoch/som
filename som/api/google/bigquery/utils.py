@@ -78,28 +78,29 @@ def create_table(dataset, table_name, project=None, schema=None, client=None, qu
     '''
     client = get_client(project, client)
     table = dataset.table(table_name)
+
+    if schema is None:
+        bot.debug("Creating table with default dicom schema")
+        from .schema import dicom_schema
+        schema = dicom_schema
+
+    # If user provides dict, create schema from it
+    elif isinstance(schema, dict):
+        schema = create_schema(schema)
+
+    table.schema = schema
     
     if not table.exists():
-        if schema is None:
-            bot.debug("Creating table with default dicom schema")
-            from .schema import dicom_schema
-            schema = dicom_schema
-
-        # If user provides dict, create schema from it
-        elif isinstance(schema, dict):
-            schema = create_schema(schema)
-
-        table.schema = schema
         table.create()
         message = 'Created table {} in dataset {}.'.format(table_name, dataset.name)
     else:
+        table.update()
         message = 'Table {} in dataset {} already exists.'.format(table_name, dataset.name)
 
     if not quiet:
         bot.info(message)
 
     return table
-
 
 
 def get_table(dataset, table_name, project=None, client=None):
