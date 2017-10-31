@@ -105,22 +105,19 @@ class BigQueryClient(StorageClientBase):
     ## Get ############################################################
     ###################################################################
 
-    def get_storage_path(self,table_name, 
-                              file_path, 
-                              entity_name, 
-                              item_name):
+    def get_storage_path(self,file_path, 
+                              entity_name,
+                              study_name):
 
         ''' get_storage_path will return the human readable path of a file
             in storage. It should look like:
 
-            [ Bucket ] / [ Table ] / [ Entity    ] / [ Item ]           / [ images ]
-            [ Bucket ] / [ IRB   ] / [ PatientID ] / [ AccessionNumber ]/ [ images ]
+            [ Bucket ] / Collection /  [ IRB ] / Entity / [ item ]
 
         '''        
-        bucket_path = "%s/%s/%s/%s" %(table_name,
-                                      entity_name,
-                                      item_name,
-                                      os.path.basename(file_path))
+        bucket_path = "Collection/%s/Entity/%s/%s" %(study_name.upper(),
+                                                     entity_name,
+                                                     os.path.basename(file_path))
         return bucket_path
 
 
@@ -137,9 +134,8 @@ class BigQueryClient(StorageClientBase):
 
     def upload_item(self,
                     file_path,
-                    item_id,
                     entity_id,
-                    table_name,
+                    study_name,
                     permission=None,
                     mimetype=None):
 
@@ -148,8 +144,7 @@ class BigQueryClient(StorageClientBase):
         '''
         # Retrieve storage path and folder in Google Storage
         uid = self.get_storage_path(file_path=file_path,
-                                    item_name=item_id,
-                                    table_name=table_name,
+                                    study_name=study_name,
                                     entity_name=entity_id)
 
         bucket_folder = os.path.dirname(uid)
@@ -173,9 +168,9 @@ class BigQueryClient(StorageClientBase):
     def upload_dataset(self, 
                        items,
                        table,
+                       study_name,
                        mimetype,
                        entity_key="entity_id",
-                       item_key="item_id",
                        permission="projectPrivate",
                        metadata={},
                        batch=True):
@@ -189,9 +184,8 @@ class BigQueryClient(StorageClientBase):
                          the names in the list of items, and each content
                          dictionary with key:value pairs of table_field:values
         :param entity_key: the keys to find the entity/item_name in the metadata. 
-               item_key  : these keys are used to determine the path in storage
                           
-                           / table / entity_id / item_id / file_paths
+                           / Collection / <study> / Entity / <entity_id> / file_paths
 
         :param batch: add entities in batches (recommended, default True)
         '''
@@ -200,18 +194,13 @@ class BigQueryClient(StorageClientBase):
             if item in metadata:
                 rowdict = metadata.get(item,{})
                 # Entity and item keys must be provided for Storage path
-                if entity_key in rowdict and item_key in rowdict:
+                if entity_key in rowdict:
                     entity_id = rowdict[entity_key]
-                    item_id = rowdict[item_key]
-
-                    # Update the row with item and entity id
-                    rowdict.update({'item_id': item_id, 'entity_id': entity_id})
 
                     # Get back storage fields
                     fields = self.upload_item(file_path=item,
                                               entity_id=entity_id,
-                                              item_id=item_id,
-                                              table_name=table.name,
+                                              study_name=study_name,
                                               mimetype=mimetype,
                                               permission=permission)
 
