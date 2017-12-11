@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-general.py: general models for text and images
+client.py: general client for metadata and images in datastore
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -25,11 +25,16 @@ SOFTWARE.
 
 '''
 
-from som.api.google.storage.client import ClientBase
-from som.api.google.storage.models import *
-from som.api.google.storage.utils import *
+from .models import (
+    Collection,
+    Entity,
+    Object
+)
+
+from .models import DataStoreManager
+from som.api.google.storage.client import StorageClientBase
+from google.cloud import datastore
 from som.logger import bot
-from som.utils import read_json
 import six
 
 ######################################################################################
@@ -83,84 +88,36 @@ def storageObject(uid,entity,url,storage_type):
     
 
 
-######################################################################################
-# Core Models, extending base model
-######################################################################################
-
-
-class Collection(ModelBase):
-  
-    def __init__(self,client,uid,create=True,fields=None):
-        self.model = collection(uid=uid)
-        super(Collection, self).__init__(client)
-        if create:
-            self.update_or_create(fields=fields)
-        else:
-            self.update_or_create(fields=fields,
-                                  save=False)
-
-
-class Entity(ModelBase):
-
-    def __init__(self,client,collection,uid,create=False,fields=None):
-        self.collection = collection
-        self.model = entity(uid,collection)
-        super(Entity, self).__init__(client)
-        if create:
-            self.update_or_create(fields=fields)
-        else:
-            self.update_or_create(fields=fields,
-                                  save=False)
-        
-
-class Object(ModelBase):
-
-    def __init__(self,client,uid,entity,url,object_type,create=True,fields=None):
-        self.entity = entity
-        self.model = storageObject(uid=uid,entity=entity,url=url,storage_type=object_type)
-        super(Object, self).__init__(client)
-        if create:
-            self.update_or_create(fields=fields)
-        else:
-            self.update_or_create(fields=fields,
-                                  save=False)
-
-
 
 ######################################################################################
 # Client to interact with Models
 ######################################################################################
 
 
-class Client(ClientBase):
+class DataStoreClient(StorageClientBase):
+    ''' a DataStore Client is a wrapper for DataStore and google Storage, with
+        a general stratgy to upload to storage, and save metadata in Datastore
+    '''
 
-    def __init__(self,bucket_name, project_name, **kwargs):
-        self.bucket_name = bucket_name
-        self.project_name = project_name
-        super(Client, self).__init__(**kwargs)
-    
-    def __str__(self):
-        return "storage.google.%s" %self.bucket_name
-
-    def __repr__(self):
-        return "storage.google.%s" %self.bucket_name
-
-
+    def __init__(self, project, bucket_name, **kwargs):
+        super(DataStoreClient, self).__init__(project, bucket_name, **kwargs)
+        self.datastore = datastore.Client(self.project)
+        self.name = "datastore"
+        self.batch = DataStoreManager(client=self.datastore)
 
     ###################################################################
     ## Create #########################################################
     ###################################################################
 
-    def create_collection(self,uid,create=True,fields=None):
-        return Collection(client=self.datastore,
-                          uid=uid,
+    def create_collection(self, uid, create=True,fields=None):
+        return Collection(uid=uid,
+                          collection=collection,
                           create=create,
                           fields=fields)
 
 
     def create_entity(self,collection,uid,create=True,fields=None):
-        return Entity(client=self.datastore,
-                      collection=collection,
+        return Entity(collection=collection,
                       uid=uid,
                       create=create,
                       fields=fields)
@@ -168,19 +125,16 @@ class Client(ClientBase):
 
     def create_object(self,uid,entity,url,object_type,create=True,fields=None):
         '''Object type should be one in Image or Text'''
-        return Object(client=self.datastore,
-                      object_type=object_type,
+        return Object(object_type=object_type,
                       uid=uid,
                       entity=entity,
                       url=url,
                       create=create,
                       fields=fields)
 
-
     def create_object(self,uid,entity,url,object_type,create=True,fields=None):
         '''Object type should be one in Image or Text'''
-        return Object(client=self.datastore,
-                      object_type=object_type,
+        return Object(object_type=object_type,
                       uid=uid,
                       entity=entity,
                       url=url,
@@ -192,12 +146,14 @@ class Client(ClientBase):
     ###################################################################
 
     def get_storage_path(self,file_path,entity,return_folder=False):
+        ''' get_storage_path will return the human readable path of a file
+            associated with an entity
+        '''
         folder = '/'.join(entity.get_keypath())
         bucket_path = "%s/%s" %(folder,os.path.basename(file_path))
         if return_folder:
             return os.path.dirname(bucket_path)
         return bucket_path
-
 
     def get_collections(self,uids=None,limit=None,keys_only=False):
         return self.batch.get(kind="Collection",
@@ -248,7 +204,7 @@ class Client(ClientBase):
         '''upload_object will add a general object to the batch manager
         The object is uploaded to Google Storage, returning storage fields.
         If the user has provided additional fields, these are added to the
-        call to create a new object (datastore)'''
+        call to create a new object'''
 
         if object_type is None:
             bot.warning("You must specify object_type. Image or Text.")
@@ -274,8 +230,6 @@ class Client(ClientBase):
             storage_fields.update(fields)
         fields = storage_fields
 
-        # TODO: here we need to try to GET object to make url, to upload metadata
-        # right now we just pass over it
 
         url = "https://storage.googleapis.com/%s/%s" %(self.bucket['name'],
                                                        storage_obj['name'])

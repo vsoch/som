@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 '''
-client.py: simple clients for google storage. This first go uses
-datastore for metadata, and Google Storage for images (objects) so
-a client means a connection to both, with functions to interact with 
-both. Both will look for the environment variable GOOGLE_APPLICATION_CREDENTIALS
+Storage client base, intended to be superclassed by DataStoreClient and
+        BigQueryClient
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -29,41 +27,44 @@ SOFTWARE.
 
 '''
 
-import datetime
-
-from google.cloud import datastore
-from som.api.google.storage.utils import (
-    get_google_service, 
+from .utils import (
     get_bucket,
     upload_file
 )
-
-from som.api.google.storage.models import BatchManager
+from som.api.google.utils import get_google_service
 from som.api import ApiConnection
 from som.logger import bot
 
 
-class ClientBase(ApiConnection):
+class StorageClientBase(ApiConnection):
+    ''' Connection to Google Storage, intended to be superclass
+        of google.datastore.DataStoreClient and
+           google.bigquery.BigQueryClient
+    '''
 
-    def __init__(self,**kwargs):
+    def __init__(self, project, bucket_name, **kwargs):
         super(ApiConnection, self).__init__(**kwargs)
-        self.datastore = datastore.Client(self.project_name)
-        self.batch = BatchManager(client=self.datastore)
+        self.project = project
         self.storage = get_google_service('storage', 'v1')
+        self.bucket_name = bucket_name
+
         if self.bucket_name is not None:
             self.get_bucket()
-  
+
     def get_bucket(self):
-        self.bucket = get_bucket(self.storage,self.bucket_name)
+        self.bucket = get_bucket(self.storage, self.bucket_name)
 
-    def make_key(self,key,ancestor=None):
-        if ancestor is not None:
-            ancestor = list(ancestor.key._flat_path)
-            key = ancestor + key
-        return self.datastore.key(*key)
+    def name(self):
+        name = ""
+        if self.bucket_name is not None:
+            name = ".%s" %self.bucket_name
+        return "google[%s][bigquery]%s" %(self.name,name)
+
+    def __str__(self):
+        return self.name()
 
 
-    def put_object(self,bucket_folder,file_path,verbose=True,permission=None, mimetype=None):
+    def put_object(self,bucket_folder,file_path, verbose=True,permission=None, mimetype=None):
         '''upload_object will upload a file to path bucket_path in storage
         '''
         return upload_file(storage_service=self.storage,

@@ -1,5 +1,5 @@
 '''
-google/modals.py: models for datastore
+google/datastore/modals.py: models for datastore
 
 Copyright (c) 2017 Vanessa Sochat
 
@@ -23,17 +23,13 @@ SOFTWARE.
 
 '''
 
-from som.api.google.storage.validators import (
-    validate_model
-)
-
-from som.api.google.storage.utils import (
-    get_google_service, 
-)
-
+from .validators import validate_model
+from som.api.google.utils import get_google_service
+from som.api.google.models import BatchManager, ModelBase
 import google.cloud.datastore as datastore
+
 from retrying import retry
-from som.api.google.storage.datastore import (
+from .utils import (
     get_key_filters,
     parse_keys
 )
@@ -48,22 +44,21 @@ import collections
 import sys
 import os
 
-######################################################################################
-# Object Manager
-######################################################################################
 
-class BatchManager:
-    '''a batch manager is bucket to hold multiple objects to filter, query, etc.
-    It a way to compile a set, and then run through a transaction. It must either
-    be instantiated with a client, or one is generated dynamically.
+
+
+################################################################################
+# DataStore Batch Manager
+################################################################################
+
+
+class DataStoreManager(BatchManager):
+    '''a batch manager that sends metadata to Google DataStore
     '''
-
-    def __init__(self,client=None):
-        if client is None:
-            client = datastore.Client()
-        self.client = client
-        self.tasks = []
-        self.queries = []
+    def __init__(self, **kwargs):
+        super(DataStoreManager, self).__init__(**kwargs)
+        if self.client is None:
+            self.client = datastore.Client()
 
     def get_kinds(self):
         query = self.client.query(kind='__kind__')
@@ -281,15 +276,14 @@ class BatchManager:
 
 
 
-######################################################################################
-# Base Client Class
-######################################################################################
+################################################################################
+# DataStore Base
+################################################################################
 
-# https://cloud.google.com/datastore/docs/concepts/entities#datastore-basic-entity-python
 
-class ModelBase:
+class DataStoreBase(ModelBase):
 
-    def __init__(self,client=None):
+    def __init__(self, **kwargs):
         '''A ModelBase is a controller for a general DataStore
         Entity. Most of the variables in init are for initial
         validation, and further fields etc are stored with
@@ -299,6 +293,11 @@ class ModelBase:
         :param _key: the initial key used for the entity
         :param _Entity: the final generated (validated) entity
         '''
+        client = None
+        if "client" in kwargs:
+            client = kwargs['client']
+
+        super(ModelBase, self).__init__(**kwargs)
         if client is None:
             client = datastore.Client()
         self.client = client
@@ -442,3 +441,55 @@ class ModelBase:
             with self.client.transaction():
                 self._Entity = self.client.get(*self._key)
         return self._Entity
+
+
+
+################################################################################
+# Core Models, extending base model
+################################################################################
+
+
+class Collection(DataStoreBase):
+    '''A collection is a Base class to hold a DataStore or BigQuery collection
+       base. It provides functions for updating and creating.
+    '''
+    def __init__(self, uid, collection, create=True, fields=None):
+        self.model = collection(uid=uid)
+        super(Collection, self).__init__()
+        if create:
+            self.update_or_create(fields=fields)
+        else:
+            self.update_or_create(fields=fields,
+                                  save=False)
+
+
+class Entity(DataStoreBase):
+    '''An entity is a Base class to hold a DataStore or BigQuery Entity (row)
+       base. It provides functions for updating and creating.
+    '''
+    def __init__(self, collection, entity, uid, create=False,fields=None):
+        self.collection = collection
+        self.model = entity(uid,collection)
+        super(Entity, self).__init__()
+        if create:
+            self.update_or_create(fields=fields)
+        else:
+            self.update_or_create(fields=fields, save=False)
+        
+
+class Object(DataStoreBase):
+    '''Base class Object for an object in storage
+    '''
+    def __init__(self,client,uid,entity,url,object_type,
+                 storageObject,create=True,fields=None):
+        self.entity = entity
+        self.model = storageObject(uid=uid,
+                                   entity=entity,
+                                   url=url,
+                                   storage_type=object_type)
+        super(Object, self).__init__(client)
+        if create:
+            self.update_or_create(fields=fields)
+        else:
+            self.update_or_create(fields=fields, save=False)
+

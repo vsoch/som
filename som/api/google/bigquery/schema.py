@@ -1,4 +1,6 @@
 '''
+google/modals.py: models for datastore
+
 Copyright (c) 2017 Vanessa Sochat
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,30 +20,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 '''
 
-__version__ = "0.2.3"
-AUTHOR = 'Vanessa Sochat'
-AUTHOR_EMAIL = 'vsochat@stanford.edu'
-NAME = 'som'
-PACKAGE_URL = "https://github.com/vsoch/som"
-KEYWORDS = 'open source, stanford, python, google, gce, storage, api, validator'
-DESCRIPTION = "stanford open modules for python"
-LICENSE = "LICENSE"
+from google.cloud import bigquery
 
-INSTALL_REQUIRES = (
 
-    ('deid', {'min_version': '0.0.3'}),
-    ('requests', {'min_version': '2.12.4'}),
-    ('retrying', {'min_version': '1.3.3'}),
-    ('simplejson', {'min_version': '3.10.0'}),
-    ('six', {'min_version': '1.10'}),
-    ('pygments', {'min_version': '2.1.3'}),
-    ('python-dateutil',{'min_version': None }),
-    ('urllib3',{'min_version': "1.15" }),
-    ('validator.py',{'min_version': None }),
-    ('google-api-python-client', {'min_version': None}),
-    ('google-cloud-datastore', {'min_version': None}),
-    ('oauth2client', {'exact_version': '3.0'})
+dicom_schema = (
 
+    # Storage Variables
+    bigquery.SchemaField('storage_download', 'STRING'),
+    bigquery.SchemaField('storage_metadataLink', 'STRING'),
+
+    # Demographics
+    bigquery.SchemaField('CodedAccessionNumberID', 'STRING'),
+    bigquery.SchemaField('CodedPatientID', 'STRING'),
+    bigquery.SchemaField('ContentType', 'STRING'),
+    bigquery.SchemaField('PatientSex', 'STRING'),
+    bigquery.SchemaField('PatientAge', 'STRING'),    
+    bigquery.SchemaField('Modality', 'STRING'),
+
+    # Domain / Context
+    bigquery.SchemaField('StudyDescription', 'STRING'),
+    bigquery.SchemaField('DicomHeader', 'STRING')
 )

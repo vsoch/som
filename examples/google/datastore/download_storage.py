@@ -4,10 +4,10 @@
 # This is an example script to upload data (images, text, metadata) to
 # google cloud storage and datastore. Data MUST be de-identified
 
+som.api.google.datastore import DataStoreClient as Client
 import os
 
 # Start google storage client for pmc-stanford
-from som.api.google.storage import Client
 client = Client(bucket_name='radiology')
 collection = client.create_collection(uid='IRB41449')
 
