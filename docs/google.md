@@ -1,5 +1,13 @@
 # Google Storage and Datastore
-At this point, you've likely used the DASHER endpoint to de-identify (code identifiers with an alias) some dicom dataset, you've queried the endpoint using the [identifiers](identifiers.md) client, and now you want to move the data into storage. As a reminder, you will get back a data structure from DASHER that looks like this:
+
+## General Context
+You have some anonymized files that you want to upload (with some metadata) to Object Storage (Google Storage) and a corresponding metadata database (BigQuery or DataStore) to query it.
+
+**How did we get here?**
+For a specific example, we can say that we have just finished anonymizing a dicom dataset by doing the following:
+
+ - we've queried the endpoint to get an anonymized id from the patient identifier using the [identifiers](identifiers.md) client.
+ - we got back a data structure from the identifiers endpoint that looked like this:
 
 ```
 $ response
@@ -15,8 +23,10 @@ $ response
    'jittered_timestamp': '1961-08-01T00:00:00-0700',
    'suid': '12fa'}]}
 ```
+ - we parsed over that data structure and used it to de-identify the headers (likely by formatting it and giving it to [deid](https://pydicom.github.io/deid).
+ - we then had a best effort anonymized set of images and metadata.
 
-and it's up to you to parse over that data structure and use it to de-identify the headers (likely by formatting it and giving it to [deid](https://pydicom.github.io/deid) and then you will have a de-identified dataset for Google Storage and Google Datastore. Let's go through the steps of doing this upload.
+And now we want to move the data into Google Storage and the metadata into Google Datastore or Google BigQuery. Let's go through the steps of doing this upload.
 
 ## Credentials
 In order to use any Google product, you need to have the variable `GOOGLE_APPLICATION_CREDENTIALS` pointing to a file with your [default application credentials](https://developers.google.com/identity/protocols/application-default-credentials) exported in the environment. It's not going to work if you don't. If you do this from within Python, you can do:
@@ -33,8 +43,66 @@ GOOGLE_APPLICATION_CREDENTIALS=$HOME/.topsecret/google
 export GOOGLE_APPLICATION_CREDENTIALS
 ```
 
+## Google Storage and BigQuery
+We have storage and bigquery coupled, so that Storage is the object store for images, and BigQuery is the metadata place to query storage.
+
+We probably first want to instantiate a client with our project and bucket name. Note that we created the bucket in the Google Cloud interface.
+
+
+```
+from som.api.google.bigquery import BigQueryClient as Client
+client = Client(bucket_name='radiology-test',
+                project='som-langlotz-lab')
+```
+
+BigQuery is based on the idea of a dataset. A dataset is one or more tables. Let's create a testing dataset.
+
+```
+dataset = client.get_or_create_dataset('testing')
+```
+
+The SOM module contains a default schema for dicom, which will store metadata about upload to storage, along with basic fields like `Modality` and the full anonymized header in a json object.
+
+```
+from som.api.google.bigquery.schema import dicom_schema
+
+table = client.get_or_create_table(dataset=dataset,
+                                   table_name='dicomCookies',
+                                   schema=dicom_schema)
+```
+
+Now we can use [deid](https://pydicom.github.io/deid) to load some dummy data.
+
+```
+from deid.data import get_dataset
+from deid.dicom import get_files
+dicom_files = get_files(get_dataset('dicom-cookies'))
+```
+
+We can then clean the files, also using `deid`:
+
+```
+from deid.dicom import get_identifiers, replace_identifiers
+metadata = get_identifiers(dicom_files)
+updated_files = replace_identifiers(dicom_files=dicom_files,
+                                    ids=metadata)
+```
+
+Now that we have a finished metadata data structure along with our updated files, we can use the client to upload to Google Storage and BigQuery.
+
+```
+client.upload_dataset(items=dicom_files,
+                       table=table,
+                       mimetype="application/dicom",
+                       entity_key="entity_id",
+                       item_key="item_id",
+                       metadata=metadata)
+```
+
+If you are interested in this full example as a script, see [upload_storage.py](https://github.com/vsoch/som/blob/master/examples/google/bigquery/upload_storage.py)
+
 ## Google Storage and Datastore
-We have storage an datastore coupled, so that Storage is the object store for images, and Datastore is the metadata place to query storage, and also have nice metadata about the images, entity, or collection to search.
+We have storage and datastore coupled, so that Storage is the object store for images, and Datastore is the metadata place to query storage, and also have nice metadata about the images, entity, or collection to search.
 
 
 ### Client
@@ -260,7 +328,7 @@ We can also see more detail by looking at the image.
 
 Note that while I'm looking at these in the web interface, these are all programatically queryable and accessible from Python, or even with Google Query Language directly in your browser. Pretty neat!
 
-If you are interested in this full example as a script, see [upload_storage_radiology.py](https://github.com/vsoch/som/blob/master/examples/google/radiology/upload_storage_radiology.py)
+If you are interested in this full example as a script, see [upload_storage.py](https://github.com/vsoch/som/blob/master/examples/google/datastore/upload_storage.py)
 
 ### Keys
 It's important to note that the language of Datastore is based on the idea of a key. We've been talking about the full path that includes the Collection, Entity, and Image, and this is exactly what the key looks like:
@@ -282,4 +350,3 @@ Along with a "URL-safe key" that has been byte64 encoded. Please note this key i
 ```
 ahJzfnNvbS1sYW5nbG90ei1sYWJyZwsSCk.... 
 ```
-
